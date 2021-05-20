@@ -1,3 +1,9 @@
+export function mod(a: number, b: number) {
+  const result = a % b
+  if (result < 0) return result + b
+  else return result
+}
+
 export function gcd(a: number, b: number): number {
   a = Math.abs(a);
   b = Math.abs(b);

@@ -136,7 +136,8 @@ export class Adic extends DVField<AdicNumber> {
     }
   }
 
-  // The field is bijective to the rational numbers.
+  // The field as implemented is equivalent to the rational field.
+  // Hence we may convert a function on rational numbers to a function on p-adic numbers.
   public liftFromRational(f: (...args: Rational[]) => Rational): (...args: AdicNumber[]) => AdicNumber {
     return (...args: AdicNumber[]) => {
       return this.fromRational(f(...args.map(x => this.toRational(x))))
@@ -194,6 +195,14 @@ export class Adic extends DVField<AdicNumber> {
     const u = a.value.unit
     const v = a.value.valuation
     return this.nonzero(rationalField.pow(u, n), v * n)
+  }
+
+  public remainder = this.liftFromRational((a, b) => rationalField.remainder(a, b))
+
+  public modPow(a: AdicNumber, n: int): AdicNumber {
+    if (a.value === Zero) return a
+    if (a.value.valuation >= n) return this.zero
+    return this.remainder(a, this.fromVal(n))
   }
 
   public toString(): string {

@@ -1,5 +1,5 @@
 import Field from './Field';
-import {gcd, int} from '../utils';
+import {gcd, int, mod} from '../utils';
 import { cache } from 'decorator-cache-getter';
 
 export class Rational {
@@ -78,6 +78,14 @@ export class RationalField extends Field<Rational> {
 
   public fromRational(r: Rational) {
     return r
+  }
+
+  public remainder(a: Rational, b: Rational): Rational {
+    if (this.isZero(a)) return a
+    const intA = a.num * b.den
+    const intB = b.num * a.den
+    if (intA < intB) return a
+    return this.reduce(mod(intA, intB), a.den * b.den)
   }
 
   public toString(): string {
