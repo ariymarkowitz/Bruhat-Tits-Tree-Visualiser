@@ -224,5 +224,5 @@ function displayLattice(v: vertex, btt: BruhatTitsTree) {
   const r = F.toRational(v.u)
 
   const n = r.den === 1 ? `${r.num}` : `\\frac{${r.num}}{${r.den}}`
-  return `[${n}]_{${v.n}}`
+  return `\\left[${n}\\right]_{${v.n}}`
 }
