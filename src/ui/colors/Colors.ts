@@ -4,5 +4,6 @@ export const colors = {
   secondary: '#bbb',
   alternative: '#111',
   border: '#444',
-  accent: '#e03'
+  accent: '#e03',
+  accent_dark: '#800',
 }

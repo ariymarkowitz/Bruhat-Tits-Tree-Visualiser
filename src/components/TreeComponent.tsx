@@ -11,8 +11,7 @@ import { matrix } from "../VectorSpace/Matrix";
 import { vec } from "../VectorSpace/VectorSpace";
 import { MainTooltip, Tooltip } from "./Tooltip";
 
-type gens = matrix<AdicNumber>
-type pvec = vec<AdicNumber>
+type pvec = [AdicNumber, AdicNumber]
 type BTT = BruhatTitsTree
 
 type props = {
@@ -122,7 +121,7 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
   const btt = useMemo(() => new BruhatTitsTree(p), [p])
   const tree = useMemo(() => btt.make(depth), [btt, depth])
 
-  const endAdic = end ? btt.vspace.fromInts(end) : end
+  const endAdic = (end ? btt.vspace.fromInts(end) : end) as [AdicNumber, AdicNumber]
 
   const graphicsTree = makeGraphicsTree(btt, tree, endAdic)
 
@@ -144,20 +143,28 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
   }
 }
 
-function circlestrokecolor(tree: BTT, lattice: vertex, end?: pvec) {
-  if (end == undefined) {
+function circlestrokecolor(tree: BTT, v: vertex, end?: pvec) {
+  if (tree.inInfEnd(v)) {
+    return colors.accent_dark
+  } else if (end == undefined) {
+    return colors.primary
+  } else if (tree.inEnd(v, end)) {
+    return colors.accent
+  } else {
     return colors.primary
   }
-  const onPath = tree.vspace.inLattice(tree.vertexToGens(lattice), end)
-  return onPath ? colors.accent : colors.primary
 }
 
-function edgestrokecolor(tree: BTT, lattice: vertex, end?: pvec) {
-  if (end == undefined) {
+function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec) {
+  if (tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
+    return colors.accent_dark
+  } else if (end == undefined) {
+    return colors.secondary
+  } else if (tree.inEnd(v1, end) && tree.inEnd(v2, end)) {
+    return colors.accent
+  } else {
     return colors.secondary
   }
-  const onPath = tree.vspace.inLattice(tree.vertexToGens(lattice), end)
-  return onPath ? colors.accent : colors.secondary
 }
 
 function defaultGraphicsProps(tree: BTT, lattice: vertex, end?: pvec): graphicsProps {
@@ -168,19 +175,19 @@ function defaultGraphicsProps(tree: BTT, lattice: vertex, end?: pvec): graphicsP
     strokeWidth: 2,
     color: colors.primary,
     circlestrokecolor: circlestrokecolor(tree, lattice, end),
-    edgestrokecolor: edgestrokecolor(tree, lattice, end)
+    edgestrokecolor: ''
   }
 }
 
-function updateGraphicsProps(tree: BTT, lattice: vertex, props: graphicsProps, end?: pvec): graphicsProps {
+function updateGraphicsProps(tree: BTT, v: vertex, parent: vertex, props: graphicsProps, end?: pvec): graphicsProps {
   return {
     radius: props.radius * 0.75,
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
     branchWidth: props.branchWidth * 0.8,
     strokeWidth: Math.max(props.strokeWidth * 0.8, 1),
     color: props.color === colors.primary ? colors.alternative : colors.primary,
-    circlestrokecolor: circlestrokecolor(tree, lattice, end),
-    edgestrokecolor: edgestrokecolor(tree, lattice, end)
+    circlestrokecolor: circlestrokecolor(tree, v, end),
+    edgestrokecolor: edgestrokecolor(tree, v, parent, end)
   }
 }
 
@@ -190,7 +197,7 @@ function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec): tree<nodePr
 
   return Tree.make((data: nodeProps) => {
     const forest = data.node.forest.map((child, i) => {
-      const graphics = updateGraphicsProps(btt, child.value, data.graphics, end) 
+      const graphics = updateGraphicsProps(btt, child.value, data.node.value, data.graphics, end) 
 
       const node = child
       const angle = Math.PI-(i + 1)*turnangle + data.angle
