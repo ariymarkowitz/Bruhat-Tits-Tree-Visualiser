@@ -1,7 +1,8 @@
 import { Rational, rationalField } from '../Field/Rational';
 import { DVField } from "../Field/DVField";
-import { extendedInt, Infinite, int } from "../utils";
+import { int } from "../utils";
 import { cache } from 'decorator-cache-getter';
+import { extendedInt, Infinite } from '../Order/ExtendedInt';
 
 type splitNumber<NumberType> = {
   unit: NumberType // Unit

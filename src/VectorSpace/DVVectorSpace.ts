@@ -1,4 +1,3 @@
-import { Infinite } from './../utils';
 import { DVField } from "../Field/DVField"
 import { int } from "../utils"
 import { matrix } from "./Matrix"
@@ -15,10 +14,7 @@ export default class DVVectorspace<FieldElement> extends VectorSpace<FieldElemen
   }
 
   public vectorInValuationRing(v: vec<FieldElement>): boolean {
-    return v.every(e => {
-      const val = this.field.valuation(e)
-      return val === Infinite || val >= 0
-    })
+    return v.every(e => this.field.inValuationRing(e))
   }
 
   public matrixInValuationRing(m: matrix<FieldElement>): boolean {

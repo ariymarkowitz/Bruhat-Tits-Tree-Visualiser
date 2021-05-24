@@ -5,19 +5,6 @@ import { TreeView } from './TreeComponent';
 
 const s = require('./main.css');
 
-type context = {
-  selected?: string
-}
-
-function formatEnd(str: string) {
-  const n = str.split(',').map(s => Number(s))
-  if (n.length === 2 && n.every(Number.isInteger)) {
-    return n
-  } else {
-    return undefined
-  }
-}
-
 function formatMatrix(str: string) {
   const n = str.split(',').map(s => Number(s))
   if (n.length === 4 && n.every(Number.isInteger)) {

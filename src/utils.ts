@@ -27,8 +27,6 @@ export function isPrime(num: number): boolean { // returns boolean
 }
 
 export type int = number
-export const Infinite = Symbol('Infinite')
-export type extendedInt = int | typeof Infinite
 
 export function range(start: number): IterableIterator<number>
 export function range(start: number, stop: number): IterableIterator<number>

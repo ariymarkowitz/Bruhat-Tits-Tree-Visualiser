@@ -1,10 +1,11 @@
 import { Adic, AdicNumber } from "../Adic/Adic"
-import { Infinite, int } from "../utils"
+import { int } from "../utils"
 import DVVectorSpace from "../VectorSpace/DVVectorSpace"
 import { matrix } from "../VectorSpace/Matrix"
 import { Tree } from "./Tree"
 import { Range } from "immutable"
 import { cache } from "decorator-cache-getter"
+import { eIntOrd } from "../Order/ExtendedInt"
 
 type generators = matrix<AdicNumber>
 
@@ -73,7 +74,7 @@ export default class BruhatTitsTree {
     const reducedEnd = F.divide(end[1], end[0])
     // Do the coefficients of the vertex agree with the end?
     const val = F.valuation(F.subtract(reducedEnd, v.u))
-    return val === Infinite || val >= v.n
+    return eIntOrd.gte(val, v.n)
   }
 
   public inInfEnd(v: vertex) {

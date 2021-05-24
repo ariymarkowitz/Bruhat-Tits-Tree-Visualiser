@@ -1,4 +1,5 @@
 import { cache } from 'decorator-cache-getter'
+import { Seq } from 'immutable'
 import Field from '../Field/Field'
 import Ring from '../Ring/Ring'
 import { int, map, range, reduce, zip } from './../utils'
@@ -93,6 +94,10 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
     return [...map(i => [...map(j =>
       this.innerProduct(this.row(j, m1), this.column(i, m2)),
       range(this.dim))], range(this.dim))]
+  }
+
+  public trace(m: matrix<FieldElement>): FieldElement {
+    return m.reduce((sum, v, i) => this.field.add(sum, v[i]), this.field.zero)
   }
 
   public determinant(m: matrix<FieldElement>): FieldElement {

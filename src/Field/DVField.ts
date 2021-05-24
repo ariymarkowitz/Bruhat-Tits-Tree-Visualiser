@@ -1,6 +1,5 @@
-import { Infinite } from './../utils';
-import Ring from '../Ring/Ring';
-import { extendedInt, int } from '../utils';
+import { eIntOrd } from './../Order/ExtendedInt';
+import { extendedInt } from '../Order/ExtendedInt';
 import Field from "./Field";
 
 // A field with a discrete valuation.
@@ -9,7 +8,6 @@ export abstract class DVField<FieldElement> extends Field<FieldElement> {
   public abstract uniformizer: FieldElement
 
   public inValuationRing(a: FieldElement): boolean {
-    const v = this.valuation(a)
-    return v === Infinite || v >= 0
+    return eIntOrd.gte(this.valuation(a), 0)
   }
 }
