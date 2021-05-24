@@ -16,7 +16,7 @@
     "easeljs-svg-path": "^0.0.2",
     "element-to-path": "^1.2.0",
     "immutable": "*",
-    "konva": "^7.2.5",
+    "konva": "^8.0.1",
     "mathjax": "^3.1.4",
     "mathjax-full": "^3.1.4",
     "path-that-svg": "^1.2.4",

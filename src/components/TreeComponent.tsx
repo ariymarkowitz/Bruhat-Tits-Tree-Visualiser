@@ -1,10 +1,10 @@
 import { Seq } from "immutable";
-import { KonvaEventObject } from "konva/types/Node";
+import { KonvaEventObject } from "konva/lib/Node";
 import React, { useContext, useMemo, useState } from "react"
 import { Circle, Group, Layer, Line, Stage } from "react-konva"
 import { AdicNumber, Zero } from "../Adic/Adic";
 import { rationalField } from "../Field/Rational";
-import BruhatTitsTree from '../Tree/BruhatTitsTree';
+import BruhatTitsTree, { vertex } from '../Tree/BruhatTitsTree';
 import { Tree, tree } from "../Tree/Tree";
 import { colors } from "../ui/colors/Colors";
 import { matrix } from "../VectorSpace/Matrix";
@@ -23,7 +23,7 @@ type props = {
 }
 
 type nodeProps = {
-  node: tree<gens>
+  node: tree<vertex>
   address: number[]
   x: number,
   y: number,
@@ -45,7 +45,7 @@ type graphicsProps = {
 export const TreeView = (props: props) => {
   const width = 800
   const height = 800
-
+  
   const makeTooltip = () => {
     const [x, setX] = useState(0)
     const [y, setY] = useState(0)
@@ -107,7 +107,7 @@ function handleMouseMove(context: MainTooltip.context | null, e: KonvaEventObjec
   if (stage === null) return
   const pos = stage.getPointerPosition()
   if (pos === null) return
-  context.setX!(pos.x)
+  context.setX!(pos.x + 10)
   context.setY!(pos.y)
   context.setText!(display)
   context.setVisible!(true)
@@ -144,23 +144,23 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
   }
 }
 
-function circlestrokecolor(tree: BTT, lattice: gens, end?: pvec) {
+function circlestrokecolor(tree: BTT, lattice: vertex, end?: pvec) {
   if (end == undefined) {
     return colors.primary
   }
-  const onPath = tree.vspace.inLattice(lattice, end)
+  const onPath = tree.vspace.inLattice(tree.vertexToGens(lattice), end)
   return onPath ? colors.accent : colors.primary
 }
 
-function edgestrokecolor(tree: BTT, lattice: gens, end?: pvec) {
+function edgestrokecolor(tree: BTT, lattice: vertex, end?: pvec) {
   if (end == undefined) {
     return colors.secondary
   }
-  const onPath = tree.vspace.inLattice(lattice, end)
+  const onPath = tree.vspace.inLattice(tree.vertexToGens(lattice), end)
   return onPath ? colors.accent : colors.secondary
 }
 
-function defaultGraphicsProps(tree: BTT, lattice: gens, end?: pvec): graphicsProps {
+function defaultGraphicsProps(tree: BTT, lattice: vertex, end?: pvec): graphicsProps {
   return {
     radius: 10,
     branchLength: 240 * Math.pow(tree.p, 0.5),
@@ -172,8 +172,7 @@ function defaultGraphicsProps(tree: BTT, lattice: gens, end?: pvec): graphicsPro
   }
 }
 
-function updateGraphicsProps(tree: BTT, lattice: gens, props: graphicsProps, end?: pvec): graphicsProps {
-
+function updateGraphicsProps(tree: BTT, lattice: vertex, props: graphicsProps, end?: pvec): graphicsProps {
   return {
     radius: props.radius * 0.75,
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
@@ -185,9 +184,9 @@ function updateGraphicsProps(tree: BTT, lattice: gens, props: graphicsProps, end
   }
 }
 
-function makeGraphicsTree(btt: BTT, tree: tree<gens>, end?: pvec): tree<nodeProps> {
+function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec): tree<nodeProps> {
   const turnangle = 2*Math.PI/(btt.p+1)
-  const rootDisplay = displayLattice(tree.value)
+  const rootDisplay = displayLattice(tree.value, btt)
 
   return Tree.make((data: nodeProps) => {
     const forest = data.node.forest.map((child, i) => {
@@ -197,7 +196,7 @@ function makeGraphicsTree(btt: BTT, tree: tree<gens>, end?: pvec): tree<nodeProp
       const angle = Math.PI-(i + 1)*turnangle + data.angle
       const x = data.x + graphics.branchLength * Math.cos(angle)
       const y = data.y + graphics.branchLength * Math.sin(angle)
-      const display = displayLattice(child.value)
+      const display = displayLattice(child.value, btt)
 
       return {node, angle, x, y, display, graphics}
     })
@@ -212,33 +211,11 @@ function makeGraphicsTree(btt: BTT, tree: tree<gens>, end?: pvec): tree<nodeProp
   })
 }
 
-function displayLattice(lattice: gens) {
-  const dispElement = (e: AdicNumber) => {
-    if (e.value === Zero) { return '0' }
-    let pString, uString
+function displayLattice(v: vertex, btt: BruhatTitsTree) {
+  const F = btt.field
 
-    if (e.value.valuation === 0) {
-      pString = ''
-    } else if (e.value.valuation === 1) {
-      pString = 'p'
-    }
-    else {
-      pString = `p^{${e.value.valuation}}`
-    }
+  const r = F.toRational(v.u)
 
-    if (rationalField.isOne(e.value.unit)) {
-      if (e.value.valuation === 0) {
-        uString = '1'
-      } else {
-        uString = ''
-      }
-    } else if (e.value.unit.den === 1) {
-      uString = `${e.value.unit.num}`
-    } else {
-      uString = `\\frac{${e.value.unit.num}}{${e.value.unit.den}}`
-    }
-    
-    return uString + pString
-  }
-  return `\\big\\langle ${lattice.map(v => `\\big( ${v.map(dispElement).join(',')} \\big)`).join(',')} \\big\\rangle`
+  const n = r.den === 1 ? `${r.num}` : `\\frac{${r.num}}{${r.den}}`
+  return `[${n}]_{${v.n}}`
 }

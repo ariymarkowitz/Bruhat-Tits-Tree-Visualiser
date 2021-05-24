@@ -7,6 +7,14 @@ import { Range, Seq } from "immutable"
 
 type generators = matrix<AdicNumber>
 
+/**
+ * The reduced form of a p-adic matrix.
+ * | 1  0   |
+ * | u  p^n |
+ * u is a finite p-adic expansion less than p^n.
+ **/
+export type vertex = {u: AdicNumber, n: int}
+
 export default class BruhatTitsTree {
   public p: int
   public field: Adic
@@ -16,6 +24,27 @@ export default class BruhatTitsTree {
     this.p = p
     this.field = new Adic(p)
     this.vspace = new DVVectorSpace(2, this.field)
+  }
+
+  private children(vertex: vertex) {
+    const F = this.field
+
+    let c: vertex[] = [...Range(1, this.p).map(i => ({
+      u: F.add(vertex.u, F.multiply(F.fromInt(i), F.fromVal(vertex.n))), n: vertex.n+1
+    }))]
+
+    if (F.isZero(vertex.u) && vertex.n <= 0) {
+      c = [...c, {u: vertex.u, n: vertex.n-1}]
+    }
+    if (!F.isZero(vertex.u) || vertex.n >= 0) {
+      c = [{u: vertex.u, n: vertex.n+1}, ...c]
+    }
+
+    return c
+  }
+
+  public vertexToGens(v: vertex): generators{
+    return [[this.field.one, v.u], [this.field.zero, this.field.fromVal(v.n)]]
   }
 
   private sublatticeInfinite(lattice: generators): generators {
@@ -32,30 +61,12 @@ export default class BruhatTitsTree {
     ]
   }
 
-  public make(depth: int, root: generators = this.vspace.matrixAlgebra.one) {
-    type T = {parent: generators | null, lattice: generators, level: int}
-
-    const F = this.field
-    const V = this.vspace
-    const M = V.matrixAlgebra
-
-    return Tree.make(({parent, lattice, level}: T) => {
-      let forest: T[]
-      if (level < depth) {
-        const latticeInfinite: generators = this.sublatticeInfinite(lattice)
-        const latticeFinite = Range(0, this.p).map(i => this.sublatticeFinite(lattice, i))
-        forest = Seq.Indexed
-          .of(latticeInfinite)
-          .concat(latticeFinite)
-          .filterNot(sublattice => parent !== null && V.isSublattice(M.scale(F.uniformizer, parent), sublattice))
-          .map(l => ({parent: lattice, lattice: l, level: level + 1}))
-          .toArray()
-      } else {
-        forest = []
+  public make(depth: int, root: vertex = {u: this.field.zero, n: 0}) {
+    return Tree.make(({v, length}) => {
+      return {
+        value: v,
+        forest: length < depth ? this.children(v).map(v => ({v, length: length + 1})) : []
       }
-
-      return {value: lattice, forest}
-
-    }, {parent: null, lattice: root, level: 0})
+    }, {v: root, length: 0})
   }
 }
