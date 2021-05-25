@@ -41,7 +41,7 @@ type graphicsProps = {
   branchWidth: number,
   branchLength: number,
   strokeWidth: number,
-  color: string,
+  fillColor: string,
   edgestrokecolor: string
   circlestrokecolor: string
 }
@@ -86,7 +86,7 @@ const TreeNode = (tooltip: any, props: nodeProps, key: number) => {
     y = {props.y}
     radius={props.graphics.radius}
     strokeWidth={props.graphics.strokeWidth}
-    fill={props.graphics.color}
+    fill={props.graphics.fillColor}
     stroke={props.graphics.circlestrokecolor}
     key = {key}
     onMouseMove = {(e) => handleMouseMove(tooltip, e, props.display)}
@@ -161,30 +161,30 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
 
 function circlestrokecolor(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo) {
   if (iso && tree.translationDistance(iso.matrix, v) === iso.minDist) {
-    return colors.info
+    return colors.fixedPoints
   } else if (tree.inInfEnd(v)) {
-    return colors.accent_dark
+    return colors.infBranch
   } else if (end == undefined) {
-    return colors.primary
+    return colors.type0
   } else if (tree.inEnd(v, end)) {
-    return colors.accent
+    return colors.end
   } else {
-    return colors.primary
+    return colors.type0
   }
 }
 
 function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec, iso?: isoInfo) {
   if (iso && tree.translationDistance(iso.matrix, v1) === iso.minDist
   && tree.translationDistance(iso.matrix, v2) === iso.minDist) {
-    return colors.info
+    return colors.fixedPoints
   } else if (tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
-    return colors.accent_dark
+    return colors.infBranch
   } else if (end == undefined) {
-    return colors.secondary
+    return colors.edge
   } else if (tree.inEnd(v1, end) && tree.inEnd(v2, end)) {
-    return colors.accent
+    return colors.end
   } else {
-    return colors.secondary
+    return colors.edge
   }
 }
 
@@ -194,7 +194,7 @@ function defaultGraphicsProps(tree: BTT, lattice: vertex, end?: pvec, iso?: isoI
     branchLength: 240 * Math.pow(tree.p, 0.5),
     branchWidth: 4,
     strokeWidth: 2,
-    color: colors.primary,
+    fillColor: colors.type0,
     circlestrokecolor: circlestrokecolor(tree, lattice, end, iso),
     edgestrokecolor: ''
   }
@@ -206,7 +206,7 @@ function updateGraphicsProps(tree: BTT, v: vertex, parent: vertex, props: graphi
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
     branchWidth: props.branchWidth * 0.8,
     strokeWidth: Math.max(props.strokeWidth * 0.8, 1),
-    color: props.color === colors.primary ? colors.alternative : colors.primary,
+    fillColor: props.fillColor === colors.type0 ? colors.type1 : colors.type0,
     circlestrokecolor: circlestrokecolor(tree, v, end, iso),
     edgestrokecolor: edgestrokecolor(tree, v, parent, end, iso)
   }
