@@ -26,6 +26,9 @@ export class RationalField extends Field<Rational> {
   // Generate a canonical representation of a rational number.
   // Every rational number created using this function will have a unique representation.
   public reduce = (num: int, den: int): Rational => {
+    if (!Number.isInteger(num) || !Number.isInteger(den)) {
+      throw new Error('Arguments are not integers')
+    }
     if (den == 0) {
       throw new Error('Denominator is zero.')
     } else if (num == 0) {

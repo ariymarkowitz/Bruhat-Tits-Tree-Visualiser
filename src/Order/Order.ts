@@ -20,4 +20,12 @@ export abstract class Order<Element> {
     if (this.gte(a, b)) return a
     else return b
   }
+  public minAll(arr: Element[]) {
+    if (arr.length === 0) throw new Error ('Array is empty')
+    return arr.reduce((min, n) => this.min(min, n), arr[1])
+  }
+  public maxAll(arr: Element[]) {
+    if (arr.length === 0) throw new Error ('Array is empty')
+    return arr.reduce((max, n) => this.max(max, n), arr[1])
+  }
 }

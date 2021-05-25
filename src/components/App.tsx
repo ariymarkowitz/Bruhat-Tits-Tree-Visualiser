@@ -8,7 +8,7 @@ const s = require('./main.css');
 function formatMatrix(str: string) {
   const n = str.split(',').map(s => Number(s))
   if (n.length === 4 && n.every(Number.isInteger)) {
-    return [[n[0],n[3]],[n[2],n[4]]]
+    return [[n[0],n[2]],[n[1],n[3]]]
   } else {
     return undefined
   }

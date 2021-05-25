@@ -14,6 +14,11 @@ import { MainTooltip, Tooltip } from "./Tooltip";
 type pvec = [AdicNumber, AdicNumber]
 type BTT = BruhatTitsTree
 
+type isoInfo = {
+  matrix: matrix<AdicNumber>;
+  minDist: number;
+}
+
 type props = {
   p: number,
   depth: number,
@@ -58,7 +63,7 @@ export const TreeView = (props: props) => {
   
   const {tooltipProps, tooltip} = makeTooltip()
 
-  const tree = makeTree(tooltip, props.p, props.depth, props.end)
+  const tree = makeTree(tooltip, props.p, props.depth, props.end, props.iso)
 
   return (
     <Stage width={width} height={height}>
@@ -117,13 +122,24 @@ function handleMouseLeave(context: MainTooltip.context | null, e: KonvaEventObje
   context.setVisible!(false)
 }
 
-function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]) {
+function makeTree(tooltip: any, p: number, depth: number, end?: [number, number], iso?: number[][]) {
   const btt = useMemo(() => new BruhatTitsTree(p), [p])
   const tree = useMemo(() => btt.make(depth), [btt, depth])
 
-  const endAdic = (end ? btt.vspace.fromInts(end) : end) as [AdicNumber, AdicNumber]
+  const endAdic = useMemo(
+    () => (end ? btt.vspace.fromInts(end) : undefined) as [AdicNumber, AdicNumber],
+    [btt, end]
+  )
+  
+  const isoAdic = useMemo(() => {
+    const _isoAdic = (iso ? btt.vspace.matrixAlgebra.fromInts(iso) : undefined)
+    return _isoAdic && !btt.vspace.matrixAlgebra.isSingular(_isoAdic) ? _isoAdic : undefined
+  }, [btt, iso])
 
-  const graphicsTree = makeGraphicsTree(btt, tree, endAdic)
+  const graphicsTree = useMemo(
+    () => makeGraphicsTree(btt, tree, endAdic, isoAdic),
+    [btt, tree, endAdic, isoAdic]
+  )
 
   type treenode = {node: tree<nodeProps>, parent: tree<nodeProps> | null}
   return {
@@ -143,8 +159,10 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
   }
 }
 
-function circlestrokecolor(tree: BTT, v: vertex, end?: pvec) {
-  if (tree.inInfEnd(v)) {
+function circlestrokecolor(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo) {
+  if (iso && tree.translationDistance(iso.matrix, v) === iso.minDist) {
+    return colors.info
+  } else if (tree.inInfEnd(v)) {
     return colors.accent_dark
   } else if (end == undefined) {
     return colors.primary
@@ -155,8 +173,11 @@ function circlestrokecolor(tree: BTT, v: vertex, end?: pvec) {
   }
 }
 
-function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec) {
-  if (tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
+function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec, iso?: isoInfo) {
+  if (iso && tree.translationDistance(iso.matrix, v1) === iso.minDist
+  && tree.translationDistance(iso.matrix, v2) === iso.minDist) {
+    return colors.info
+  } else if (tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
     return colors.accent_dark
   } else if (end == undefined) {
     return colors.secondary
@@ -167,37 +188,39 @@ function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec) {
   }
 }
 
-function defaultGraphicsProps(tree: BTT, lattice: vertex, end?: pvec): graphicsProps {
+function defaultGraphicsProps(tree: BTT, lattice: vertex, end?: pvec, iso?: isoInfo): graphicsProps {
   return {
     radius: 10,
     branchLength: 240 * Math.pow(tree.p, 0.5),
     branchWidth: 4,
     strokeWidth: 2,
     color: colors.primary,
-    circlestrokecolor: circlestrokecolor(tree, lattice, end),
+    circlestrokecolor: circlestrokecolor(tree, lattice, end, iso),
     edgestrokecolor: ''
   }
 }
 
-function updateGraphicsProps(tree: BTT, v: vertex, parent: vertex, props: graphicsProps, end?: pvec): graphicsProps {
+function updateGraphicsProps(tree: BTT, v: vertex, parent: vertex, props: graphicsProps, end?: pvec, iso?: isoInfo): graphicsProps {
   return {
     radius: props.radius * 0.75,
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
     branchWidth: props.branchWidth * 0.8,
     strokeWidth: Math.max(props.strokeWidth * 0.8, 1),
     color: props.color === colors.primary ? colors.alternative : colors.primary,
-    circlestrokecolor: circlestrokecolor(tree, v, end),
-    edgestrokecolor: edgestrokecolor(tree, v, parent, end)
+    circlestrokecolor: circlestrokecolor(tree, v, end, iso),
+    edgestrokecolor: edgestrokecolor(tree, v, parent, end, iso)
   }
 }
 
-function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec): tree<nodeProps> {
+function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec, iso?: matrix<AdicNumber>): tree<nodeProps> {
   const turnangle = 2*Math.PI/(btt.p+1)
   const rootDisplay = displayLattice(tree.value, btt)
 
+  const isoInfo = iso ? {matrix: iso, minDist: btt.minTranslationDistance(iso)} : undefined
+
   return Tree.make((data: nodeProps) => {
     const forest = data.node.forest.map((child, i) => {
-      const graphics = updateGraphicsProps(btt, child.value, data.node.value, data.graphics, end) 
+      const graphics = updateGraphicsProps(btt, child.value, data.node.value, data.graphics, end, isoInfo) 
 
       const node = child
       const angle = Math.PI-(i + 1)*turnangle + data.angle
@@ -214,7 +237,7 @@ function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec): tree<nodePr
     y: 0,
     angle: Math.PI + turnangle,
     display: rootDisplay,
-    graphics: defaultGraphicsProps(btt, tree.value, end)
+    graphics: defaultGraphicsProps(btt, tree.value, end, isoInfo)
   })
 }
 

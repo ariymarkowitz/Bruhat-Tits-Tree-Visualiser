@@ -5,7 +5,7 @@ import { matrix } from "../VectorSpace/Matrix"
 import { Tree } from "./Tree"
 import { Range } from "immutable"
 import { cache } from "decorator-cache-getter"
-import { eIntOrd } from "../Order/ExtendedInt"
+import { eInt, extendedInt, Infinite } from "../Order/ExtendedInt"
 
 type generators = matrix<AdicNumber>
 
@@ -64,6 +64,20 @@ export default class BruhatTitsTree {
     }
   }
 
+  public minTranslationDistance(m: matrix<AdicNumber>): int {
+    const M = this.vspace.matrixAlgebra
+    const F = this.field
+
+    const vDet = F.valuation(M.determinant(m))
+    if (vDet === Infinite) throw new Error('Matrix is singular')
+
+    const a = eInt.min(
+      F.valuation(M.trace(m)),
+      Math.floor(vDet/2)
+    )
+    return -2*a + vDet
+  }
+
   // Check whether the end lies in the lattice.
   public inEnd(v: vertex, end: [AdicNumber, AdicNumber]) {
     const F = this.field
@@ -74,7 +88,7 @@ export default class BruhatTitsTree {
     const reducedEnd = F.divide(end[1], end[0])
     // Do the coefficients of the vertex agree with the end?
     const val = F.valuation(F.subtract(reducedEnd, v.u))
-    return eIntOrd.gte(val, v.n)
+    return eInt.gte(val, v.n)
   }
 
   public inInfEnd(v: vertex) {
@@ -83,6 +97,36 @@ export default class BruhatTitsTree {
 
   public vertexToGens(v: vertex): generators{
     return [[this.field.one, v.u], [this.field.zero, this.field.fromVal(v.n)]]
+  }
+
+  public minValuation(m: generators): extendedInt {
+    return eInt.minAll(m.flat(1).map(e => this.field.valuation(e)))
+  }
+
+  public getIntMatrix(m: generators): generators {
+    const F = this.field
+    const M = this.vspace.matrixAlgebra
+
+    const minVal = this.minValuation(m)
+    if (minVal === Infinite) throw new Error('Matrix is zero')
+
+    return M.scale(F.fromVal(-minVal), m)
+  }
+
+  public distanceToRoot(m: generators): int {
+    const F = this.field
+    const M = this.vspace.matrixAlgebra
+
+    const vDet = F.valuation(M.determinant(m))
+    const minV = this.minValuation(m)
+    if (vDet === Infinite || minV === Infinite) throw new Error('Matrix is zero')
+
+    return -2 * minV + vDet
+  }
+
+  public translationDistance(a: generators, v: vertex): int {
+    const M = this.vspace.matrixAlgebra
+    return this.distanceToRoot(M.conjugate(a, this.vertexToGens(v)))
   }
 
   public make(depth: int, root: vertex = {u: this.field.zero, n: 0}) {

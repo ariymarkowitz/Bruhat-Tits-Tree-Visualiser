@@ -6,7 +6,7 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "module": "es6",
-    "target": "es6",
+    "target": "es2019",
     "allowJs": true,
     "esModuleInterop": true,
     "moduleResolution": "node",

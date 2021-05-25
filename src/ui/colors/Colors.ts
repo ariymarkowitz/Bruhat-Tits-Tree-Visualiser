@@ -5,5 +5,6 @@ export const colors = {
   alternative: '#111',
   border: '#444',
   accent: '#e03',
-  accent_dark: '#800',
+  accent_dark: '#822',
+  info: '#09e'
 }

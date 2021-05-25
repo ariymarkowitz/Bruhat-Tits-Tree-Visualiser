@@ -85,9 +85,7 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
   }
 
   public innerProduct(v1: FieldElement[], v2: FieldElement[]): FieldElement {
-    return reduce(this.field.zero, (s, a) =>
-      this.field.add(s, this.field.multiply(a[0], a[1])),
-      zip(v1, v2))
+    return v1.reduce((s, e, i) => this.field.add(s, this.field.multiply(e, v2[i])), this.field.zero)
   }
 
   public multiply(m1: matrix<FieldElement>, m2: matrix<FieldElement>): matrix<FieldElement> {
@@ -138,6 +136,18 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
 
   public fromInt(n: int): matrix<FieldElement> {
     return this.fromScalar(this.field.one)
+  }
+
+  public isSingular(m: matrix<FieldElement>): boolean {
+    return this.field.isZero(this.determinant(m))
+  }
+
+  public clone(m: matrix<FieldElement>): matrix<FieldElement> {
+    return m.map(v => [...v])
+  }
+
+  public conjugate(m: matrix<FieldElement>, p: matrix<FieldElement>): matrix<FieldElement> {
+    return this.multiply(this.multiply(this.invert(p), m), p)
   }
 
   public toString(): string {

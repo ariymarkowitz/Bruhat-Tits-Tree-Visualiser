@@ -1,4 +1,4 @@
-import { eIntOrd } from './../Order/ExtendedInt';
+import { eInt } from './../Order/ExtendedInt';
 import { extendedInt } from '../Order/ExtendedInt';
 import Field from "./Field";
 
@@ -8,6 +8,6 @@ export abstract class DVField<FieldElement> extends Field<FieldElement> {
   public abstract uniformizer: FieldElement
 
   public inValuationRing(a: FieldElement): boolean {
-    return eIntOrd.gte(this.valuation(a), 0)
+    return eInt.gte(this.valuation(a), 0)
   }
 }
