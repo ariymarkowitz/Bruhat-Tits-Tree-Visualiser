@@ -4,6 +4,22 @@ body {
 }
 
 #tree-controls label {
-  width: 20%;
+  width: 30%;
   text-align: right;
+}
+
+#tree-controls .input {
+  width: 60%;
+}
+
+#tree-controls .number-input .input {
+  width: 100%;
+}
+
+#tree-controls .number-input input {
+  text-align: left !important;
+}
+
+#tree-controls .number-input > div {
+  width: 100%;
 }

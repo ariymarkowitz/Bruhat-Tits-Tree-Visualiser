@@ -14,7 +14,7 @@ function formatMatrix(str: string) {
 }
 
 const NumberInput2 = (props: any) => {
-  return <NumberInput {...props} className='ui input' />
+  return <NumberInput {...props} className='ui input number-input' />
 }
 
 const App = () => {
@@ -65,10 +65,10 @@ const App = () => {
   return (
     <Container>
       <Grid>
-        <Grid.Column width={12}>
+        <Grid.Column width={13}>
           <TreeView p={p} depth={depth} end={end as [number, number]} iso={iso} />
         </Grid.Column>
-        <Grid.Column width={4}>
+        <Grid.Column width={3}>
           <Form inverted autoComplete='off' id='tree-controls'>
             <Form.Group grouped>
               <Form.Field inline label='p' control={NumberInput2}
