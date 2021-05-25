@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 const path = require('path');
 
 module.exports = {
@@ -21,21 +22,6 @@ module.exports = {
         test: /\.exec\.js$/,
         use: [ 'script-loader' ]
       },
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              modules: true,
-              sourceMap: true
-            }
-          }
-        ]
-      },
     ],
   },
   resolve: {
@@ -54,6 +40,11 @@ module.exports = {
     template: 'src/index.html',
     files: {
       js: [ "dist/bundle.js"],
-    },
-  })],
+    }
+  }),
+  new CopyPlugin({
+    patterns: [
+      { from: "src/style", to: "." },
+    ],
+  }),],
 };

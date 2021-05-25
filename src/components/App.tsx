@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Grid, Input, Segment } from 'semantic-ui-react';
+import { Container, Form, Grid, Input, Segment } from 'semantic-ui-react';
 import { isPrime } from '../utils';
 import { TreeView } from './TreeComponent';
-
-const s = require('./main.css');
+import NumberInput from 'semantic-ui-react-numberinput';
 
 function formatMatrix(str: string) {
-  const n = str.split(',').map(s => Number(s))
+  const n = str.split(',').map(s => Number.parseInt(s))
   if (n.length === 4 && n.every(Number.isInteger)) {
     return [[n[0],n[2]],[n[1],n[3]]]
   } else {
     return undefined
   }
+}
+
+const NumberInput2 = (props: any) => {
+  return <NumberInput {...props} className='ui input' />
 }
 
 const App = () => {
@@ -27,7 +30,7 @@ const App = () => {
 
   useEffect(() => {
     const newP = Number.parseInt(inputP)
-    if (Number.isInteger(newP) && newP > 1 && newP < 20 && isPrime(newP)) {
+    if (Number.isInteger(newP) && isPrime(newP)) {
       setP(newP)
     }
   }, [inputP])
@@ -66,19 +69,16 @@ const App = () => {
           <TreeView p={p} depth={depth} end={end as [number, number]} iso={iso} />
         </Grid.Column>
         <Grid.Column width={4}>
-          <Segment inverted>
-            p 
-            <Input inverted value={inputP} onChange={(e) => setInputP(e.target.value)} />
-          </Segment>
-          <Segment inverted>Depth 
-            <Input inverted value={depth} onChange={(e) => validateDepth(e.target.value)} />
-          </Segment>
-          <Segment inverted>End 
-            <Input inverted value = {inputEnd} onChange={(e) => setInputEnd(e.target.value)} />
-          </Segment>
-          <Segment inverted>Isometry 
-            <Input inverted onChange={(e) => setIso(formatMatrix(e.target.value))} />
-          </Segment>
+          <Form inverted autoComplete='off' id='tree-controls'>
+            <Form.Group grouped>
+              <Form.Field inline label='p' control={NumberInput2}
+              buttonPlacement="right" value={inputP} minValue={1} maxValue={10}
+              onChange={(e: any) => setInputP(e)} />
+              <Form.Input inline label='Depth' value={depth} onChange={(e: any) => validateDepth(e.target.value)} />
+              <Form.Input inline label='End' value = {inputEnd} onChange={(e: any) => setInputEnd(e.target.value)} />
+              <Form.Input inline label='Isometry' onChange={(e: any) => setIso(formatMatrix(e.target.value))} />
+            </Form.Group>
+          </Form>
         </Grid.Column>
       </Grid>
     </Container>

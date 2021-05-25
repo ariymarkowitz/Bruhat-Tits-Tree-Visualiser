@@ -7,6 +7,7 @@ import { rationalField } from "../Field/Rational";
 import BruhatTitsTree, { vertex } from '../Tree/BruhatTitsTree';
 import { Tree, tree } from "../Tree/Tree";
 import { colors } from "../ui/colors/Colors";
+import { mod } from "../utils";
 import { matrix } from "../VectorSpace/Matrix";
 import { vec } from "../VectorSpace/VectorSpace";
 import { MainTooltip, Tooltip } from "./Tooltip";
@@ -159,8 +160,22 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
   }
 }
 
+function circlefillcolor(tree: BTT, v: vertex, iso?: isoInfo) {
+  if (iso && tree.lengthOfImage(iso.matrix, v) === 0) {
+    return colors.rootImage
+  } else if (!iso && tree.field.isZero(v.u) && v.n === 0) {
+    return colors.rootImage
+  } else if (mod(v.n, 2) === 1) {
+    return colors.type1
+  } else {
+    return colors.type0
+  }
+}
+
 function circlestrokecolor(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo) {
-  if (iso && tree.translationDistance(iso.matrix, v) === iso.minDist) {
+  if (iso && iso.minDist !== 0 && tree.translationDistance(iso.matrix, v) === iso.minDist) {
+    return colors.translationAxis
+  } else if (iso && iso.minDist === 0 && tree.translationDistance(iso.matrix, v) === 0) {
     return colors.fixedPoints
   } else if (tree.inInfEnd(v)) {
     return colors.infBranch
@@ -174,8 +189,17 @@ function circlestrokecolor(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo) {
 }
 
 function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec, iso?: isoInfo) {
-  if (iso && tree.translationDistance(iso.matrix, v1) === iso.minDist
-  && tree.translationDistance(iso.matrix, v2) === iso.minDist) {
+  if (
+    iso && iso.minDist !== 0
+    && tree.translationDistance(iso.matrix, v1) === iso.minDist
+    && tree.translationDistance(iso.matrix, v2) === iso.minDist
+  ) {
+    return colors.translationAxis
+  } else if (
+    iso && iso.minDist === 0
+    && tree.translationDistance(iso.matrix, v1) === 0
+    && tree.translationDistance(iso.matrix, v2) === 0
+  ) {
     return colors.fixedPoints
   } else if (tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
     return colors.infBranch
@@ -188,14 +212,14 @@ function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec, iso?: is
   }
 }
 
-function defaultGraphicsProps(tree: BTT, lattice: vertex, end?: pvec, iso?: isoInfo): graphicsProps {
+function defaultGraphicsProps(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo): graphicsProps {
   return {
     radius: 10,
     branchLength: 240 * Math.pow(tree.p, 0.5),
     branchWidth: 4,
     strokeWidth: 2,
-    fillColor: colors.type0,
-    circlestrokecolor: circlestrokecolor(tree, lattice, end, iso),
+    fillColor: circlefillcolor(tree, v, iso),
+    circlestrokecolor: circlestrokecolor(tree, v, end, iso),
     edgestrokecolor: ''
   }
 }
@@ -206,7 +230,7 @@ function updateGraphicsProps(tree: BTT, v: vertex, parent: vertex, props: graphi
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
     branchWidth: props.branchWidth * 0.8,
     strokeWidth: Math.max(props.strokeWidth * 0.8, 1),
-    fillColor: props.fillColor === colors.type0 ? colors.type1 : colors.type0,
+    fillColor: circlefillcolor(tree, v, iso),
     circlestrokecolor: circlestrokecolor(tree, v, end, iso),
     edgestrokecolor: edgestrokecolor(tree, v, parent, end, iso)
   }

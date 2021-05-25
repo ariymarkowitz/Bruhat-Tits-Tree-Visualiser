@@ -22,7 +22,8 @@
     "path-that-svg": "^1.2.4",
     "react": "^17.0.2",
     "react-konva": "*",
-    "semantic-ui-react": "^2.0.3"
+    "semantic-ui-react": "^2.0.3",
+    "semantic-ui-react-numberinput": "^1.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.0",
@@ -36,6 +37,7 @@
     "@typescript-eslint/eslint-plugin": "^4.22.1",
     "@typescript-eslint/parser": "^4.22.1",
     "babel-loader": "^8.2.2",
+    "copy-webpack-plugin": "^9.0.0",
     "css-loader": "^5.2.4",
     "eslint": "^7.25.0",
     "eslint-plugin-react": "^7.23.2",

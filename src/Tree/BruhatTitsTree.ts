@@ -129,6 +129,11 @@ export default class BruhatTitsTree {
     return this.distanceToRoot(M.conjugate(a, this.vertexToGens(v)))
   }
 
+  public lengthOfImage(a: generators, v: vertex) {
+    const M = this.vspace.matrixAlgebra
+    return this.distanceToRoot(M.multiply(a, this.vertexToGens(v)))
+  }
+
   public make(depth: int, root: vertex = {u: this.field.zero, n: 0}) {
     return Tree.make(({v, length}) => {
       return {

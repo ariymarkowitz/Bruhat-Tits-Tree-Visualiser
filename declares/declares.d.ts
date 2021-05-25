@@ -1,4 +1,2 @@
-declare module 'easeljs-svg-path'
-declare module 'element-to-path'
-declare module 'path-that-svg'
+declare module "semantic-ui-react-numberinput"
 declare var loadMathJax: () => Promise<any>
