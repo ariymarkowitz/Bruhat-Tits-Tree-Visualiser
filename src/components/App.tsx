@@ -50,7 +50,7 @@ const App = () => {
 
   const validateDepth = (n: string) => {
     const v = Number.parseInt(n)
-    if (Number.isInteger(v) && v > 0 && v < 10) {
+    if (Number.isInteger(v)) {
       setInputDepth([v, p])
     }
   }
@@ -73,8 +73,10 @@ const App = () => {
             <Form.Group grouped>
               <Form.Field inline label='p' control={NumberInput2}
               buttonPlacement="right" value={inputP} minValue={1} maxValue={10}
-              onChange={(e: any) => setInputP(e)} />
-              <Form.Input inline label='Depth' value={depth} onChange={(e: any) => validateDepth(e.target.value)} />
+              onChange={(value: string) => setInputP(value)} />
+              <Form.Field inline label='Depth' control={NumberInput2}
+              buttonPlacement="right" value={depth} minValue={1} maxValue={10}
+              onChange={(value: string) => validateDepth(value)} />
               <Form.Input inline label='End' value = {inputEnd} onChange={(e: any) => setInputEnd(e.target.value)} />
               <Form.Input inline label='Isometry' onChange={(e: any) => setIso(formatMatrix(e.target.value))} />
             </Form.Group>
