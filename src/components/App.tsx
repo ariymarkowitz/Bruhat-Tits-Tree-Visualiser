@@ -3,11 +3,11 @@ import { Container, Form, Grid, Input, Segment } from 'semantic-ui-react';
 import { isPrime } from '../utils';
 import { TreeView } from './TreeComponent';
 import NumberInput from 'semantic-ui-react-numberinput';
+import { MatrixInput } from './MatrixInput';
 
-function formatMatrix(str: string) {
-  const n = str.split(',').map(s => Number.parseInt(s))
-  if (n.length === 4 && n.every(Number.isInteger)) {
-    return [[n[0],n[2]],[n[1],n[3]]]
+function formatMatrix(m: number[]) {
+  if (m.length === 4 && m.every(Number.isInteger)) {
+    return [[m[0],m[2]],[m[1],m[3]]]
   } else {
     return undefined
   }
@@ -26,6 +26,7 @@ const App = () => {
   const [inputEnd, setInputEnd] = useState<string>('')
   const [end, setEnd] = useState<number[] | undefined>(undefined)
 
+  const [inputIso, setInputIso] = useState<number[]>([1, 0, 0, 1])
   const [iso, setIso] = useState<number[][] | undefined>(undefined)
 
   useEffect(() => {
@@ -48,6 +49,10 @@ const App = () => {
     
   }, [inputEnd])
 
+  useEffect(() => {
+    setIso(formatMatrix(inputIso))
+  }, [inputIso])
+
   const validateDepth = (n: string) => {
     const v = Number.parseInt(n)
     if (Number.isInteger(v)) {
@@ -69,16 +74,17 @@ const App = () => {
           <TreeView p={p} depth={depth} end={end as [number, number]} iso={iso} />
         </Grid.Column>
         <Grid.Column width={3}>
-          <Form inverted autoComplete='off' id='tree-controls'>
+          <Form autoComplete='off' id='tree-controls'>
             <Form.Group grouped>
               <Form.Field inline label='p' control={NumberInput2}
-              buttonPlacement="right" value={inputP} minValue={1} maxValue={10}
+              buttonPlacement="right" value={inputP.toString()} minValue={1} maxValue={10}
               onChange={(value: string) => setInputP(value)} />
               <Form.Field inline label='Depth' control={NumberInput2}
-              buttonPlacement="right" value={depth} minValue={1} maxValue={10}
+              buttonPlacement="right" value={depth.toString()} minValue={1} maxValue={10}
               onChange={(value: string) => validateDepth(value)} />
               <Form.Input inline label='End' value = {inputEnd} onChange={(e: any) => setInputEnd(e.target.value)} />
-              <Form.Input inline label='Isometry' onChange={(e: any) => setIso(formatMatrix(e.target.value))} />
+              <Form.Field control={MatrixInput} inline label='Isometry'
+              value={inputIso} onChange={(m: number[]) => setInputIso(m)} />
             </Form.Group>
           </Form>
         </Grid.Column>

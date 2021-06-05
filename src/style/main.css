@@ -21,5 +21,24 @@ body {
 }
 
 #tree-controls .number-input > div {
-  width: 100%;
+  width: 200px;
+}
+
+.matrix-input-container {
+  display: inline-grid;
+  grid-template-columns: repeat(2, 50%);
+  grid-template-rows: repeat(2, 50%);
+  gap: 2px;
+  width: 64px;
+  height: 64px;
+}
+
+.matrix-input-container input,
+.ui.form .matrix-input-container input {
+  background: none;
+  color: inherit;
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  border-radius: 0;
+  padding: 5px;
+  text-align: center;
 }
