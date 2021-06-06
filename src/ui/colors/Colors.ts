@@ -5,7 +5,7 @@ export const colors = {
   type1: '#111',
   border: '#444',
   end: '#e03',
-  infBranch: '#822',
+  infBranch: '#a34339',
   fixedPoints: '#09e',
   translationAxis: '#0c0',
   rootImage: '#f57'

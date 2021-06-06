@@ -80,23 +80,31 @@ export default class BruhatTitsTree {
 
   // Check whether the end lies in the lattice.
   public inEnd(v: vertex, end: [AdicNumber, AdicNumber]) {
-    const F = this.field
-    // Check the special case of (1, 0).
-    // This can be more nicely done in terms of integer-reduced lattices without the spacial cases,
-    // But this works fine and is probably more efficient.
-    if (F.isZero(end[0])) return F.isZero(v.u) && v.n <= 0
-    const reducedEnd = F.divide(end[1], end[0])
-    // Do the coefficients of the vertex agree with the end?
-    const val = F.valuation(F.subtract(reducedEnd, v.u))
-    return eInt.gte(val, v.n)
+    return this.vspace.inLattice(this.vertexToIntGens(v), this.toIntVector(end))
   }
 
   public inInfEnd(v: vertex) {
     return (this.field.isZero(v.u) && v.n <= 0)
   }
 
-  public vertexToGens(v: vertex): generators{
+  public toIntVector(v: AdicNumber[]): AdicNumber[] {
+    const a = eInt.minAll(v.map(n => this.field.valuation(n)))
+    if (a === Infinite) return v
+    else return this.vspace.scale(v, this.field.fromVal(-a))
+  }
+
+  public toIntMatrix(m: generators): generators {
+    const a = this.minValuation(m)
+    if (a === Infinite) return m
+    else return this.vspace.matrixAlgebra.scale(this.field.fromVal(-a), m)
+  }
+
+  public vertexToGens(v: vertex): generators {
     return [[this.field.one, v.u], [this.field.zero, this.field.fromVal(v.n)]]
+  }
+
+  public vertexToIntGens(v: vertex): generators {
+    return this.toIntMatrix(this.vertexToGens(v))
   }
 
   public minValuation(m: generators): extendedInt {

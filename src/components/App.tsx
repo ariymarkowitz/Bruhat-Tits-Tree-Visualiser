@@ -20,14 +20,35 @@ function primeStep(component: NumericInput, direction: string) {
   }
 }
 
+function parseEnd(s: string): [number, number] | undefined {
+  // Match 'a / b', where a and b are integers.
+  const matches = /^(?<num>-?\d+) *(\/ *(?<den>-?\d+) *)?$/.exec(s)
+  if (!matches || !matches.groups) return undefined
+  const g = matches.groups
+  if (g.num) {
+    const num = Number(matches.groups.num)
+    if (g.den) {
+      const den = Number(matches.groups.den)
+      if (num === 0 && den === 0) return undefined
+      return [den, num]
+    } else {
+      return [1, num]
+    }
+  } else {
+    return undefined
+  }
+}
+
 const App = () => {
   const [inputP, setInputP] = useState<string>('2')
   const [p, setP] = useState<number>(2)
 
   const [inputDepth, setInputDepth] = useState([7, p])
 
+  const [showEnd, setShowEnd] = useState(false)
+
   const [inputEnd, setInputEnd] = useState<string>('')
-  const [end, setEnd] = useState<number[] | undefined>(undefined)
+  const [end, setEnd] = useState<[number, number] | undefined>(undefined)
 
   const [showIso, setShowIso] = useState(false)
 
@@ -42,16 +63,7 @@ const App = () => {
   }, [inputP])
 
   useEffect(() => {
-    if (inputEnd == '') {
-      setEnd(undefined)
-    } else {
-      const ns = inputEnd.split(',')
-      if (ns.length !== 2) return
-      const [a, b] = ns.map(e => Number.parseInt(e))
-      if (!(Number.isInteger(a) && Number.isInteger(b))) return
-      setEnd([a, b])
-    }
-    
+    setEnd(parseEnd(inputEnd))
   }, [inputEnd])
 
   useEffect(() => {
@@ -75,6 +87,13 @@ const App = () => {
     }
   }
 
+  const validateEnd = (s: string) => {
+    // Match a substring of 'a / b', where a and b are integers.
+    if (/^-?\d* *(\/ *-?\d*)?$/.test(s)) {
+      setInputEnd(s)
+    }
+  }
+
   let depth
   if (inputDepth[0] <= 1) {
     depth = 1
@@ -85,7 +104,7 @@ const App = () => {
   return (
     <div className='container'>
       <div className='tree-container'>
-        <TreeView p={p} depth={depth} end={end as [number, number]} iso={showIso ? iso : undefined} />
+        <TreeView p={p} depth={depth} end={showEnd ? end : undefined} iso={showIso ? iso : undefined} />
       </div>
       <div className='sidebar'>
           <div className='sidebar-row'>
@@ -99,8 +118,12 @@ const App = () => {
               onChange={(_, s) => validateDepth(s)} style={false} />
           </div>
           <div className='sidebar-row'>
-            <label htmlFor='End'>End</label>
-            <input type='text' name='End' value = {inputEnd} onChange={e => setInputEnd(e.target.value)} />
+            <div>
+              <input type='checkbox' checked={showEnd} onChange={e => setShowEnd(e.target.checked)} />
+              <label htmlFor='End'>End</label>
+            </div>
+            <input type='text' name='End' value = {inputEnd}
+              onChange={e => validateEnd(e.target.value)} className={showEnd ? undefined : 'disabled'} />
           </div>
           <div className='sidebar-row'>
             <div>

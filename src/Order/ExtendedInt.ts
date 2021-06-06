@@ -12,10 +12,10 @@ export class ExtendedInt extends Order<extendedInt> {
   public lte(a: extendedInt, b: extendedInt): boolean {
     return (b === Infinite) || (a !== Infinite && a <= b)
   }
-  public min(a: extendedInt, b: extendedInt): int
   public min(a: extendedInt, b: int): int
   public min(a: int, b: extendedInt): int
   public min(a: int, b: int): int
+  public min(a: extendedInt, b: extendedInt): extendedInt
   public min(a: extendedInt, b: extendedInt) {
     if (a === Infinite) return b
     if (b === Infinite) return a

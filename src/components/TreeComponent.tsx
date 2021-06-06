@@ -177,12 +177,10 @@ function circlestrokecolor(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo) {
     return colors.translationAxis
   } else if (iso && iso.minDist === 0 && tree.translationDistance(iso.matrix, v) === 0) {
     return colors.fixedPoints
+  } else if (end !== undefined && tree.inEnd(v, end)) {
+    return colors.end
   } else if (tree.inInfEnd(v)) {
     return colors.infBranch
-  } else if (end == undefined) {
-    return colors.type0
-  } else if (tree.inEnd(v, end)) {
-    return colors.end
   } else {
     return colors.type0
   }
@@ -201,12 +199,10 @@ function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec, iso?: is
     && tree.translationDistance(iso.matrix, v2) === 0
   ) {
     return colors.fixedPoints
+  } else if (end !== undefined && tree.inEnd(v1, end) && tree.inEnd(v2, end)) {
+    return colors.end
   } else if (tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
     return colors.infBranch
-  } else if (end == undefined) {
-    return colors.edge
-  } else if (tree.inEnd(v1, end) && tree.inEnd(v2, end)) {
-    return colors.end
   } else {
     return colors.edge
   }
