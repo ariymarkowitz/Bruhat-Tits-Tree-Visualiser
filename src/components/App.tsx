@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Form, Grid, Input, Segment } from 'semantic-ui-react';
 import { isPrime } from '../utils';
 import { TreeView } from './TreeComponent';
-import NumberInput from 'semantic-ui-react-numberinput';
 import { MatrixInput } from './MatrixInput';
+import NumericInput from "react-numeric-input";
 
-function formatMatrix(m: number[]) {
-  if (m.length === 4 && m.every(Number.isInteger)) {
-    return [[m[0],m[2]],[m[1],m[3]]]
+function primeStep(component: NumericInput, direction: string) {
+  const n = component.state.value
+  if (n == null) return 1
+  if (direction === NumericInput.DIRECTION_UP) {
+    let step = 1
+    while (!isPrime(n + step)) step++
+    return step
+  } else if (n <= 2) {
+    return 0
   } else {
-    return undefined
+    let step = 1
+    while (!isPrime(n - step)) step++
+    return step
   }
-}
-
-const NumberInput2 = (props: any) => {
-  return <NumberInput {...props} className='ui input number-input' />
 }
 
 const App = () => {
@@ -26,7 +29,9 @@ const App = () => {
   const [inputEnd, setInputEnd] = useState<string>('')
   const [end, setEnd] = useState<number[] | undefined>(undefined)
 
-  const [inputIso, setInputIso] = useState<number[]>([1, 0, 0, 1])
+  const [showIso, setShowIso] = useState(false)
+
+  const [inputIso, setInputIso] = useState<string[]>(['1', '0', '0', '1'])
   const [iso, setIso] = useState<number[][] | undefined>(undefined)
 
   useEffect(() => {
@@ -50,7 +55,17 @@ const App = () => {
   }, [inputEnd])
 
   useEffect(() => {
-    setIso(formatMatrix(inputIso))
+    if (inputIso.length === 4) {
+      const m = inputIso.map(Number)
+      console.log(m)
+      if (m.every(Number.isInteger)) {
+        setIso([[m[0],m[2]],[m[1],m[3]]])
+      } else {
+        setIso(undefined)
+      }
+    } else {
+      setIso(undefined)
+    }
   }, [inputIso])
 
   const validateDepth = (n: string) => {
@@ -68,28 +83,34 @@ const App = () => {
   }
 
   return (
-    <Container>
-      <Grid>
-        <Grid.Column width={13}>
-          <TreeView p={p} depth={depth} end={end as [number, number]} iso={iso} />
-        </Grid.Column>
-        <Grid.Column width={3}>
-          <Form autoComplete='off' id='tree-controls'>
-            <Form.Group grouped>
-              <Form.Field inline label='p' control={NumberInput2}
-              buttonPlacement="right" value={inputP.toString()} minValue={1} maxValue={10}
-              onChange={(value: string) => setInputP(value)} />
-              <Form.Field inline label='Depth' control={NumberInput2}
-              buttonPlacement="right" value={depth.toString()} minValue={1} maxValue={10}
-              onChange={(value: string) => validateDepth(value)} />
-              <Form.Input inline label='End' value = {inputEnd} onChange={(e: any) => setInputEnd(e.target.value)} />
-              <Form.Field control={MatrixInput} inline label='Isometry'
-              value={inputIso} onChange={(m: number[]) => setInputIso(m)} />
-            </Form.Group>
-          </Form>
-        </Grid.Column>
-      </Grid>
-    </Container>
+    <div className='container'>
+      <div className='tree-container'>
+        <TreeView p={p} depth={depth} end={end as [number, number]} iso={showIso ? iso : undefined} />
+      </div>
+      <div className='sidebar'>
+          <div className='sidebar-row'>
+            <label htmlFor='p'>p</label>
+            <NumericInput name={'p'} value={inputP} min={2} max={10} step={primeStep}
+              onChange={(_, s) => setInputP(s)} style={false} />
+          </div>
+          <div className='sidebar-row'>
+            <label htmlFor='Depth'>Depth</label>
+            <NumericInput name='Depth' value={depth} min={1} max={10}
+              onChange={(_, s) => validateDepth(s)} style={false} />
+          </div>
+          <div className='sidebar-row'>
+            <label htmlFor='End'>End</label>
+            <input type='text' name='End' value = {inputEnd} onChange={e => setInputEnd(e.target.value)} />
+          </div>
+          <div className='sidebar-row'>
+            <div>
+              <input type='checkbox' checked={showIso} onChange={e => setShowIso(e.target.checked)} />
+              <label>Isometry</label>
+            </div>
+            <MatrixInput value={inputIso} onChange={m => setInputIso(m)} className={showIso ? undefined : 'disabled'} />
+          </div>
+      </div>
+    </div>
   );
 };
 
