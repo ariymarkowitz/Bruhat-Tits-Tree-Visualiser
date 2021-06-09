@@ -6,7 +6,7 @@ import { AdicNumber, Zero } from "../Adic/Adic";
 import { rationalField } from "../Field/Rational";
 import BruhatTitsTree, { vertex } from '../Tree/BruhatTitsTree';
 import { Tree, tree } from "../Tree/Tree";
-import { colors } from "../ui/colors/Colors";
+import { theme } from "../style/themes/main";
 import { mod } from "../utils";
 import { matrix } from "../VectorSpace/Matrix";
 import { vec } from "../VectorSpace/VectorSpace";
@@ -46,6 +46,8 @@ type graphicsProps = {
   edgestrokecolor: string
   circlestrokecolor: string
 }
+
+const colors = theme.tree
 
 export const TreeView = (props: props) => {
   const width = 800

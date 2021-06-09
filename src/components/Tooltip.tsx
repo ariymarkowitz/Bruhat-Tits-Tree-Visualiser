@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Group, Image, Rect } from 'react-konva';
-import { colors } from '../ui/colors/Colors';
+import { theme } from '../style/themes/main';
 import { latexToImg } from './LatexToImg';
 
 type props = {
@@ -39,8 +39,8 @@ export const Tooltip = (props: props) => {
           width={image.width + 2*padding}
           height={image.height + 2*padding}
           strokeWidth={1}
-          stroke={colors.border}
-          fill={colors.background}
+          stroke={theme.colors.border}
+          fill={theme.colors.background}
         />
         <Image image={image} x={padding} y={padding} />
       </Group>

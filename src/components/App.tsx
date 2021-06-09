@@ -108,18 +108,24 @@ const App = () => {
       </div>
       <div className='sidebar'>
           <div className='sidebar-row'>
-            <label htmlFor='p'>p</label>
+            <div>
+              <label htmlFor='p'>p</label>
+            </div>
             <NumericInput name={'p'} value={inputP} min={2} max={10} step={primeStep}
               onChange={(_, s) => setInputP(s)} style={false} />
           </div>
           <div className='sidebar-row'>
-            <label htmlFor='Depth'>Depth</label>
+            <div>
+              <label htmlFor='Depth'>Depth</label>
+            </div>
             <NumericInput name='Depth' value={depth} min={1} max={10}
               onChange={(_, s) => validateDepth(s)} style={false} />
           </div>
           <div className='sidebar-row'>
             <div>
-              <input type='checkbox' checked={showEnd} onChange={e => setShowEnd(e.target.checked)} />
+              <div>
+                <input type='checkbox' checked={showEnd} onChange={e => setShowEnd(e.target.checked)} />
+              </div>
               <label htmlFor='End'>End</label>
             </div>
             <input type='text' name='End' value = {inputEnd}
