@@ -1,15 +1,13 @@
 import { Seq } from "immutable";
 import { KonvaEventObject } from "konva/lib/Node";
-import React, { useContext, useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Circle, Group, Layer, Line, Stage } from "react-konva"
-import { AdicNumber, Zero } from "../Adic/Adic";
-import { rationalField } from "../Field/Rational";
+import { AdicNumber } from "../Adic/Adic";
 import BruhatTitsTree, { vertex } from '../Tree/BruhatTitsTree';
 import { Tree, tree } from "../Tree/Tree";
 import { theme } from "../style/themes/themes";
 import { mod } from "../utils";
 import { matrix } from "../VectorSpace/Matrix";
-import { vec } from "../VectorSpace/VectorSpace";
 import { MainTooltip, Tooltip } from "./Tooltip";
 
 type pvec = [AdicNumber, AdicNumber]

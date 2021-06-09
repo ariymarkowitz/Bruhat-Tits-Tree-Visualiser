@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Group, Image, Rect } from 'react-konva';
 import { theme } from '../style/themes/themes';
 import { latexToImg } from './LatexToImg';
