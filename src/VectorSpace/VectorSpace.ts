@@ -1,6 +1,6 @@
 import { cache } from "decorator-cache-getter"
 import Field from "../Field/Field"
-import { int, map, range } from "../utils"
+import { int } from "../utils"
 import MatrixAlgebra, { matrix } from "./Matrix"
 
 export type vec<FieldElement> = FieldElement[]
@@ -40,13 +40,6 @@ export default class Vectorspace<FieldElement> {
   @cache
   public get matrixAlgebra(): MatrixAlgebra<FieldElement> {
     return new MatrixAlgebra(this, this.dim)
-  }
-
-  public transform(m: matrix<FieldElement>, v: FieldElement[]) {
-    let M = this.matrixAlgebra
-    return Array.from(map(j => {
-        return M.innerProduct(M.row(j, m), v)
-      }, range(this.dim)))
   }
 
   public toString(): string {

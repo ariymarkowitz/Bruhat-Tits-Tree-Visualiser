@@ -3,9 +3,9 @@ import { int } from "../utils"
 import DVVectorSpace from "../VectorSpace/DVVectorSpace"
 import { matrix } from "../VectorSpace/Matrix"
 import { Tree } from "./Tree"
-import { Range } from "immutable"
 import { cache } from "decorator-cache-getter"
 import { eInt, extendedInt, Infinite } from "../Order/ExtendedInt"
+import { Seq } from "../Seq/Seq"
 
 type generators = matrix<AdicNumber>
 
@@ -36,7 +36,9 @@ export default class BruhatTitsTree {
   private children(vertex: vertex) {
     const F = this.field
 
-    let c: vertex[] = [...Range(1, this.p).map(i => this.apply(vertex, i))]
+    let c: vertex[] = Seq.Range(1, this.p)
+      .map(i => this.apply(vertex, i))
+      .toArray()
 
     if (F.isZero(vertex.u) && vertex.n <= 0) {
       c = [...c, {u: vertex.u, n: vertex.n-1}]

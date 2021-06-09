@@ -1,8 +1,8 @@
 import { cache } from 'decorator-cache-getter'
-import { Seq } from 'immutable'
+import { range, Seq } from '../Seq/Seq'
 import Field from '../Field/Field'
 import Ring from '../Ring/Ring'
-import { int, map, range, reduce, zip } from './../utils'
+import { int } from '../utils'
 import VectorSpace, { vec } from './VectorSpace'
 
 export type matrix<FieldElement> = FieldElement[][]
@@ -37,15 +37,11 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
   }
 
   public fill(f: (col: int, row: int) => FieldElement): matrix<FieldElement>{
-    let m: matrix<FieldElement> = new Array(this.dim)
-    for (let col of range(this.dim)) {
-      let v: vec<FieldElement> = new Array(this.dim)
-      for (let row of range(this.dim)) {
-        v[row] = f(col, row)
-      }
-      m[col] = v
-    }
-    return m
+    return Seq.Range(this.dim)
+      .map(col => Seq.Range(this.dim)
+        .map(row => f(row, col))
+        .toArray())
+      .toArray()
   }
 
   public column(i: int, m: matrix<FieldElement>): FieldElement[] {
@@ -53,7 +49,7 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
   }
 
   public row(i: int, m: matrix<FieldElement>): FieldElement[] {
-    return [...map((v) => v[i], m)]
+    return m.map(v => v[i])
   }
 
   public replaceRow(m: matrix<FieldElement>, index: int, newrow: FieldElement[]): matrix<FieldElement> {
@@ -88,10 +84,22 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
     return v1.reduce((s, e, i) => this.field.add(s, this.field.multiply(e, v2[i])), this.field.zero)
   }
 
+  public apply(m1: matrix<FieldElement>, m2: vec<FieldElement>): vec<FieldElement> {
+    const F = this.field
+    return Seq.Range(this.dim)
+      .map(row => Seq.Range(this.dim)
+        .reduce(F.zero, (sum, i) => F.add(sum, F.multiply(m1[i][row], m2[i])))
+      ).toArray()
+  }
+
   public multiply(m1: matrix<FieldElement>, m2: matrix<FieldElement>): matrix<FieldElement> {
-    return [...map(i => [...map(j =>
-      this.innerProduct(this.row(j, m1), this.column(i, m2)),
-      range(this.dim))], range(this.dim))]
+    const F = this.field
+    return Seq.Range(this.dim)
+      .map(col => Seq.Range(this.dim)
+        .map(row => Seq.Range(this.dim)
+          .reduce(F.zero, (sum, i) => F.add(sum, F.multiply(m1[i][row], m2[col][i])))
+        ).toArray()
+      ).toArray()
   }
 
   public trace(m: matrix<FieldElement>): FieldElement {

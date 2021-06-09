@@ -1,7 +1,9 @@
-import { Seq } from "immutable";
 import { KonvaEventObject } from "konva/lib/Node";
 import React, { useMemo, useState } from "react"
-import { Circle, Group, Layer, Line, Stage } from "react-konva"
+import { Circle, Group, Layer, Line, Stage } from "react-konva/lib/ReactKonvaCore"
+import "konva/lib/shapes/Circle";
+import "konva/lib/shapes/Rect";
+import "konva/lib/shapes/Line";
 import { AdicNumber } from "../Adic/Adic";
 import BruhatTitsTree, { vertex } from '../Tree/BruhatTitsTree';
 import { Tree, tree } from "../Tree/Tree";
@@ -9,6 +11,7 @@ import { theme } from "../style/themes/themes";
 import { mod } from "../utils";
 import { matrix } from "../VectorSpace/Matrix";
 import { MainTooltip, Tooltip } from "./Tooltip";
+import { Seq } from "../Seq/Seq";
 
 type pvec = [AdicNumber, AdicNumber]
 type BTT = BruhatTitsTree
@@ -143,19 +146,21 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
   )
 
   type treenode = {node: tree<nodeProps>, parent: tree<nodeProps> | null}
+  const vertexIter = Tree.iter<treenode>(
+    (data) => data.node.forest.map(n => ({node: n, parent: data.node})),
+    {node: graphicsTree, parent: null}
+  )
+  const edgeIter = Tree.iter<treenode>(
+    (data) => data.node.forest.map(n => ({node: n, parent: data.node})),
+    {node: graphicsTree, parent: null}
+  )
   return {
-    vertices: Seq(Tree.seq<treenode>(
-        (data) => data.node.forest.map(n => ({node: n, parent: data.node})),
-        {node: graphicsTree, parent: null}
-      ))
-      .map((n, i) => TreeNode(tooltip, n.node.value, i))
+    vertices: new Seq(vertexIter)
+      .mapIndexed((n, i) => TreeNode(tooltip, n.node.value, i))
       .toArray(),
-    edges: Seq(Tree.seq<treenode>(
-        (data) => data.node.forest.map(n => ({node: n, parent: data.node})),
-        {node: graphicsTree, parent: null}
-      ))
+    edges: new Seq(edgeIter)
       .filter(n => n.parent != null)
-      .map((n, i) => TreeEdge(n.node.value, n.parent!.value.x, n.parent!.value.y, i))
+      .mapIndexed((n, i) => TreeEdge(n.node.value, n.parent!.value.x, n.parent!.value.y, i))
       .toArray()
   }
 }

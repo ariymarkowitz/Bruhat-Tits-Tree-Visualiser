@@ -22,7 +22,8 @@ export default class DVVectorspace<FieldElement> extends VectorSpace<FieldElemen
   }
 
   public inLattice(gens: matrix<FieldElement>, v: vec<FieldElement>) {
-    return this.vectorInValuationRing(this.transform(this.matrixAlgebra.invert(gens), v))
+    const M = this.matrixAlgebra
+    return this.vectorInValuationRing(M.apply(M.invert(gens), v))
   }
 
   public isSublattice(gens: matrix<FieldElement>, subgens: matrix<FieldElement>) {

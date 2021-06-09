@@ -14,10 +14,10 @@ export namespace Tree {
     f(init).map(node => foreach(f, node))
   }
 
-  export function* seq<T>(f: (root: T) => T[], init: T): Generator<T> {
+  export function* iter<T>(f: (root: T) => T[], init: T): Generator<T> {
     yield init
     for (let child of f(init)) {
-      yield* seq(f, child)
+      yield* iter(f, child)
     }
   }
 }
