@@ -9,11 +9,12 @@ export default {
     type0: '#ddd',
     edge: '#bbb',
     type1: '#111',
-    border: '#444',
     end: '#e03',
     infBranch: '#a34339',
     fixedPoints: '#09e',
     translationAxis: '#0c0',
-    rootImage: '#f57'
+    rootImage: '#f57',
+    branchWidth: 4,
+    vertexStrokeWidth: 2,
   }
 }

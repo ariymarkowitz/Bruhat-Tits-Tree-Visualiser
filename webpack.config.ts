@@ -1,7 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require("copy-webpack-plugin");
 import path from 'path';
-import { theme } from './src/style/themes/main';
+import { theme } from './src/style/themes/themes';
 const sass = require('sass');
 const sassUtils = require('node-sass-utils')(sass);
 
