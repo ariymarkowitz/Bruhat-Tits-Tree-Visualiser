@@ -1,63 +1,38 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Group, Image, Rect } from 'react-konva';
-import { theme } from '../style/themes/themes';
-import { latexToImg } from './LatexToImg';
+import { MathJax, MathJaxContext } from "better-react-mathjax";
+import React, { createContext, useEffect, useState } from "react"
 
-type props = {
-  padding?: number
-  text?: string,
-  visible?: boolean
+type tooltipProps = {
   x: number,
   y: number,
+  text?: string,
+  visible?: boolean,
 }
 
-const defaultProps = {
-  padding: 5,
-  text: '',
-  visible: false
-}
+export const Tooltip = (props: tooltipProps) => {
+  const [pos, setPos] = useState({x: 0, y: 0})
+  const [visible, setVisible] = useState(false) 
 
-export const Tooltip = (props: props) => {
-  const _props = {...defaultProps, ...props}
-  const [image, setImage] = useState<HTMLCanvasElement | null>(null)
-  const [_visible, set_visible] = useState<boolean>()
-  const loadImage = useMemo(() => latexToImg(_props.text), [_props.text])
-  useEffect(() => {loadImage.then(result => {
-    if (result.width !== 0 && result.height !== 0) {
-      setImage(result)
-    } else {
-      setImage(null)
+  useEffect(() => {
+    if (visible !== true) {
+      setVisible(false)
     }
-    set_visible(_props.visible)
-  })}, [loadImage, _props.visible])
-  const padding = props.padding || 5;
-  if (image !== null) {
-    const dpr = window.devicePixelRatio
-    return (
-      <Group x={_props.x} y={_props.y} visible={_visible} opacity={0.8} scaleX={1/dpr} scaleY={1/dpr}>
-        <Rect
-          width={image.width + 2*padding}
-          height={image.height + 2*padding}
-          strokeWidth={1}
-          stroke={theme.colors.border}
-          fill={theme.colors.background}
-        />
-        <Image image={image} x={padding} y={padding} />
-      </Group>
-    )
-  } else {
-    return <></>
-  }
-}
+  }, [visible])
 
-export namespace MainTooltip {
-  type Dispatch<T> = React.Dispatch<React.SetStateAction<T>>
-  export type context = {
-    setX?: Dispatch<number>,
-    setY?: Dispatch<number>,
-    setText?: Dispatch<string>,
-    setVisible?: Dispatch<boolean>,
-  }
-
-  export const ContextContainer = React.createContext<context | null>({})
+  return (
+    <MathJaxContext hideUntilTypeset={'first'}>
+      <div className="tooltip" style={{
+        position: 'absolute',
+        left: pos.x,
+        top: pos.y,
+        display: props.visible ? undefined : 'none'
+      }}>
+        <MathJax dynamic onTypeset={() => {
+          if (props.x && props.y) setPos({x: props.x, y: props.y})
+          if (visible) setVisible(true)
+        }}>
+          {props.text}
+        </MathJax>
+      </div>
+    </MathJaxContext>
+  )
 }

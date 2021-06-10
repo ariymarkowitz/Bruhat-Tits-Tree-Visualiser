@@ -3,6 +3,7 @@ import { isPrime } from '../utils';
 import { TreeView } from './TreeComponent';
 import { MatrixInput } from './MatrixInput';
 import NumericInput from "react-numeric-input";
+import { Tooltip } from './Tooltip';
 
 function primeStep(component: NumericInput, direction: string) {
   const n = component.state.value
@@ -55,6 +56,10 @@ const App = () => {
   const [inputIso, setInputIso] = useState<string[]>(['1', '0', '0', '1'])
   const [iso, setIso] = useState<number[][] | undefined>(undefined)
 
+  const [tooltipPos, setTooltipPos] = useState({x: 0, y: 0})
+  const [tooltipText, setTooltipText] = useState('')
+  const [tooltipVisible, setTooltipVisible] = useState(false)
+
   useEffect(() => {
     const newP = Number.parseInt(inputP)
     if (Number.isInteger(newP) && isPrime(newP)) {
@@ -69,7 +74,6 @@ const App = () => {
   useEffect(() => {
     if (inputIso.length === 4) {
       const m = inputIso.map(Number)
-      console.log(m)
       if (m.every(Number.isInteger)) {
         setIso([[m[0],m[2]],[m[1],m[3]]])
       } else {
@@ -104,7 +108,14 @@ const App = () => {
   return (
     <div className='container'>
       <div className='tree-container'>
-        <TreeView p={p} depth={depth} end={showEnd ? end : undefined} iso={showIso ? iso : undefined} />
+        <TreeView p={p} depth={depth} end={showEnd ? end : undefined} iso={showIso ? iso : undefined}
+          onTooltipShow={e => {
+            setTooltipPos({x: e.x + 10, y: e.y})
+            setTooltipText(e.text)
+            setTooltipVisible(true)
+          }}
+          onTooltipHide={() => setTooltipVisible(false)}
+        />
       </div>
       <div className='sidebar'>
           <div className='sidebar-row'>
@@ -139,6 +150,7 @@ const App = () => {
             <MatrixInput value={inputIso} onChange={m => setInputIso(m)} className={showIso ? undefined : 'disabled'} />
           </div>
       </div>
+      <Tooltip x={tooltipPos.x} y={tooltipPos.y} text={tooltipText} visible={tooltipVisible}/>
     </div>
   );
 };

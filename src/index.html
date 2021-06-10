@@ -7,17 +7,8 @@
 
   <script>
     window.loadMathJax = new Promise((resolve) => {
-      window.MathJax = {
-      startup: {
-        ready: function () {
-          window.MathJax.startup.defaultReady()
-          resolve(MathJax)
-        }
-      }
-    }
     })
   </script>
-  <script id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.4/es5/tex-svg.min.js"></script>
 
   <link rel="stylesheet" href="main.css"></link>
   

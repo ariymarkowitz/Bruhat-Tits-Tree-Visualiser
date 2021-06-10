@@ -1,6 +1,20 @@
-import React from "react"
+import React, { createElement, useState } from "react"
+import { MathJax, MathJaxContext } from "better-react-mathjax";
 
-import { MathComponent } from 'mathjax-react'
+const config = {
+  loader: { load: ["[tex]/html"] },
+  tex: {
+    packages: { "[+]": ["html"] },
+    inlineMath: [
+      ["$", "$"],
+      ["\\(", "\\)"]
+    ],
+    displayMath: [
+      ["$$", "$$"],
+      ["\\[", "\\]"]
+    ]
+  }
+};
 
 type props = {
   value: string[],
@@ -19,14 +33,16 @@ export const MatrixInput = (props: props) => {
 
   return(
     <div className={'matrix-input-container ' + props.className}>
-      <MathComponent tex={String.raw`\left[\rule{0cm}{1.4cm}\right.`} display={false} />
-      <div className="matrix-input">
-        <input type='text' value={props.value[0]} onChange={e => setArrValidated(e.target.value, 0)}/>
-        <input type='text' value={props.value[1]} onChange={e => setArrValidated(e.target.value, 1)}/>
-        <input type='text' value={props.value[2]} onChange={e => setArrValidated(e.target.value, 2)}/>
-        <input type='text' value={props.value[3]} onChange={e => setArrValidated(e.target.value, 3)}/>
-      </div>
-      <MathComponent tex={String.raw`\left.\rule{0cm}{1.4cm}\right]`} display={false} />
+      <MathJaxContext hideUntilTypeset={'first'} version={3} config={config} >
+        <MathJax>{String.raw`$\left[\rule{0cm}{1.4cm}\right.$`}</MathJax>
+        <div className="matrix-input">
+          <input type='text' value={props.value[0]} onChange={e => setArrValidated(e.target.value, 0)}/>
+          <input type='text' value={props.value[1]} onChange={e => setArrValidated(e.target.value, 1)}/>
+          <input type='text' value={props.value[2]} onChange={e => setArrValidated(e.target.value, 2)}/>
+          <input type='text' value={props.value[3]} onChange={e => setArrValidated(e.target.value, 3)}/>
+        </div>
+        <MathJax>{String.raw`$\left.\rule{0cm}{1.4cm}\right]$`}</MathJax>
+      </MathJaxContext>
     </div>
   )
 }

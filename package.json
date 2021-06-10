@@ -10,12 +10,12 @@
   "author": "Ari Markowitz",
   "license": "ISC",
   "dependencies": {
+    "better-react-mathjax": "^1.0.2",
     "decorator-cache-getter": "^1.0.0",
     "konva": "^8.0.1",
-    "mathjax": "^3.1.4",
-    "mathjax-full": "^3.1.4",
-    "mathjax-react": "^1.0.6",
+    "mathjax3-react": "^1.0.11",
     "react": "^17.0.2",
+    "react-error-boundary": "^3.1.3",
     "react-konva": "*",
     "react-numeric-input": "^2.2.3"
   },

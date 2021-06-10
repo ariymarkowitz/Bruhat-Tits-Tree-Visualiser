@@ -156,11 +156,19 @@ input[type='checkbox'] {
     }
   
     input:focus {
-      border-color: $focusBorderColor;
+      border: $focusBorderColor;
     }
   }
 }
 
 .disabled {
   opacity: 0.5;
+}
+
+.tooltip {
+  opacity: 0.8;
+  padding: 2px;
+  background-color: $backgroundColor;
+  border: 1px solid $borderColor;
+  pointer-events: none;
 }

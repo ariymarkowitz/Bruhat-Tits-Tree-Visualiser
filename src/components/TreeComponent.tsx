@@ -10,7 +10,6 @@ import { Tree, tree } from "../Tree/Tree";
 import { theme } from "../style/themes/themes";
 import { mod } from "../utils";
 import { matrix } from "../VectorSpace/Matrix";
-import { MainTooltip, Tooltip } from "./Tooltip";
 import { Seq } from "../Seq/Seq";
 
 type pvec = [AdicNumber, AdicNumber]
@@ -21,11 +20,22 @@ type isoInfo = {
   minDist: number;
 }
 
+type tooltipProps = {
+  x: number,
+  y: number,
+  text: string
+}
+type tooltipShowEvent = (e: tooltipProps) => void
+type tooltipHideEvent = () => void
+
 type props = {
   p: number,
   depth: number,
   end?: [number, number]
   iso?: number[][]
+
+  onTooltipShow?: tooltipShowEvent
+  onTooltipHide?: tooltipHideEvent
 }
 
 type nodeProps = {
@@ -53,21 +63,8 @@ const treeTheme = theme.tree
 export const TreeView = (props: props) => {
   const width = 800
   const height = 800
-  
-  const makeTooltip = () => {
-    const [x, setX] = useState(0)
-    const [y, setY] = useState(0)
-    const [text, setText] = useState<string>('')
-    const [visible, setVisible] = useState(false)
 
-    const tooltip = {setX, setY, setText, setVisible}
-
-    return {tooltipProps: {x, y, text, visible}, tooltip}
-  }
-  
-  const {tooltipProps, tooltip} = makeTooltip()
-
-  const tree = makeTree(tooltip, props.p, props.depth, props.end, props.iso)
+  const tree = makeTree(props.p, props.depth, props.end, props.iso, props.onTooltipShow, props.onTooltipHide)
 
   return (
     <Stage width={width} height={height}>
@@ -77,14 +74,11 @@ export const TreeView = (props: props) => {
           <Group>{tree.vertices}</Group>
         </Group>
       </Layer>
-      <Layer listening={false}>
-        <Tooltip x={tooltipProps.x} y={tooltipProps.y} text={tooltipProps.text} visible={tooltipProps.visible}/>
-      </Layer>
     </Stage>
   )
 }
 
-const TreeNode = (tooltip: any, props: nodeProps, key: number) => {
+const TreeNode = (props: nodeProps, key: number, onTooltipShow?: tooltipShowEvent, onTooltipHide?: tooltipHideEvent) => {
   return <Circle
     x = {props.x}
     y = {props.y}
@@ -93,8 +87,12 @@ const TreeNode = (tooltip: any, props: nodeProps, key: number) => {
     fill={props.graphics.fillColor}
     stroke={props.graphics.circlestrokecolor}
     key = {key}
-    onMouseMove = {(e) => handleMouseMove(tooltip, e, props.display)}
-    onMouseLeave = {(e) => handleMouseLeave(tooltip, e)}
+    onMouseMove = {(e) => {
+      if (onTooltipShow) handleMouseMove(onTooltipShow, e, props.display)
+    }}
+    onMouseLeave = {(e) => {
+      if (onTooltipHide) handleMouseLeave(onTooltipHide, e)
+    }}
     />
 }
 
@@ -109,24 +107,18 @@ const TreeEdge = (props: nodeProps, x: number, y: number, key: number) => {
   />
 }
 
-function handleMouseMove(context: MainTooltip.context | null, e: KonvaEventObject<MouseEvent>, display: string) {
-  if (context === null) return
-  const stage = e.target.getStage()
-  if (stage === null) return
-  const pos = stage.getPointerPosition()
-  if (pos === null) return
-  context.setX!(pos.x + 10)
-  context.setY!(pos.y)
-  context.setText!(display)
-  context.setVisible!(true)
+function handleMouseMove(onTooltipShow: tooltipShowEvent, e: KonvaEventObject<MouseEvent>, display: string) {
+  onTooltipShow({x: e.evt.pageX, y: e.evt.pageY, text: display})
 }
 
-function handleMouseLeave(context: MainTooltip.context | null, e: KonvaEventObject<MouseEvent>) {
-  if (context === null) return
-  context.setVisible!(false)
+function handleMouseLeave(onTooltipHide: tooltipHideEvent, e: KonvaEventObject<MouseEvent>) {
+  onTooltipHide()
 }
 
-function makeTree(tooltip: any, p: number, depth: number, end?: [number, number], iso?: number[][]) {
+function makeTree(
+  p: number, depth: number, end?: [number, number], iso?: number[][],
+  onTooltipShow?: tooltipShowEvent, onTooltipHide?: tooltipHideEvent
+) {
   const btt = useMemo(() => new BruhatTitsTree(p), [p])
   const tree = useMemo(() => btt.make(depth), [btt, depth])
 
@@ -156,7 +148,7 @@ function makeTree(tooltip: any, p: number, depth: number, end?: [number, number]
   )
   return {
     vertices: new Seq(vertexIter)
-      .mapIndexed((n, i) => TreeNode(tooltip, n.node.value, i))
+      .mapIndexed((n, i) => TreeNode(n.node.value, i, onTooltipShow, onTooltipHide))
       .toArray(),
     edges: new Seq(edgeIter)
       .filter(n => n.parent != null)
@@ -272,5 +264,5 @@ function displayLattice(v: vertex, btt: BruhatTitsTree) {
   const r = F.toRational(v.u)
 
   const n = r.den === 1 ? `${r.num}` : `\\frac{${r.num}}{${r.den}}`
-  return `\\left[${n}\\right]_{${v.n}}`
+  return `$\\left[${n}\\right]_{${v.n}}$`
 }
