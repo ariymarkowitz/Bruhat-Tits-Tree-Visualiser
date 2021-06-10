@@ -207,7 +207,7 @@ function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec, iso?: is
 
 function defaultGraphicsProps(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo): graphicsProps {
   return {
-    radius: 10,
+    radius: treeTheme.vertexRadius,
     branchLength: 240 * Math.pow(tree.p, 0.5),
     branchWidth: treeTheme.branchWidth,
     strokeWidth: treeTheme.vertexStrokeWidth,

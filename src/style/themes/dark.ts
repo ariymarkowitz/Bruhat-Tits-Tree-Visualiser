@@ -16,5 +16,6 @@ export default {
     rootImage: '#f57',
     branchWidth: 4,
     vertexStrokeWidth: 2,
+    vertexRadius: 10,
   }
 }

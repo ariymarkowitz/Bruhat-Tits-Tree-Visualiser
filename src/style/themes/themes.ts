@@ -1,9 +1,11 @@
 import darkTheme from './dark'
 import lightTheme from './light'
+import lightLargeTheme from './light-large'
 
 const themes = {
   dark: darkTheme,
-  light: lightTheme
+  light: lightTheme,
+  lightLarge: lightLargeTheme,
 }
 
-export const theme = themes.light
+export const theme = themes.lightLarge

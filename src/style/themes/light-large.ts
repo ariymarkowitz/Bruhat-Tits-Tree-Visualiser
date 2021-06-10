@@ -14,8 +14,8 @@ export default {
     fixedPoints: 'rgb(0, 135, 255)',
     translationAxis: 'rgb(0, 227, 44)',
     rootImage: '#f57',
-    branchWidth: 5,
-    vertexStrokeWidth: 2.5,
-    vertexRadius: 10,
+    branchWidth: 8,
+    vertexStrokeWidth: 4,
+    vertexRadius: 14,
   }
 }
