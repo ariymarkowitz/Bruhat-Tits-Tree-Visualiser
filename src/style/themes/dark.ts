@@ -7,8 +7,9 @@ export default {
   },
   tree: {
     type0: '#ddd',
-    edge: '#bbb',
     type1: '#111',
+    vertexStroke: '#ddd',
+    edge: '#bbb',
     end: '#e03',
     infBranch: '#a34339',
     fixedPoints: '#09e',

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { isPrime } from '../utils/utils';
-import { TreeView } from './TreeComponent';
+import { TreeComponentOptions, TreeView } from './TreeComponent';
 import { MatrixInput } from './MatrixInput';
 import NumericInput from "react-numeric-input";
 import { Tooltip } from './Tooltip';
@@ -53,6 +53,9 @@ const App = () => {
 
   const [showIso, setShowIso] = useState(false)
 
+  const [showInfEnd, setShowInfEnd] = useState(false)
+  const [showRootImage, setShowRootImage] = useState(false)
+
   const [inputIso, setInputIso] = useState<string[]>(['1', '0', '0', '1'])
   const [iso, setIso] = useState<number[][] | undefined>(undefined)
 
@@ -98,17 +101,25 @@ const App = () => {
     }
   }
 
-  let depth
+  let depth: number
   if (inputDepth[0] <= 1) {
     depth = 1
   } else {
     depth = Math.max(2, Math.min(inputDepth[0], Math.floor(inputDepth[0] * (inputDepth[1]+1) / (p+1))))
   }
 
+  const options: TreeComponentOptions = useMemo(() => ({
+    depth: depth,
+    end: showEnd ? end : undefined,
+    iso: showIso ? iso : undefined,
+    showInfEnd: showInfEnd,
+    showRootImage: showRootImage,
+  }), [depth, showEnd, end, showIso, iso, showInfEnd, showRootImage])
+
   return (
     <div className='container'>
       <div className='tree-container'>
-        <TreeView p={p} depth={depth} end={showEnd ? end : undefined} iso={showIso ? iso : undefined}
+        <TreeView p={p} options={options}
           onTooltipShow={e => {
             setTooltipPos({x: e.x + 10, y: e.y})
             setTooltipText(e.text)
@@ -132,22 +143,44 @@ const App = () => {
             <NumericInput name='Depth' value={depth} min={1} max={10}
               onChange={(_, s) => validateDepth(s)} style={false} />
           </div>
+          <hr />
           <div className='sidebar-row'>
             <div>
               <div>
                 <input type='checkbox' checked={showEnd} onChange={e => setShowEnd(e.target.checked)} />
               </div>
-              <label htmlFor='End'>End</label>
+              <label htmlFor='End' className='with-checkbox'>End</label>
             </div>
             <input type='text' name='End' value = {inputEnd}
               onChange={e => validateEnd(e.target.value)} className={showEnd ? undefined : 'disabled'} />
           </div>
           <div className='sidebar-row'>
             <div>
-              <input type='checkbox' checked={showIso} onChange={e => setShowIso(e.target.checked)} />
-              <label>Isometry</label>
+              <input type='checkbox' checked={showInfEnd} name='show-inf-end'
+                onChange={e => setShowInfEnd(e.target.checked)} />
+            </div>
+            <div>
+              <label htmlFor='show-inf-end'>Show end at infinity</label>
+            </div>
+          </div>
+          <hr />
+          <div className='sidebar-row'>
+            <div>
+              <div>
+                <input type='checkbox' checked={showIso} onChange={e => setShowIso(e.target.checked)} />
+              </div>
+              <label className='with-checkbox'>Isometry</label>
             </div>
             <MatrixInput value={inputIso} onChange={m => setInputIso(m)} className={showIso ? undefined : 'disabled'} />
+          </div>
+          <div className='sidebar-row'>
+            <div>
+              <input type='checkbox' checked={showRootImage} name='show-root-image'
+              onChange={e => setShowRootImage(e.target.checked)} />
+            </div>
+            <div>
+              <label htmlFor='show-root-image'>Show image of origin</label>
+            </div>
           </div>
       </div>
       <Tooltip x={tooltipPos.x} y={tooltipPos.y} text={tooltipText} visible={tooltipVisible}/>

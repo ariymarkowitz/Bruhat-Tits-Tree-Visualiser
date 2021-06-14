@@ -30,12 +30,17 @@ type tooltipHideEvent = () => void
 
 type props = {
   p: number,
-  depth: number,
-  end?: [number, number]
-  iso?: number[][]
-
+  options: TreeComponentOptions
   onTooltipShow?: tooltipShowEvent
   onTooltipHide?: tooltipHideEvent
+}
+
+export type TreeComponentOptions = {
+  depth: number,
+  end?: [number, number],
+  iso?: number[][],
+  showInfEnd?: boolean,
+  showRootImage?: boolean
 }
 
 type nodeProps = {
@@ -60,11 +65,11 @@ type graphicsProps = {
 
 const treeTheme = theme.tree
 
-export const TreeView = (props: props) => {
+export const TreeView = ({p, options, onTooltipShow, onTooltipHide}: props) => {
   const width = 800
   const height = 800
 
-  const tree = makeTree(props.p, props.depth, props.end, props.iso, props.onTooltipShow, props.onTooltipHide)
+  const tree = makeTree(p, options, onTooltipShow, onTooltipHide)
 
   return (
     <Stage width={width} height={height}>
@@ -93,7 +98,7 @@ const TreeNode = (props: nodeProps, key: number, onTooltipShow?: tooltipShowEven
     onMouseLeave = {(e) => {
       if (onTooltipHide) handleMouseLeave(onTooltipHide, e)
     }}
-    />
+  />
 }
 
 const TreeEdge = (props: nodeProps, x: number, y: number, key: number) => {
@@ -115,26 +120,23 @@ function handleMouseLeave(onTooltipHide: tooltipHideEvent, e: KonvaEventObject<M
   onTooltipHide()
 }
 
-function makeTree(
-  p: number, depth: number, end?: [number, number], iso?: number[][],
-  onTooltipShow?: tooltipShowEvent, onTooltipHide?: tooltipHideEvent
-) {
+function makeTree(p: number, options: TreeComponentOptions, onTooltipShow?: tooltipShowEvent, onTooltipHide?: tooltipHideEvent) {
   const btt = useMemo(() => new BruhatTitsTree(p), [p])
-  const tree = useMemo(() => btt.make(depth), [btt, depth])
+  const tree = useMemo(() => btt.make(options.depth), [btt, options.depth])
 
   const endAdic = useMemo(
-    () => (end ? btt.vspace.fromInts(end) : undefined) as [AdicNumber, AdicNumber],
-    [btt, end]
+    () => (options.end ? btt.vspace.fromInts(options.end) : undefined) as [AdicNumber, AdicNumber],
+    [btt, options.end]
   )
   
   const isoAdic = useMemo(() => {
-    const _isoAdic = (iso ? btt.vspace.matrixAlgebra.fromInts(iso) : undefined)
+    const _isoAdic = (options.iso ? btt.vspace.matrixAlgebra.fromInts(options.iso) : undefined)
     return _isoAdic && !btt.vspace.matrixAlgebra.isSingular(_isoAdic) ? _isoAdic : undefined
-  }, [btt, iso])
+  }, [btt, options.iso])
 
   const graphicsTree = useMemo(
-    () => makeGraphicsTree(btt, tree, endAdic, isoAdic),
-    [btt, tree, endAdic, isoAdic]
+    () => makeGraphicsTree(btt, tree, options, endAdic, isoAdic),
+    [btt, tree, options]
   )
 
   type treenode = {node: tree<nodeProps>, parent: tree<nodeProps> | null}
@@ -157,79 +159,94 @@ function makeTree(
   }
 }
 
-function circlefillcolor(tree: BTT, v: vertex, iso?: isoInfo) {
-  if (iso && tree.lengthOfImage(iso.matrix, v) === 0) {
-    return treeTheme.rootImage
-  } else if (!iso && tree.field.isZero(v.u) && v.n === 0) {
-    return treeTheme.rootImage
-  } else if (mod(v.n, 2) === 1) {
+function circlefillcolor(tree: BTT, v: vertex, options: TreeComponentOptions, iso?: isoInfo) {
+  if (options.showRootImage) {
+    if (iso && tree.lengthOfImage(iso.matrix, v) === 0) {
+      return treeTheme.rootImage
+    } else if (!iso && tree.field.isZero(v.u) && v.n === 0) {
+      return treeTheme.rootImage
+    }
+  }
+  if (mod(v.n, 2) === 1) {
     return treeTheme.type1
   } else {
     return treeTheme.type0
   }
 }
 
-function circlestrokecolor(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo) {
-  if (iso && iso.minDist !== 0 && tree.translationDistance(iso.matrix, v) === iso.minDist) {
-    return treeTheme.translationAxis
-  } else if (iso && iso.minDist === 0 && tree.translationDistance(iso.matrix, v) === 0) {
-    return treeTheme.fixedPoints
-  } else if (end !== undefined && tree.inEnd(v, end)) {
+function circlestrokecolor(tree: BTT, v: vertex, options: TreeComponentOptions, end?: pvec, iso?: isoInfo) {
+  if (iso) {
+    if (iso.minDist !== 0 && tree.translationDistance(iso.matrix, v) === iso.minDist) {
+      return treeTheme.translationAxis
+    } else if (iso.minDist === 0 && tree.translationDistance(iso.matrix, v) === 0) {
+      return treeTheme.fixedPoints
+    }
+  }
+  if (end !== undefined && tree.inEnd(v, end)) {
     return treeTheme.end
-  } else if (tree.inInfEnd(v)) {
+  } else if (options.showInfEnd && tree.inInfEnd(v)) {
     return treeTheme.infBranch
   } else {
-    return treeTheme.type0
+    return treeTheme.vertexStroke
   }
 }
 
-function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, end?: pvec, iso?: isoInfo) {
-  if (
-    iso && iso.minDist !== 0
-    && tree.translationDistance(iso.matrix, v1) === iso.minDist
-    && tree.translationDistance(iso.matrix, v2) === iso.minDist
-  ) {
-    return treeTheme.translationAxis
-  } else if (
-    iso && iso.minDist === 0
-    && tree.translationDistance(iso.matrix, v1) === 0
-    && tree.translationDistance(iso.matrix, v2) === 0
-  ) {
-    return treeTheme.fixedPoints
-  } else if (end !== undefined && tree.inEnd(v1, end) && tree.inEnd(v2, end)) {
+function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: TreeComponentOptions, end?: pvec, iso?: isoInfo) {
+  if (iso) {
+    if (
+      iso.minDist !== 0
+      && tree.translationDistance(iso.matrix, v1) === iso.minDist
+      && tree.translationDistance(iso.matrix, v2) === iso.minDist
+    ) {
+      return treeTheme.translationAxis
+    } else if (
+        iso.minDist === 0
+        && tree.translationDistance(iso.matrix, v1) === 0
+        && tree.translationDistance(iso.matrix, v2) === 0
+    ) {
+      return treeTheme.fixedPoints
+    }
+  }
+  if (end !== undefined && tree.inEnd(v1, end) && tree.inEnd(v2, end)) {
     return treeTheme.end
-  } else if (tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
+  } else if (options.showInfEnd && tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
     return treeTheme.infBranch
   } else {
     return treeTheme.edge
   }
 }
 
-function defaultGraphicsProps(tree: BTT, v: vertex, end?: pvec, iso?: isoInfo): graphicsProps {
+function defaultGraphicsProps(tree: BTT, v: vertex, options: TreeComponentOptions, end?: pvec, iso?: isoInfo): graphicsProps {
   return {
     radius: treeTheme.vertexRadius,
     branchLength: 240 * Math.pow(tree.p, 0.5),
     branchWidth: treeTheme.branchWidth,
     strokeWidth: treeTheme.vertexStrokeWidth,
-    fillColor: circlefillcolor(tree, v, iso),
-    circlestrokecolor: circlestrokecolor(tree, v, end, iso),
+    fillColor: circlefillcolor(tree, v, options, iso),
+    circlestrokecolor: circlestrokecolor(tree, v, options, end, iso),
     edgestrokecolor: ''
   }
 }
 
-function updateGraphicsProps(tree: BTT, v: vertex, parent: vertex, props: graphicsProps, end?: pvec, iso?: isoInfo): graphicsProps {
+function updateGraphicsProps(
+  tree: BTT, v: vertex, parent: vertex, props: graphicsProps,
+  options: TreeComponentOptions, end?: pvec, iso?: isoInfo
+): graphicsProps {
   return {
     radius: props.radius * 0.75,
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
     branchWidth: props.branchWidth * 0.8,
     strokeWidth: Math.max(props.strokeWidth * 0.8, 1),
-    fillColor: circlefillcolor(tree, v, iso),
-    circlestrokecolor: circlestrokecolor(tree, v, end, iso),
-    edgestrokecolor: edgestrokecolor(tree, v, parent, end, iso)
+    fillColor: circlefillcolor(tree, v, options, iso),
+    circlestrokecolor: circlestrokecolor(tree, v, options, end, iso),
+    edgestrokecolor: edgestrokecolor(tree, v, parent, options, end, iso)
   }
 }
 
-function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec, iso?: matrix<AdicNumber>): tree<nodeProps> {
+function makeGraphicsTree(
+    btt: BTT, tree: tree<vertex>, options: TreeComponentOptions,
+    end?: pvec, iso?: matrix<AdicNumber>
+  ): tree<nodeProps> {
   const turnangle = 2*Math.PI/(btt.p+1)
   const rootDisplay = displayLattice(tree.value, btt)
 
@@ -237,7 +254,7 @@ function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec, iso?: matrix
 
   return Tree.make((data: nodeProps) => {
     const forest = data.node.forest.map((child, i) => {
-      const graphics = updateGraphicsProps(btt, child.value, data.node.value, data.graphics, end, isoInfo) 
+      const graphics = updateGraphicsProps(btt, child.value, data.node.value, data.graphics, options, end, isoInfo) 
 
       const node = child
       const angle = Math.PI-(i + 1)*turnangle + data.angle
@@ -254,7 +271,7 @@ function makeGraphicsTree(btt: BTT, tree: tree<vertex>, end?: pvec, iso?: matrix
     y: 0,
     angle: Math.PI + turnangle,
     display: rootDisplay,
-    graphics: defaultGraphicsProps(btt, tree.value, end, isoInfo)
+    graphics: defaultGraphicsProps(btt, tree.value, options, end, isoInfo)
   })
 }
 

@@ -8,6 +8,7 @@ export default {
   tree: {
     type0: '#151515',
     type1: '#e5e5e5',
+    vertexStroke: '#151515',
     edge: '#252525',
     end: '#e70000',
     infBranch: '#a31f12',
