@@ -1,7 +1,7 @@
 import RingAdditiveGroup from "../Ring/RingAdditiveGroup"
 import FieldMultiplicativeGroup from "../Group/FieldMultiplicativeGroup"
 import Ring from "../Ring/Ring"
-import { int } from "../utils"
+import { int } from "../utils/utils"
 import { Rational } from "./Rational"
 
 export default abstract class Field<FieldElement> extends Ring<FieldElement> {

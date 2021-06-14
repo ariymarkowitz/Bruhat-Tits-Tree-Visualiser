@@ -1,4 +1,4 @@
-import { int } from "../utils"
+import { int } from "../utils/utils"
 import RingAdditiveGroup from "./RingAdditiveGroup"
 
 export default abstract class Ring<RingElement> {

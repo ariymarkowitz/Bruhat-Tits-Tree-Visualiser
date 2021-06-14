@@ -1,11 +1,11 @@
 import { Adic, AdicNumber } from "../Adic/Adic"
-import { int } from "../utils"
+import { int } from "../utils/utils"
 import DVVectorSpace from "../VectorSpace/DVVectorSpace"
 import { matrix } from "../VectorSpace/Matrix"
 import { Tree } from "./Tree"
 import { cache } from "decorator-cache-getter"
 import { eInt, extendedInt, Infinite } from "../Order/ExtendedInt"
-import { Seq } from "../Seq/Seq"
+import { Seq } from "../utils/Seq"
 
 type generators = matrix<AdicNumber>
 

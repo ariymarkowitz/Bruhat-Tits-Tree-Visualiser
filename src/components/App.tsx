@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { isPrime } from '../utils';
+import { isPrime } from '../utils/utils';
 import { TreeView } from './TreeComponent';
 import { MatrixInput } from './MatrixInput';
 import NumericInput from "react-numeric-input";

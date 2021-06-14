@@ -1,6 +1,6 @@
 import { cache } from "decorator-cache-getter"
 import Field from "../Field/Field"
-import { int } from "../utils"
+import { int } from "../utils/utils"
 import MatrixAlgebra, { matrix } from "./Matrix"
 
 export type vec<FieldElement> = FieldElement[]

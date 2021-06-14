@@ -8,9 +8,9 @@ import { AdicNumber } from "../Adic/Adic";
 import BruhatTitsTree, { vertex } from '../Tree/BruhatTitsTree';
 import { Tree, tree } from "../Tree/Tree";
 import { theme } from "../style/themes/themes";
-import { mod } from "../utils";
+import { mod } from "../utils/utils";
 import { matrix } from "../VectorSpace/Matrix";
-import { Seq } from "../Seq/Seq";
+import { Seq } from "../utils/Seq";
 
 type pvec = [AdicNumber, AdicNumber]
 type BTT = BruhatTitsTree
