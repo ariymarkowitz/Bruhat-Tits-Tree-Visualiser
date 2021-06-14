@@ -1,5 +1,5 @@
-import { MathJax, MathJaxContext } from "better-react-mathjax";
-import React, { createContext, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
+import { MathJax } from "./MathJax"
 
 type tooltipProps = {
   x: number,
@@ -9,30 +9,37 @@ type tooltipProps = {
 }
 
 export const Tooltip = (props: tooltipProps) => {
-  const [pos, setPos] = useState({x: 0, y: 0})
-  const [visible, setVisible] = useState(false) 
+  const _visible = props.visible ?? true
+
+  const [visible, setVisible] = useState(false)
+  const [pos, setPos] = useState({x: props.x, y: props.y})
+  const [update, setUpdate] = useState(false)
 
   useEffect(() => {
-    if (visible !== true) {
-      setVisible(false)
+    if (update) {
+      setPos({x: props.x, y: props.y})
     }
-  }, [visible])
+  }, [update, props.x, props.y])
+
+  useEffect(() => {
+    if (update) {
+      setVisible(_visible)
+    }
+  }, [update, _visible])
 
   return (
-    <MathJaxContext hideUntilTypeset={'first'}>
-      <div className="tooltip" style={{
-        position: 'absolute',
-        left: pos.x,
-        top: pos.y,
-        display: props.visible ? undefined : 'none'
-      }}>
-        <MathJax dynamic onTypeset={() => {
-          if (props.x && props.y) setPos({x: props.x, y: props.y})
-          if (visible) setVisible(true)
-        }}>
-          {props.text}
-        </MathJax>
-      </div>
-    </MathJaxContext>
+    <div className="tooltip" style={{
+      position: 'absolute',
+      left: pos.x,
+      top: pos.y,
+      display: visible ? undefined : 'none'
+    }}>{
+      props.text
+        ? <MathJax tex={props.text}
+          beforeTypeset={() => setUpdate(false)}
+          onTypeset={() => setUpdate(true)}
+        />
+        : undefined
+    }</div>
   )
 }

@@ -1,1 +1,0 @@
-declare var loadMathJax: () => Promise<any>

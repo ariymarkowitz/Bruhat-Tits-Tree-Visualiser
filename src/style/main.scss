@@ -156,7 +156,7 @@ input[type='checkbox'] {
     }
   
     input:focus {
-      border: $focusBorderColor;
+      border-color: $focusBorderColor;
     }
   }
 }
@@ -166,7 +166,7 @@ input[type='checkbox'] {
 }
 
 .tooltip {
-  opacity: 0.85;
+  opacity: 0.9;
   padding: 2px;
   background-color: $backgroundColor;
   border: 1px solid $borderColor;
