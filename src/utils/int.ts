@@ -1,10 +1,13 @@
-export function mod(a: number, b: number) {
+// Helps for keeping track of what the number is supposed to represent.
+export type int = number
+
+export function mod(a: int, b: int) {
   const result = a % b
   if (result < 0) return result + b
   else return result
 }
 
-export function gcd(a: number, b: number): number {
+export function gcd(a: int, b: int): int {
   a = Math.abs(a)
   b = Math.abs(b)
   if (b > a) {
@@ -18,7 +21,7 @@ export function gcd(a: number, b: number): number {
   }
 }
 
-export function isPrime(num: number): boolean {
+export function isPrime(num: int): boolean {
   if (num <= 1) return false
   if (num % 2 === 0 && num > 2) return false
   const s = Math.sqrt(num)
@@ -27,6 +30,3 @@ export function isPrime(num: number): boolean {
   }
   return true
 }
-
-// Helps for keeping track of what the number is supposed to represent.
-export type int = number

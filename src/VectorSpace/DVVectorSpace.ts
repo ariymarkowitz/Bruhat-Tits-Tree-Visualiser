@@ -1,5 +1,5 @@
 import { DVField } from "../Field/DVField"
-import { int } from "../utils/utils"
+import { int } from "../utils/int"
 import { Matrix } from "./Matrix"
 import { VectorSpace, Vec } from "./VectorSpace"
 

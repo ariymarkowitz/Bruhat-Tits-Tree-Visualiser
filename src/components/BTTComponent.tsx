@@ -9,7 +9,7 @@ import { theme } from "../style/themes/themes";
 import { BruhatTitsTree, vertex } from '../Tree/BruhatTitsTree';
 import * as Tree from "../Tree/Tree";
 import { Seq } from "../utils/Seq";
-import { mod } from "../utils/utils";
+import { mod } from "../utils/int";
 import { Matrix } from "../VectorSpace/Matrix";
 
 type AdicVec = [AdicNumber, AdicNumber]

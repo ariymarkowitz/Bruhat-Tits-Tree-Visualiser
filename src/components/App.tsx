@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import NumericInput from "react-numeric-input";
-import { isPrime } from '../utils/utils';
+import { isPrime } from '../utils/int';
 import { BTTComponent, BTTOptions } from './BTTComponent';
 import { MatrixInput } from './MatrixInput';
 import { LabelWithCheckbox, Sidebar, SidebarLeft, SidebarRight, SidebarRow } from './Sidebar';

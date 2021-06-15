@@ -2,7 +2,7 @@ import { cache } from 'decorator-cache-getter'
 import { Seq } from '../utils/Seq'
 import { Field } from '../Field/Field'
 import { Ring } from '../Ring/Ring'
-import { int } from '../utils/utils'
+import { int } from '../utils/int'
 import { VectorSpace, Vec } from './VectorSpace'
 
 export type Matrix<FieldElement> = FieldElement[][]

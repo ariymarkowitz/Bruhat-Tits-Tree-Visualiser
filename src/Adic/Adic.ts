@@ -1,6 +1,6 @@
 import { Rational, RationalField } from '../Field/Rational';
 import { DVField } from "../Field/DVField";
-import { int } from "../utils/utils";
+import { int } from "../utils/int";
 import { cache } from 'decorator-cache-getter';
 import { ExtendedInt, Infinite } from '../Order/ExtendedInt';
 

@@ -1,5 +1,5 @@
 import { cache } from 'decorator-cache-getter';
-import { gcd, int, mod } from '../utils/utils';
+import { gcd, int, mod } from '../utils/int';
 import { Field } from './Field';
 
 export class Rational {

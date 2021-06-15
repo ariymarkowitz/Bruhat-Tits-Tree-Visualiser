@@ -1,4 +1,4 @@
-import { int } from "../utils/utils"
+import { int } from "../utils/int"
 import { Order } from "./Order"
 
 export const Infinite = Symbol('Infinite')
