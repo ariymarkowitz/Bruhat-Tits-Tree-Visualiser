@@ -1,13 +1,13 @@
-import { Adic, AdicNumber } from "../Adic/Adic"
-import { int } from "../utils/utils"
-import DVVectorSpace from "../VectorSpace/DVVectorSpace"
-import { matrix } from "../VectorSpace/Matrix"
-import { Tree } from "./Tree"
 import { cache } from "decorator-cache-getter"
-import { eInt, extendedInt, Infinite } from "../Order/ExtendedInt"
+import { Adic, AdicNumber } from "../Adic/Adic"
+import { EIntOrd, ExtendedInt, Infinite } from "../Order/ExtendedInt"
 import { Seq } from "../utils/Seq"
+import { int } from "../utils/utils"
+import { DVVectorSpace } from "../VectorSpace/DVVectorSpace"
+import { Matrix } from "../VectorSpace/Matrix"
+import * as Tree from "./Tree"
 
-type generators = matrix<AdicNumber>
+type generators = Matrix<AdicNumber>
 
 /**
  * The reduced form of a p-adic matrix.
@@ -17,7 +17,7 @@ type generators = matrix<AdicNumber>
  **/
 export type vertex = {u: AdicNumber, n: int}
 
-export default class BruhatTitsTree {
+export class BruhatTitsTree {
   public p: int
   public field: Adic
   public vspace: DVVectorSpace<AdicNumber>
@@ -66,14 +66,14 @@ export default class BruhatTitsTree {
     }
   }
 
-  public minTranslationDistance(m: matrix<AdicNumber>): int {
+  public minTranslationDistance(m: Matrix<AdicNumber>): int {
     const M = this.vspace.matrixAlgebra
     const F = this.field
 
     const vDet = F.valuation(M.determinant(m))
     if (vDet === Infinite) throw new Error('Matrix is singular')
 
-    const a = eInt.min(
+    const a = EIntOrd.min(
       F.valuation(M.trace(m)),
       Math.floor(vDet/2)
     )
@@ -90,7 +90,7 @@ export default class BruhatTitsTree {
   }
 
   public toIntVector(v: AdicNumber[]): AdicNumber[] {
-    const a = eInt.minAll(v.map(n => this.field.valuation(n)))
+    const a = EIntOrd.minAll(v.map(n => this.field.valuation(n)))
     if (a === Infinite) return v
     else return this.vspace.scale(v, this.field.fromVal(-a))
   }
@@ -109,8 +109,8 @@ export default class BruhatTitsTree {
     return this.toIntMatrix(this.vertexToGens(v))
   }
 
-  public minValuation(m: generators): extendedInt {
-    return eInt.minAll(m.flat(1).map(e => this.field.valuation(e)))
+  public minValuation(m: generators): ExtendedInt {
+    return EIntOrd.minAll(m.flat(1).map(e => this.field.valuation(e)))
   }
 
   public getIntMatrix(m: generators): generators {

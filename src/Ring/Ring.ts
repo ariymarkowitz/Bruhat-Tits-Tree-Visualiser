@@ -1,7 +1,7 @@
 import { int } from "../utils/utils"
-import RingAdditiveGroup from "./RingAdditiveGroup"
+import { RingAdditiveGroup } from "./RingAdditiveGroup"
 
-export default abstract class Ring<RingElement> {
+export abstract class Ring<RingElement> {
   public abstract add(a: RingElement, b: RingElement): RingElement
   public abstract negate(a: RingElement): RingElement
   public abstract multiply(a: RingElement, b: RingElement): RingElement

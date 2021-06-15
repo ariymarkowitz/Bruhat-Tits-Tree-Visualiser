@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react"
 import { MathJax } from "./MathJax"
 
-type tooltipProps = {
+interface TooltipProps {
   x: number,
   y: number,
   text?: string,
   visible?: boolean,
 }
 
-export const Tooltip = (props: tooltipProps) => {
+export const Tooltip = (props: TooltipProps) => {
   const _visible = props.visible ?? true
 
   const [visible, setVisible] = useState(false)

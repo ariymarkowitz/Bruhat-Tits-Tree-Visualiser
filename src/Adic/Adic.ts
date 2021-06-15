@@ -1,38 +1,32 @@
-import { Rational, rationalField } from '../Field/Rational';
+import { Rational, RationalField } from '../Field/Rational';
 import { DVField } from "../Field/DVField";
 import { int } from "../utils/utils";
 import { cache } from 'decorator-cache-getter';
-import { extendedInt, Infinite } from '../Order/ExtendedInt';
+import { ExtendedInt, Infinite } from '../Order/ExtendedInt';
 
-type splitNumber<NumberType> = {
+interface SplitNumber<NumberType> {
   unit: NumberType // Unit
   valuation: int   // Valuation
 }
 
 export const Zero = Symbol('Zero');
 
-type maybeSplitNumber<NumberType> = typeof Zero | splitNumber<NumberType>
+type MaybeSplitNumber<NumberType> = typeof Zero | SplitNumber<NumberType>
 
 export class AdicNumber {
   public p: int
-  public value: maybeSplitNumber<Rational>
+  public value: MaybeSplitNumber<Rational>
 
-  public static nonzero(p: int, value: splitNumber<Rational>): AdicNumber {
+  public static nonzero(p: int, value: SplitNumber<Rational>): AdicNumber {
     return new AdicNumber(p, value)
   }
 
-  public constructor(p: int, value: maybeSplitNumber<Rational>) {
+  public constructor(p: int, value: MaybeSplitNumber<Rational>) {
     this.p = p
     this.value = value
   }
 
-  public toString() {
-    if (this.value !== Zero) {
-      return `Adic[${this.p}]((${this.value.unit})e${this.value.valuation})`
-    } else {
-      return `Adic[${this.p}](0)`
-    }
-  }
+  
 }
 
 export class Adic extends DVField<AdicNumber> {
@@ -56,14 +50,14 @@ export class Adic extends DVField<AdicNumber> {
 
   @cache
   public get one(): AdicNumber {
-    return new AdicNumber(this.p, {unit: rationalField.one, valuation: 0})
+    return new AdicNumber(this.p, {unit: RationalField.one, valuation: 0})
   }
 
   public nonzero(unit: Rational, valuation: int): AdicNumber {
     return new AdicNumber(this.p, {unit, valuation})
   }
 
-  public valuation(x: AdicNumber): extendedInt {
+  public valuation(x: AdicNumber): ExtendedInt {
     return x.value === Zero ? Infinite : x.value.valuation
   }
 
@@ -73,11 +67,11 @@ export class Adic extends DVField<AdicNumber> {
     } else if (a.value === Zero || b.value === Zero) {
       return false
     } else {
-      return a.value.valuation === b.value.valuation && rationalField.equals(a.value.unit, b.value.unit)
+      return a.value.valuation === b.value.valuation && RationalField.equals(a.value.unit, b.value.unit)
     }
   }
 
-  private splitInt(n: int): splitNumber<int> {
+  private splitInt(n: int): SplitNumber<int> {
     if (n === 0) { throw new Error('Input must be nonzero.') }
 
     const s = Math.sign(n)
@@ -96,22 +90,22 @@ export class Adic extends DVField<AdicNumber> {
       return this.zero
     } else {
       const {unit: u, valuation: v} = this.splitInt(n)
-      return this.nonzero(rationalField.fromInt(u), v)
+      return this.nonzero(RationalField.fromInt(u), v)
     }
   }
 
   // Returns p^a.
-  public fromVal(a: extendedInt): AdicNumber {
+  public fromVal(a: ExtendedInt): AdicNumber {
     if (a === Infinite) {
       return this.zero
     } else {
-      return this.nonzero(rationalField.one, a)
+      return this.nonzero(RationalField.one, a)
     }
 
   }
 
   public fromRational(r: Rational): AdicNumber {
-    if (rationalField.isZero(r)) {
+    if (RationalField.isZero(r)) {
       return this.zero
     } else {
       const num = this.splitInt(r.num)
@@ -125,15 +119,15 @@ export class Adic extends DVField<AdicNumber> {
 
   public toRational(x: AdicNumber): Rational {
     if (x.value === Zero) {
-      return rationalField.zero
+      return RationalField.zero
     } else {
       const {unit, valuation} = x.value
       if (valuation === 0) {
         return unit
       } else if (valuation < 0) {
-        return rationalField.multiply(unit, new Rational(1, Math.pow(this.p, -valuation)))
+        return RationalField.multiply(unit, new Rational(1, Math.pow(this.p, -valuation)))
       }
-      return rationalField.multiply(unit, new Rational(Math.pow(this.p, valuation), 1))
+      return RationalField.multiply(unit, new Rational(Math.pow(this.p, valuation), 1))
     }
   }
 
@@ -145,15 +139,15 @@ export class Adic extends DVField<AdicNumber> {
     }
   }
 
-  public add = this.liftFromRational((a, b) => rationalField.add(a, b))
-  public subtract = this.liftFromRational((a, b) => rationalField.subtract(a, b))
+  public add = this.liftFromRational((a, b) => RationalField.add(a, b))
+  public subtract = this.liftFromRational((a, b) => RationalField.subtract(a, b))
 
   public negate(a: AdicNumber): AdicNumber {
     if (a.value === Zero) {
       return a
     } else {
       const value = a.value
-      return this.nonzero(rationalField.negate(value.unit), value.valuation)
+      return this.nonzero(RationalField.negate(value.unit), value.valuation)
     }
   }
 
@@ -161,7 +155,7 @@ export class Adic extends DVField<AdicNumber> {
     if (a.value === Zero || b.value === Zero) {
       return this.zero
     } else {
-      const u = rationalField.multiply(a.value.unit, b.value.unit)
+      const u = RationalField.multiply(a.value.unit, b.value.unit)
       const v = a.value.valuation + b.value.valuation
       return this.nonzero(u, v)
     }
@@ -174,7 +168,7 @@ export class Adic extends DVField<AdicNumber> {
     if (a.value === Zero) {
       return this.zero
     } else {
-      const u = rationalField.unsafeDivide(a.value.unit, b.value.unit)
+      const u = RationalField.unsafeDivide(a.value.unit, b.value.unit)
       const v = a.value.valuation - b.value.valuation
       return this.nonzero(u, v)
     }
@@ -186,7 +180,7 @@ export class Adic extends DVField<AdicNumber> {
     }
     const u = a.value.unit
     const v = a.value.valuation
-    return this.nonzero(rationalField.unsafeInvert(u), -v)
+    return this.nonzero(RationalField.unsafeInvert(u), -v)
   }
 
   public nonZeroPow(a: AdicNumber, n: int): AdicNumber {
@@ -195,10 +189,10 @@ export class Adic extends DVField<AdicNumber> {
     }
     const u = a.value.unit
     const v = a.value.valuation
-    return this.nonzero(rationalField.pow(u, n), v * n)
+    return this.nonzero(RationalField.pow(u, n), v * n)
   }
 
-  public remainder = this.liftFromRational((a, b) => rationalField.remainder(a, b))
+  public remainder = this.liftFromRational((a, b) => RationalField.remainder(a, b))
 
   public modPow(a: AdicNumber, n: int): AdicNumber {
     if (a.value === Zero) return a
@@ -206,7 +200,17 @@ export class Adic extends DVField<AdicNumber> {
     return this.remainder(a, this.fromVal(n))
   }
 
-  public toString(): string {
-    return `${this.p}-adic Field`
+  public toString(): string
+  public toString(n: AdicNumber): string
+  public toString(n?: AdicNumber): string {
+    if (n === undefined) {
+      return `${this.p}-adic Field`
+    }
+    
+    if (n.value !== Zero) {
+      return `Adic[${this.p}]((${n.value.unit})e${n.value.valuation})`
+    } else {
+      return `Adic[${this.p}](0)`
+    }
   }
 }

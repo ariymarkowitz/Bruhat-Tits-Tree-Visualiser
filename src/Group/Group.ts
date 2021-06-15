@@ -1,4 +1,4 @@
-export default abstract class Group<GroupElement> {
+export abstract class Group<GroupElement> {
   public abstract identity: GroupElement
   public abstract multiply(a: GroupElement, b: GroupElement): GroupElement
   public abstract invert(a: GroupElement): GroupElement

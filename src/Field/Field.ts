@@ -1,10 +1,9 @@
-import RingAdditiveGroup from "../Ring/RingAdditiveGroup"
-import FieldMultiplicativeGroup from "../Group/FieldMultiplicativeGroup"
-import Ring from "../Ring/Ring"
+import { FieldMultiplicativeGroup } from "../Group/FieldMultiplicativeGroup"
+import { Ring } from "../Ring/Ring"
 import { int } from "../utils/utils"
 import { Rational } from "./Rational"
 
-export default abstract class Field<FieldElement> extends Ring<FieldElement> {
+export abstract class Field<FieldElement> extends Ring<FieldElement> {
   public abstract unsafeInvert(a: FieldElement): FieldElement
 
   public invert(a: FieldElement): FieldElement {

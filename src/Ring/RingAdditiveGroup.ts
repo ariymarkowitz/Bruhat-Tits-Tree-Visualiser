@@ -1,7 +1,7 @@
-import Group from "../Group/Group"
-import Ring from "./Ring"
+import { Group } from "../Group/Group"
+import { Ring } from "./Ring"
 
-export default class RingAdditiveGroup<RingElement> extends Group<RingElement> {
+export class RingAdditiveGroup<RingElement> extends Group<RingElement> {
   private _ring: Ring<RingElement>
   public get ring(): Ring<RingElement> {
     return this._ring

@@ -1,7 +1,7 @@
-import Field from "../Field/Field"
-import Group from "./Group"
+import { Field } from "../Field/Field"
+import { Group } from "./Group"
 
-export default class FieldMultiplicativeGroup<FieldElement> extends Group<FieldElement> {
+export class FieldMultiplicativeGroup<FieldElement> extends Group<FieldElement> {
   private _field: Field<FieldElement>
   public get field(): Field<FieldElement> {
     return this._field

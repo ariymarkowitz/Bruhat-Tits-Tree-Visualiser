@@ -1,6 +1,6 @@
-import Field from './Field';
-import {gcd, int, mod} from '../utils/utils';
 import { cache } from 'decorator-cache-getter';
+import { gcd, int, mod } from '../utils/utils';
+import { Field } from './Field';
 
 export class Rational {
   public num: int
@@ -16,7 +16,7 @@ export class Rational {
 }
 
 // A singleton class that represents the rationals.
-export class RationalField extends Field<Rational> {
+class RationalFieldSingleton extends Field<Rational> {
   private _zero = {num: 0, den: 1}
   private _one = {num: 1, den: 1}
 
@@ -96,4 +96,4 @@ export class RationalField extends Field<Rational> {
   }
 }
 
-export const rationalField = new RationalField()
+export const RationalField = new RationalFieldSingleton()

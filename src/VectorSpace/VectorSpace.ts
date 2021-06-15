@@ -1,11 +1,11 @@
 import { cache } from "decorator-cache-getter"
-import Field from "../Field/Field"
+import { Field } from "../Field/Field"
 import { int } from "../utils/utils"
-import MatrixAlgebra, { matrix } from "./Matrix"
+import { MatrixAlgebra } from "./Matrix"
 
-export type vec<FieldElement> = FieldElement[]
+export type Vec<FieldElement> = FieldElement[]
 
-export default class Vectorspace<FieldElement> {
+export class VectorSpace<FieldElement> {
   private _dim: int
   public get dim(): int { return this._dim }
 

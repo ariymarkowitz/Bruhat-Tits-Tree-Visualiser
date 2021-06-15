@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { isPrime } from '../utils/utils';
-import { TreeComponentOptions, TreeView } from './TreeComponent';
-import { MatrixInput } from './MatrixInput';
 import NumericInput from "react-numeric-input";
-import { Tooltip } from './Tooltip';
+import { isPrime } from '../utils/utils';
+import { BTTComponent, BTTOptions } from './BTTComponent';
+import { MatrixInput } from './MatrixInput';
 import { LabelWithCheckbox, Sidebar, SidebarLeft, SidebarRight, SidebarRow } from './Sidebar';
+import { Tooltip } from './Tooltip';
 
 function primeStep(component: NumericInput, direction: string) {
   const n = component.state.value
@@ -109,7 +109,7 @@ const App = () => {
     depth = Math.max(2, Math.min(inputDepth[0], Math.floor(inputDepth[0] * (inputDepth[1]+1) / (p+1))))
   }
 
-  const options: TreeComponentOptions = useMemo(() => ({
+  const options: BTTOptions = useMemo(() => ({
     depth: depth,
     end: showEnd ? end : undefined,
     iso: showIso ? iso : undefined,
@@ -120,7 +120,7 @@ const App = () => {
   return (
     <div className='container'>
       <div className='tree-container'>
-        <TreeView p={p} options={options}
+        <BTTComponent p={p} options={options}
           onTooltipShow={e => {
             setTooltipPos({x: e.x + 10, y: e.y})
             setTooltipText(e.text)

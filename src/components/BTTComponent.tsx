@@ -1,41 +1,42 @@
 import { KonvaEventObject } from "konva/lib/Node";
-import React, { useMemo, useState } from "react"
-import { Circle, Group, Layer, Line, Stage } from "react-konva/lib/ReactKonvaCore"
 import "konva/lib/shapes/Circle";
-import "konva/lib/shapes/Rect";
 import "konva/lib/shapes/Line";
+import "konva/lib/shapes/Rect";
+import React, { useMemo } from "react";
+import { Circle, Group, Layer, Line, Stage } from "react-konva/lib/ReactKonvaCore";
 import { AdicNumber } from "../Adic/Adic";
-import BruhatTitsTree, { vertex } from '../Tree/BruhatTitsTree';
-import { Tree, tree } from "../Tree/Tree";
 import { theme } from "../style/themes/themes";
-import { mod } from "../utils/utils";
-import { matrix } from "../VectorSpace/Matrix";
+import { BruhatTitsTree, vertex } from '../Tree/BruhatTitsTree';
+import * as Tree from "../Tree/Tree";
 import { Seq } from "../utils/Seq";
+import { mod } from "../utils/utils";
+import { Matrix } from "../VectorSpace/Matrix";
 
-type pvec = [AdicNumber, AdicNumber]
+type AdicVec = [AdicNumber, AdicNumber]
+type Tree<T> = Tree.Tree<T>
 type BTT = BruhatTitsTree
 
-type isoInfo = {
-  matrix: matrix<AdicNumber>;
+interface IsometryInfo {
+  matrix: Matrix<AdicNumber>;
   minDist: number;
 }
 
-type tooltipProps = {
+interface TooltipProps {
   x: number,
   y: number,
   text: string
 }
-type tooltipShowEvent = (e: tooltipProps) => void
-type tooltipHideEvent = () => void
+type TooltipShowEvent = (e: TooltipProps) => void
+type TooltipHideEvent = () => void
 
-type props = {
+interface BTTProps {
   p: number,
-  options: TreeComponentOptions
-  onTooltipShow?: tooltipShowEvent
-  onTooltipHide?: tooltipHideEvent
+  options: BTTOptions
+  onTooltipShow?: TooltipShowEvent
+  onTooltipHide?: TooltipHideEvent
 }
 
-export type TreeComponentOptions = {
+export interface BTTOptions {
   depth: number,
   end?: [number, number],
   iso?: number[][],
@@ -43,17 +44,17 @@ export type TreeComponentOptions = {
   showRootImage?: boolean
 }
 
-type nodeProps = {
-  node: tree<vertex>
+interface NodeProps {
+  node: Tree<vertex>
   address: number[]
   x: number,
   y: number,
   angle: number,
-  graphics: graphicsProps
+  graphics: GraphicsProps
   display: string
 }
 
-type graphicsProps = {
+interface GraphicsProps {
   radius: number,
   branchWidth: number,
   branchLength: number,
@@ -65,7 +66,7 @@ type graphicsProps = {
 
 const treeTheme = theme.tree
 
-export const TreeView = ({p, options, onTooltipShow, onTooltipHide}: props) => {
+export const BTTComponent = ({p, options, onTooltipShow, onTooltipHide}: BTTProps) => {
   const width = 800
   const height = 800
 
@@ -83,7 +84,7 @@ export const TreeView = ({p, options, onTooltipShow, onTooltipHide}: props) => {
   )
 }
 
-const TreeNode = (props: nodeProps, key: number, onTooltipShow?: tooltipShowEvent, onTooltipHide?: tooltipHideEvent) => {
+const BTTNode = (props: NodeProps, key: number, onTooltipShow?: TooltipShowEvent, onTooltipHide?: TooltipHideEvent) => {
   return <Circle
     x = {props.x}
     y = {props.y}
@@ -101,7 +102,7 @@ const TreeNode = (props: nodeProps, key: number, onTooltipShow?: tooltipShowEven
   />
 }
 
-const TreeEdge = (props: nodeProps, x: number, y: number, key: number) => {
+const TreeEdge = (props: NodeProps, x: number, y: number, key: number) => {
   return <Line
     x = {x}
     y = {y}
@@ -112,15 +113,15 @@ const TreeEdge = (props: nodeProps, x: number, y: number, key: number) => {
   />
 }
 
-function handleMouseMove(onTooltipShow: tooltipShowEvent, e: KonvaEventObject<MouseEvent>, display: string) {
+function handleMouseMove(onTooltipShow: TooltipShowEvent, e: KonvaEventObject<MouseEvent>, display: string) {
   onTooltipShow({x: e.evt.pageX, y: e.evt.pageY, text: display})
 }
 
-function handleMouseLeave(onTooltipHide: tooltipHideEvent, e: KonvaEventObject<MouseEvent>) {
+function handleMouseLeave(onTooltipHide: TooltipHideEvent, e: KonvaEventObject<MouseEvent>) {
   onTooltipHide()
 }
 
-function makeTree(p: number, options: TreeComponentOptions, onTooltipShow?: tooltipShowEvent, onTooltipHide?: tooltipHideEvent) {
+function makeTree(p: number, options: BTTOptions, onTooltipShow?: TooltipShowEvent, onTooltipHide?: TooltipHideEvent) {
   const btt = useMemo(() => new BruhatTitsTree(p), [p])
   const tree = useMemo(() => btt.make(options.depth), [btt, options.depth])
 
@@ -139,18 +140,18 @@ function makeTree(p: number, options: TreeComponentOptions, onTooltipShow?: tool
     [btt, tree, options]
   )
 
-  type treenode = {node: tree<nodeProps>, parent: tree<nodeProps> | null}
-  const vertexIter = Tree.iter<treenode>(
+  type TreeNode = {node: Tree<NodeProps>, parent: Tree<NodeProps> | null}
+  const vertexIter = Tree.iter<TreeNode>(
     (data) => data.node.forest.map(n => ({node: n, parent: data.node})),
     {node: graphicsTree, parent: null}
   )
-  const edgeIter = Tree.iter<treenode>(
+  const edgeIter = Tree.iter<TreeNode>(
     (data) => data.node.forest.map(n => ({node: n, parent: data.node})),
     {node: graphicsTree, parent: null}
   )
   return {
     vertices: new Seq(vertexIter)
-      .mapIndexed((n, i) => TreeNode(n.node.value, i, onTooltipShow, onTooltipHide))
+      .mapIndexed((n, i) => BTTNode(n.node.value, i, onTooltipShow, onTooltipHide))
       .toArray(),
     edges: new Seq(edgeIter)
       .filter(n => n.parent != null)
@@ -159,7 +160,7 @@ function makeTree(p: number, options: TreeComponentOptions, onTooltipShow?: tool
   }
 }
 
-function circlefillcolor(tree: BTT, v: vertex, options: TreeComponentOptions, iso?: isoInfo) {
+function circlefillcolor(tree: BTT, v: vertex, options: BTTOptions, iso?: IsometryInfo) {
   if (options.showRootImage) {
     if (iso && tree.lengthOfImage(iso.matrix, v) === 0) {
       return treeTheme.rootImage
@@ -174,7 +175,7 @@ function circlefillcolor(tree: BTT, v: vertex, options: TreeComponentOptions, is
   }
 }
 
-function circlestrokecolor(tree: BTT, v: vertex, options: TreeComponentOptions, end?: pvec, iso?: isoInfo) {
+function circlestrokecolor(tree: BTT, v: vertex, options: BTTOptions, end?: AdicVec, iso?: IsometryInfo) {
   if (iso) {
     if (iso.minDist !== 0 && tree.translationDistance(iso.matrix, v) === iso.minDist) {
       return treeTheme.translationAxis
@@ -191,7 +192,7 @@ function circlestrokecolor(tree: BTT, v: vertex, options: TreeComponentOptions, 
   }
 }
 
-function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: TreeComponentOptions, end?: pvec, iso?: isoInfo) {
+function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: BTTOptions, end?: AdicVec, iso?: IsometryInfo) {
   if (iso) {
     if (
       iso.minDist !== 0
@@ -216,7 +217,8 @@ function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: TreeCompone
   }
 }
 
-function defaultGraphicsProps(tree: BTT, v: vertex, options: TreeComponentOptions, end?: pvec, iso?: isoInfo): graphicsProps {
+function defaultGraphicsProps(tree: BTT, v: vertex, options: BTTOptions,
+  end?: AdicVec, iso?: IsometryInfo): GraphicsProps {
   return {
     radius: treeTheme.vertexRadius,
     branchLength: 240 * Math.pow(tree.p, 0.5),
@@ -229,9 +231,9 @@ function defaultGraphicsProps(tree: BTT, v: vertex, options: TreeComponentOption
 }
 
 function updateGraphicsProps(
-  tree: BTT, v: vertex, parent: vertex, props: graphicsProps,
-  options: TreeComponentOptions, end?: pvec, iso?: isoInfo
-): graphicsProps {
+  tree: BTT, v: vertex, parent: vertex, props: GraphicsProps,
+  options: BTTOptions, end?: AdicVec, iso?: IsometryInfo
+): GraphicsProps {
   return {
     radius: props.radius * 0.75,
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
@@ -244,15 +246,15 @@ function updateGraphicsProps(
 }
 
 function makeGraphicsTree(
-    btt: BTT, tree: tree<vertex>, options: TreeComponentOptions,
-    end?: pvec, iso?: matrix<AdicNumber>
-  ): tree<nodeProps> {
+    btt: BTT, tree: Tree<vertex>, options: BTTOptions,
+    end?: AdicVec, iso?: Matrix<AdicNumber>
+  ): Tree<NodeProps> {
   const turnangle = 2*Math.PI/(btt.p+1)
   const rootDisplay = displayLattice(tree.value, btt)
 
   const isoInfo = iso ? {matrix: iso, minDist: btt.minTranslationDistance(iso)} : undefined
 
-  return Tree.make((data: nodeProps) => {
+  return Tree.make((data: NodeProps) => {
     const forest = data.node.forest.map((child, i) => {
       const graphics = updateGraphicsProps(btt, child.value, data.node.value, data.graphics, options, end, isoInfo) 
 

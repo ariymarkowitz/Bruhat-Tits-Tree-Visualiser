@@ -2,7 +2,7 @@
 
 import React, { useLayoutEffect, useRef, useState } from "react";
 
-type MathProps = {
+interface MathProps {
   tex: string,
   display?: boolean,
   beforeTypeset?: () => void

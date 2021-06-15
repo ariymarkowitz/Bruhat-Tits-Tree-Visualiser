@@ -1,13 +1,13 @@
 import React from "react"
 import { MathJax } from "./MathJax";
 
-type props = {
+interface MatrixInputProps {
   value: string[],
   onChange: (value: string[]) => void,
   className?: string
 }
 
-export const MatrixInput = (props: props) => {
+export const MatrixInput = (props: MatrixInputProps) => {
   const setArrValidated = (s: string, index: number) => {
     if (/^-?\d*$/.test(s)) {
       const arr = [...props.value]

@@ -1,13 +1,13 @@
 import { cache } from 'decorator-cache-getter'
-import { range, Seq } from '../utils/Seq'
-import Field from '../Field/Field'
-import Ring from '../Ring/Ring'
+import { Seq } from '../utils/Seq'
+import { Field } from '../Field/Field'
+import { Ring } from '../Ring/Ring'
 import { int } from '../utils/utils'
-import VectorSpace, { vec } from './VectorSpace'
+import { VectorSpace, Vec } from './VectorSpace'
 
-export type matrix<FieldElement> = FieldElement[][]
+export type Matrix<FieldElement> = FieldElement[][]
 
-export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElement>> {
+export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
   private _dim: int
   public get dim(): int {return this._dim}
 
@@ -32,11 +32,11 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
     return this.fill((col, row) => row === col ? this.field.one : this.field.zero)
   }
 
-  public map(m: matrix<FieldElement>, f: (e: FieldElement, col: int, row: int) => FieldElement): matrix<FieldElement> {
+  public map(m: Matrix<FieldElement>, f: (e: FieldElement, col: int, row: int) => FieldElement): Matrix<FieldElement> {
     return m.map((v, i) => v.map((e, j) => f(e, i, j)))
   }
 
-  public fill(f: (col: int, row: int) => FieldElement): matrix<FieldElement>{
+  public fill(f: (col: int, row: int) => FieldElement): Matrix<FieldElement>{
     return Seq.Range(this.dim)
       .map(col => Seq.Range(this.dim)
         .map(row => f(row, col))
@@ -44,39 +44,39 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
       .toArray()
   }
 
-  public column(i: int, m: matrix<FieldElement>): FieldElement[] {
+  public column(i: int, m: Matrix<FieldElement>): FieldElement[] {
     return m[i]
   }
 
-  public row(i: int, m: matrix<FieldElement>): FieldElement[] {
+  public row(i: int, m: Matrix<FieldElement>): FieldElement[] {
     return m.map(v => v[i])
   }
 
-  public replaceRow(m: matrix<FieldElement>, index: int, newrow: FieldElement[]): matrix<FieldElement> {
+  public replaceRow(m: Matrix<FieldElement>, index: int, newrow: FieldElement[]): Matrix<FieldElement> {
     return this.map(m, (e, i, j) => j === index ? newrow[i] : e)
   }
 
-  public replaceColumn(m: matrix<FieldElement>, index: int, newcol: FieldElement[]): matrix<FieldElement> {
+  public replaceColumn(m: Matrix<FieldElement>, index: int, newcol: FieldElement[]): Matrix<FieldElement> {
     return m.map((v, i) => (i === index) ? newcol : v)
   }
 
-  public fromInts(ints: matrix<int>): matrix<FieldElement> {
+  public fromInts(ints: Matrix<int>): Matrix<FieldElement> {
     return ints.map(v => v.map(e => this.field.fromInt(e)))
   }
 
-  public add(m1: matrix<FieldElement>, m2: matrix<FieldElement>): matrix<FieldElement> {
+  public add(m1: Matrix<FieldElement>, m2: Matrix<FieldElement>): Matrix<FieldElement> {
     return m1.map((v, i) => v.map((e, j) => this.field.add(e, m2[i][j])))
   }
 
-  public subtract(m1: matrix<FieldElement>, m2: matrix<FieldElement>): matrix<FieldElement> {
+  public subtract(m1: Matrix<FieldElement>, m2: Matrix<FieldElement>): Matrix<FieldElement> {
     return m1.map((v, i) => v.map((e, j) => this.field.subtract(e, m2[i][j])))
   }
 
-  public negate(m: matrix<FieldElement>): matrix<FieldElement> {
+  public negate(m: Matrix<FieldElement>): Matrix<FieldElement> {
     return m.map(v => v.map(e => this.field.negate(e)))
   }
 
-  public scale(n: FieldElement, m: matrix<FieldElement>): matrix<FieldElement> {
+  public scale(n: FieldElement, m: Matrix<FieldElement>): Matrix<FieldElement> {
     return m.map(v => v.map(e => this.field.multiply(e, n)))
   }
 
@@ -84,7 +84,7 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
     return v1.reduce((s, e, i) => this.field.add(s, this.field.multiply(e, v2[i])), this.field.zero)
   }
 
-  public apply(m1: matrix<FieldElement>, m2: vec<FieldElement>): vec<FieldElement> {
+  public apply(m1: Matrix<FieldElement>, m2: Vec<FieldElement>): Vec<FieldElement> {
     const F = this.field
     return Seq.Range(this.dim)
       .map(row => Seq.Range(this.dim)
@@ -92,7 +92,7 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
       ).toArray()
   }
 
-  public multiply(m1: matrix<FieldElement>, m2: matrix<FieldElement>): matrix<FieldElement> {
+  public multiply(m1: Matrix<FieldElement>, m2: Matrix<FieldElement>): Matrix<FieldElement> {
     const F = this.field
     return Seq.Range(this.dim)
       .map(col => Seq.Range(this.dim)
@@ -102,11 +102,11 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
       ).toArray()
   }
 
-  public trace(m: matrix<FieldElement>): FieldElement {
+  public trace(m: Matrix<FieldElement>): FieldElement {
     return m.reduce((sum, v, i) => this.field.add(sum, v[i]), this.field.zero)
   }
 
-  public determinant(m: matrix<FieldElement>): FieldElement {
+  public determinant(m: Matrix<FieldElement>): FieldElement {
     if (this.dim === 0) {
       return this.field.one
     } else if (this.dim === 1) {
@@ -119,7 +119,7 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
     }
   }
 
-  public invert(m: matrix<FieldElement>): matrix<FieldElement> {
+  public invert(m: Matrix<FieldElement>): Matrix<FieldElement> {
     let F = this.field
     if (F.isZero(this.determinant(m))) {
       throw new Error('Matrix is singular')
@@ -138,23 +138,23 @@ export default class MatrixAlgebra<FieldElement> extends Ring<matrix<FieldElemen
     }
   }
 
-  public fromScalar(x: FieldElement): matrix<FieldElement> {
+  public fromScalar(x: FieldElement): Matrix<FieldElement> {
     return this.fill((col, row) => row === col ? x : this.field.zero)
   }
 
-  public fromInt(n: int): matrix<FieldElement> {
+  public fromInt(n: int): Matrix<FieldElement> {
     return this.fromScalar(this.field.one)
   }
 
-  public isSingular(m: matrix<FieldElement>): boolean {
+  public isSingular(m: Matrix<FieldElement>): boolean {
     return this.field.isZero(this.determinant(m))
   }
 
-  public clone(m: matrix<FieldElement>): matrix<FieldElement> {
+  public clone(m: Matrix<FieldElement>): Matrix<FieldElement> {
     return m.map(v => [...v])
   }
 
-  public conjugate(m: matrix<FieldElement>, p: matrix<FieldElement>): matrix<FieldElement> {
+  public conjugate(m: Matrix<FieldElement>, p: Matrix<FieldElement>): Matrix<FieldElement> {
     return this.multiply(this.multiply(this.invert(p), m), p)
   }
 
