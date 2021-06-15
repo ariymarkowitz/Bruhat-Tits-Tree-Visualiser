@@ -4,6 +4,7 @@ import { TreeComponentOptions, TreeView } from './TreeComponent';
 import { MatrixInput } from './MatrixInput';
 import NumericInput from "react-numeric-input";
 import { Tooltip } from './Tooltip';
+import { LabelWithCheckbox, Sidebar, SidebarLeft, SidebarRight, SidebarRow } from './Sidebar';
 
 function primeStep(component: NumericInput, direction: string) {
   const n = component.state.value
@@ -128,61 +129,66 @@ const App = () => {
           onTooltipHide={() => setTooltipVisible(false)}
         />
       </div>
-      <div className='sidebar'>
-          <div className='sidebar-row'>
-            <div>
-              <label htmlFor='p'>p</label>
-            </div>
+      <Sidebar>
+        <SidebarRow>
+          <SidebarLeft>
+            <label htmlFor='p'>p</label>
+          </SidebarLeft>
+          <SidebarRight>
             <NumericInput name={'p'} value={inputP} min={2} max={10} step={primeStep}
               onChange={(_, s) => setInputP(s)} style={false} />
-          </div>
-          <div className='sidebar-row'>
-            <div>
-              <label htmlFor='Depth'>Depth</label>
-            </div>
+          </SidebarRight>
+        </SidebarRow>
+        <SidebarRow>
+          <SidebarLeft>
+            <label htmlFor='Depth'>Depth</label>
+          </SidebarLeft>
+          <SidebarRight>
             <NumericInput name='Depth' value={depth} min={1} max={10}
               onChange={(_, s) => validateDepth(s)} style={false} />
-          </div>
-          <hr />
-          <div className='sidebar-row'>
-            <div>
-              <div>
-                <input type='checkbox' checked={showEnd} onChange={e => setShowEnd(e.target.checked)} />
-              </div>
-              <label htmlFor='End' className='with-checkbox'>End</label>
-            </div>
+          </SidebarRight>
+        </SidebarRow>
+        <hr />
+        <SidebarRow>
+          <SidebarLeft>
+            <LabelWithCheckbox checked={showEnd} htmlFor='End' onChange={e => setShowEnd(e.target.checked)}>
+              End
+            </LabelWithCheckbox>
+          </SidebarLeft>
+          <SidebarRight>
             <input type='text' name='End' value = {inputEnd}
               onChange={e => validateEnd(e.target.value)} className={showEnd ? undefined : 'disabled'} />
-          </div>
-          <div className='sidebar-row'>
-            <div>
-              <input type='checkbox' checked={showInfEnd} name='show-inf-end'
-                onChange={e => setShowInfEnd(e.target.checked)} />
-            </div>
-            <div>
-              <label htmlFor='show-inf-end'>Show end at infinity</label>
-            </div>
-          </div>
-          <hr />
-          <div className='sidebar-row'>
-            <div>
-              <div>
-                <input type='checkbox' checked={showIso} onChange={e => setShowIso(e.target.checked)} />
-              </div>
-              <label className='with-checkbox'>Isometry</label>
-            </div>
+          </SidebarRight>
+        </SidebarRow>
+        <SidebarRow>
+          <SidebarLeft>
+            <input type='checkbox' checked={showInfEnd} name='show-inf-end'
+              onChange={e => setShowInfEnd(e.target.checked)} />
+          </SidebarLeft>
+          <SidebarRight>
+            <div><label htmlFor='show-inf-end'>Show end at infinity</label></div>
+          </SidebarRight>
+        </SidebarRow>
+        <SidebarRow>
+          <SidebarLeft>
+            <LabelWithCheckbox checked={showIso} onChange={e => setShowIso(e.target.checked)}>
+              Isometry
+            </LabelWithCheckbox>
+          </SidebarLeft>
+          <SidebarRight>
             <MatrixInput value={inputIso} onChange={m => setInputIso(m)} className={showIso ? undefined : 'disabled'} />
-          </div>
-          <div className='sidebar-row'>
-            <div>
-              <input type='checkbox' checked={showRootImage} name='show-root-image'
-              onChange={e => setShowRootImage(e.target.checked)} />
-            </div>
-            <div>
-              <label htmlFor='show-root-image'>Show image of origin</label>
-            </div>
-          </div>
-      </div>
+          </SidebarRight>
+        </SidebarRow>
+        <SidebarRow>
+          <SidebarLeft>
+            <input type='checkbox' checked={showRootImage} name='show-root-image'
+            onChange={e => setShowRootImage(e.target.checked)} />
+          </SidebarLeft>
+          <SidebarRight>
+            <div><label htmlFor='show-root-image'>Show image of origin</label></div>
+          </SidebarRight>
+        </SidebarRow>
+      </Sidebar>
       <Tooltip x={tooltipPos.x} y={tooltipPos.y} text={tooltipText} visible={tooltipVisible}/>
     </div>
   );
