@@ -1,39 +1,39 @@
 import { cache } from "decorator-cache-getter"
-import { Field } from "../Field/Field"
+import { Field as FieldType } from "../Field/Field"
 import { int } from "../utils/utils"
 import { MatrixAlgebra } from "./Matrix"
 
 export type Vec<FieldElement> = FieldElement[]
 
-export class VectorSpace<FieldElement> {
+export class VectorSpace<FieldElement, Field extends FieldType<FieldElement> = FieldType<FieldElement>> {
   private _dim: int
   public get dim(): int { return this._dim }
 
-  private _field: Field<FieldElement>
-  public get field(): Field<FieldElement> { return this._field }
+  private _field: Field
+  public get field(): Field { return this._field }
 
-  public constructor(dim: int, field: Field<FieldElement>) {
+  public constructor(dim: int, field: Field) {
     this._field = field
     this._dim = dim
   }
 
-  public fromInts(ints: int[]): FieldElement[] {
+  public fromInts(ints: Vec<int>): Vec<FieldElement> {
     return ints.map(e => this.field.fromInt(e))
   }
 
-  public add(v1: FieldElement[], v2: FieldElement[]): FieldElement[] {
+  public add(v1: Vec<FieldElement>, v2: Vec<FieldElement>): Vec<FieldElement> {
     return v1.map((v, i) => this.field.add(v, v2[i]))
   }
 
-  public subtract(v1: FieldElement[], v2: FieldElement[]): FieldElement[] {
+  public subtract(v1: Vec<FieldElement>, v2: Vec<FieldElement>): Vec<FieldElement> {
     return v1.map((v, i) => this.field.subtract(v, v2[i]))
   }
 
-  public negate(v: FieldElement[]): FieldElement[] {
+  public negate(v: Vec<FieldElement>): Vec<FieldElement> {
     return v.map(e => this.field.negate(e))
   }
 
-  public scale(v: FieldElement[], n: FieldElement): FieldElement[] {
+  public scale(v: Vec<FieldElement>, n: FieldElement): Vec<FieldElement> {
     return v.map(e => this.field.multiply(e, n)) 
   }
 

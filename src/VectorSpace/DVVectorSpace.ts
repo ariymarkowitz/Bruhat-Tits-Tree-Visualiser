@@ -3,14 +3,11 @@ import { int } from "../utils/utils"
 import { Matrix } from "./Matrix"
 import { VectorSpace, Vec } from "./VectorSpace"
 
-export class DVVectorSpace<FieldElement> extends VectorSpace<FieldElement> {
+export class DVVectorSpace<FieldElement, Field extends DVField<FieldElement> = DVField<FieldElement>>
+  extends VectorSpace<FieldElement, Field> {
 
-  private _dvfield: DVField<FieldElement>
-  public get field(): DVField<FieldElement> { return this._dvfield }
-
-  public constructor(dim: int, field: DVField<FieldElement>) {
+  public constructor(dim: int, field: Field) {
     super(dim, field)
-    this._dvfield = field
   }
 
   public vectorInValuationRing(v: Vec<FieldElement>): boolean {

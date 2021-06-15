@@ -1,5 +1,4 @@
-import { ExtendedInt } from '../Order/ExtendedInt';
-import { EIntOrd } from './../Order/ExtendedInt';
+import { EIntOrd, ExtendedInt } from '../Order/ExtendedInt';
 import { Field } from "./Field";
 
 // A field with a discrete valuation.

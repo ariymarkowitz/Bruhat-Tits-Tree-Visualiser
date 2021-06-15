@@ -44,11 +44,11 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
       .toArray()
   }
 
-  public column(i: int, m: Matrix<FieldElement>): FieldElement[] {
+  public column(i: int, m: Matrix<FieldElement>): Vec<FieldElement> {
     return m[i]
   }
 
-  public row(i: int, m: Matrix<FieldElement>): FieldElement[] {
+  public row(i: int, m: Matrix<FieldElement>): Vec<FieldElement> {
     return m.map(v => v[i])
   }
 
@@ -80,7 +80,7 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return m.map(v => v.map(e => this.field.multiply(e, n)))
   }
 
-  public innerProduct(v1: FieldElement[], v2: FieldElement[]): FieldElement {
+  public innerProduct(v1: Vec<FieldElement>, v2: Vec<FieldElement>): FieldElement {
     return v1.reduce((s, e, i) => this.field.add(s, this.field.multiply(e, v2[i])), this.field.zero)
   }
 
