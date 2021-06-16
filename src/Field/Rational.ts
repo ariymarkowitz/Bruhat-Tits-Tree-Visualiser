@@ -2,26 +2,19 @@ import { cache } from 'decorator-cache-getter';
 import { gcd, int, mod } from '../utils/int';
 import { Field } from './Field';
 
-export class Rational {
-  public num: int
-  public den: int
-  public constructor(num: int, den: int) {
-    this.num = num
-    this.den = den
-  }
+export interface Rational {
+  num: int
+  den: int
+}
 
-  public toString(): string {
-    return `${this.num}/${this.den}`
-  }
+export function Rational(num: int, den: int): Rational {
+  return {num, den}
 }
 
 // A singleton class that represents the rationals.
 class RationalFieldSingleton extends Field<Rational> {
-  private _zero = {num: 0, den: 1}
-  private _one = {num: 1, den: 1}
-
-  @cache public get zero() { return new Rational(0, 1) }
-  @cache public get one() { return new Rational(1, 1) }
+  @cache public get zero() { return Rational(0, 1) }
+  @cache public get one() { return Rational(1, 1) }
 
   // Generate a canonical representation of a rational number.
   // Every rational number created using this function will have a unique representation.
@@ -29,26 +22,34 @@ class RationalFieldSingleton extends Field<Rational> {
     if (!Number.isInteger(num) || !Number.isInteger(den)) {
       throw new Error('Arguments are not integers')
     }
-    if (den == 0) {
+    if (den === 0) {
       throw new Error('Denominator is zero.')
-    } else if (num == 0) {
-      return new Rational(0, 1)
+    } else if (num === 0) {
+      return Rational(0, 1)
     } else {
       const sign = Math.sign(num) * Math.sign(den)
       num = Math.abs(num)
       den = Math.abs(den)
 
       const g = gcd(num, den)
-      return new Rational(sign * num/g, den/g)
+      return Rational(sign * num/g, den/g)
     }
   }
 
   public add(a: Rational, b: Rational) {
-    return this.reduce(a.num * b.den + b.num * a.den, a.den * b.den)
+    if (a.den === 1 && b.den === 1) {
+      return this.fromInt(a.num + b.num)
+    } else {
+      return this.reduce(a.num * b.den + b.num * a.den, a.den * b.den)
+    }
   }
 
   public subtract(a: Rational, b: Rational) {
-    return this.reduce(a.num * b.den - b.num * a.den, a.den * b.den)
+    if (a.den === 1 && b.den === 1) {
+      return this.fromInt(a.num - b.num)
+    } else {
+      return this.reduce(a.num * b.den - b.num * a.den, a.den * b.den)
+    }
   }
 
   public multiply(a: Rational, b: Rational) {
@@ -60,11 +61,11 @@ class RationalFieldSingleton extends Field<Rational> {
   }
 
   public negate(a: Rational) {
-    return new Rational(-a.num, a.den)
+    return Rational(-a.num, a.den)
   }
 
   public unsafeInvert(a: Rational) {
-    return new Rational(a.den*Math.sign(a.num), Math.abs(a.num))
+    return Rational(a.den*Math.sign(a.num), Math.abs(a.num))
   }
 
   public equals(a: Rational, b: Rational): boolean {
@@ -72,11 +73,11 @@ class RationalFieldSingleton extends Field<Rational> {
   }
 
   public nonZeroPow(a: Rational, n: int) {
-    return new Rational(Math.pow(a.num, n), Math.pow(a.den, n))
+    return Rational(Math.pow(a.num, n), Math.pow(a.den, n))
   }
 
   public fromInt(n: int) {
-    return new Rational(n, 1)
+    return Rational(n, 1)
   }
 
   public fromRational(r: Rational) {
@@ -85,14 +86,19 @@ class RationalFieldSingleton extends Field<Rational> {
 
   public remainder(a: Rational, b: Rational): Rational {
     if (this.isZero(a)) return a
+    if (a.den === 1 && b.den === 1) return this.fromInt(mod(a.num, b.num))
     const intA = a.num * b.den
     const intB = b.num * a.den
     if (intA < intB) return a
     return this.reduce(mod(intA, intB), a.den * b.den)
   }
 
-  public toString(): string {
-    return `Rational Field`
+  public toString(r?: Rational): string {
+    if (r === undefined) {
+      return `Rational Field`
+    } else {
+      return `${r.num}/${r.den}`
+    }
   }
 }
 

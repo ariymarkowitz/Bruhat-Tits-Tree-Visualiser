@@ -1,13 +1,15 @@
+import { Vec } from './../VectorSpace/VectorSpace';
 import { cache } from "decorator-cache-getter"
-import { Adic, AdicNumber } from "../Adic/Adic"
+import { Adic } from "../Adic/Adic"
 import { EIntOrd, ExtendedInt, Infinite } from "../Order/ExtendedInt"
 import { Seq } from "../utils/Seq"
 import { int } from "../utils/int"
 import { DVVectorSpace } from "../VectorSpace/DVVectorSpace"
 import { Matrix } from "../VectorSpace/Matrix"
 import * as Tree from "./Tree"
+import { Rational } from "../Field/Rational"
 
-type generators = Matrix<AdicNumber>
+type generators = Matrix<Rational>
 
 /**
  * The reduced form of a p-adic matrix.
@@ -15,12 +17,12 @@ type generators = Matrix<AdicNumber>
  * | u  p^n |
  * u is a finite p-adic expansion less than p^n.
  **/
-export type vertex = {u: AdicNumber, n: int}
+export type vertex = {u: Rational, n: int}
 
 export class BruhatTitsTree {
   public p: int
   public field: Adic
-  public vspace: DVVectorSpace<AdicNumber>
+  public vspace: DVVectorSpace<Rational>
 
   public constructor(p: int) {
     this.p = p
@@ -29,7 +31,7 @@ export class BruhatTitsTree {
   }
 
   @cache
-  public get infEnd(): [AdicNumber, AdicNumber] {
+  public get infEnd(): Vec<Rational> {
     return [this.field.zero, this.field.one]
   }
 
@@ -66,7 +68,7 @@ export class BruhatTitsTree {
     }
   }
 
-  public minTranslationDistance(m: Matrix<AdicNumber>): int {
+  public minTranslationDistance(m: Matrix<Rational>): int {
     const M = this.vspace.matrixAlgebra
     const F = this.field
 
@@ -81,7 +83,7 @@ export class BruhatTitsTree {
   }
 
   // Check whether the end lies in the lattice.
-  public inEnd(v: vertex, end: [AdicNumber, AdicNumber]) {
+  public inEnd(v: vertex, end: Vec<Rational>) {
     return this.vspace.inLattice(this.vertexToIntGens(v), this.toIntVector(end))
   }
 
@@ -89,7 +91,7 @@ export class BruhatTitsTree {
     return (this.field.isZero(v.u) && v.n <= 0)
   }
 
-  public toIntVector(v: AdicNumber[]): AdicNumber[] {
+  public toIntVector(v: Vec<Rational>): Vec<Rational> {
     const a = EIntOrd.minAll(v.map(n => this.field.valuation(n)))
     if (a === Infinite) return v
     else return this.vspace.scale(v, this.field.fromVal(-a))

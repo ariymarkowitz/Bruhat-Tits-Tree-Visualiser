@@ -4,20 +4,20 @@ import "konva/lib/shapes/Line";
 import "konva/lib/shapes/Rect";
 import React, { useMemo } from "react";
 import { Circle, Group, Layer, Line, Stage } from "react-konva/lib/ReactKonvaCore";
-import { AdicNumber } from "../Adic/Adic";
 import { theme } from "../style/themes/themes";
 import { BruhatTitsTree, vertex } from '../Tree/BruhatTitsTree';
 import * as Tree from "../Tree/Tree";
 import { Seq } from "../utils/Seq";
 import { mod } from "../utils/int";
 import { Matrix } from "../VectorSpace/Matrix";
+import { Rational } from "../Field/Rational";
+import { Vec } from "../VectorSpace/VectorSpace";
 
-type AdicVec = [AdicNumber, AdicNumber]
 type Tree<T> = Tree.Tree<T>
 type BTT = BruhatTitsTree
 
 interface IsometryInfo {
-  matrix: Matrix<AdicNumber>;
+  matrix: Matrix<Rational>;
   minDist: number;
 }
 
@@ -126,7 +126,7 @@ function makeTree(p: number, options: BTTOptions, onTooltipShow?: TooltipShowEve
   const tree = useMemo(() => btt.make(options.depth), [btt, options.depth])
 
   const endAdic = useMemo(
-    () => (options.end ? btt.vspace.fromInts(options.end) : undefined) as [AdicNumber, AdicNumber],
+    () => (options.end ? btt.vspace.fromInts(options.end) : undefined),
     [btt, options.end]
   )
   
@@ -175,7 +175,7 @@ function circlefillcolor(tree: BTT, v: vertex, options: BTTOptions, iso?: Isomet
   }
 }
 
-function circlestrokecolor(tree: BTT, v: vertex, options: BTTOptions, end?: AdicVec, iso?: IsometryInfo) {
+function circlestrokecolor(tree: BTT, v: vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
   if (iso) {
     if (iso.minDist !== 0 && tree.translationDistance(iso.matrix, v) === iso.minDist) {
       return treeTheme.translationAxis
@@ -192,7 +192,7 @@ function circlestrokecolor(tree: BTT, v: vertex, options: BTTOptions, end?: Adic
   }
 }
 
-function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: BTTOptions, end?: AdicVec, iso?: IsometryInfo) {
+function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
   if (iso) {
     if (
       iso.minDist !== 0
@@ -218,7 +218,7 @@ function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: BTTOptions,
 }
 
 function defaultGraphicsProps(tree: BTT, v: vertex, options: BTTOptions,
-  end?: AdicVec, iso?: IsometryInfo): GraphicsProps {
+  end?: Vec<Rational>, iso?: IsometryInfo): GraphicsProps {
   return {
     radius: treeTheme.vertexRadius,
     branchLength: 240 * Math.pow(tree.p, 0.5),
@@ -232,7 +232,7 @@ function defaultGraphicsProps(tree: BTT, v: vertex, options: BTTOptions,
 
 function updateGraphicsProps(
   tree: BTT, v: vertex, parent: vertex, props: GraphicsProps,
-  options: BTTOptions, end?: AdicVec, iso?: IsometryInfo
+  options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo
 ): GraphicsProps {
   return {
     radius: props.radius * 0.75,
@@ -247,7 +247,7 @@ function updateGraphicsProps(
 
 function makeGraphicsTree(
     btt: BTT, tree: Tree<vertex>, options: BTTOptions,
-    end?: AdicVec, iso?: Matrix<AdicNumber>
+    end?: Vec<Rational>, iso?: Matrix<Rational>
   ): Tree<NodeProps> {
   const turnangle = 2*Math.PI/(btt.p+1)
   const rootDisplay = displayLattice(tree.value, btt)
@@ -280,7 +280,7 @@ function makeGraphicsTree(
 function displayLattice(v: vertex, btt: BruhatTitsTree) {
   const F = btt.field
 
-  const r = F.toRational(v.u)
+  const r = v.u
 
   const n = r.den === 1 ? `${r.num}` : `\\frac{${r.num}}{${r.den}}`
   return `\\left[${n}\\right]_{${v.n}}`
