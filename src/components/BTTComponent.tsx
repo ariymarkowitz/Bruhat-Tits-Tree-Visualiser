@@ -5,7 +5,7 @@ import "konva/lib/shapes/Rect";
 import React, { useMemo } from "react";
 import { Circle, Group, Layer, Line, Stage } from "react-konva/lib/ReactKonvaCore";
 import { theme } from "../style/themes/themes";
-import { BruhatTitsTree, vertex } from '../Tree/BruhatTitsTree';
+import { BruhatTitsTree, Vertex } from '../Tree/BruhatTitsTree';
 import * as Tree from "../Tree/Tree";
 import { Seq } from "../utils/Seq";
 import { mod } from "../utils/int";
@@ -45,7 +45,7 @@ export interface BTTOptions {
 }
 
 interface NodeProps {
-  node: Tree<vertex>
+  node: Tree<Vertex>
   address: number[]
   x: number,
   y: number,
@@ -160,7 +160,7 @@ function makeTree(p: number, options: BTTOptions, onTooltipShow?: TooltipShowEve
   }
 }
 
-function circlefillcolor(tree: BTT, v: vertex, options: BTTOptions, iso?: IsometryInfo) {
+function circlefillcolor(tree: BTT, v: Vertex, options: BTTOptions, iso?: IsometryInfo) {
   if (options.showRootImage) {
     if (iso && tree.lengthOfImage(iso.matrix, v) === 0) {
       return treeTheme.rootImage
@@ -175,7 +175,7 @@ function circlefillcolor(tree: BTT, v: vertex, options: BTTOptions, iso?: Isomet
   }
 }
 
-function circlestrokecolor(tree: BTT, v: vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
+function circlestrokecolor(tree: BTT, v: Vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
   if (iso) {
     if (iso.minDist !== 0 && tree.translationDistance(iso.matrix, v) === iso.minDist) {
       return treeTheme.translationAxis
@@ -192,7 +192,7 @@ function circlestrokecolor(tree: BTT, v: vertex, options: BTTOptions, end?: Vec<
   }
 }
 
-function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
+function edgestrokecolor(tree: BTT, v1: Vertex, v2: Vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
   if (iso) {
     if (
       iso.minDist !== 0
@@ -217,7 +217,7 @@ function edgestrokecolor(tree: BTT, v1: vertex, v2: vertex, options: BTTOptions,
   }
 }
 
-function defaultGraphicsProps(tree: BTT, v: vertex, options: BTTOptions,
+function defaultGraphicsProps(tree: BTT, v: Vertex, options: BTTOptions,
   end?: Vec<Rational>, iso?: IsometryInfo): GraphicsProps {
   return {
     radius: treeTheme.vertexRadius,
@@ -231,7 +231,7 @@ function defaultGraphicsProps(tree: BTT, v: vertex, options: BTTOptions,
 }
 
 function updateGraphicsProps(
-  tree: BTT, v: vertex, parent: vertex, props: GraphicsProps,
+  tree: BTT, v: Vertex, parent: Vertex, props: GraphicsProps,
   options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo
 ): GraphicsProps {
   return {
@@ -246,7 +246,7 @@ function updateGraphicsProps(
 }
 
 function makeGraphicsTree(
-    btt: BTT, tree: Tree<vertex>, options: BTTOptions,
+    btt: BTT, tree: Tree<Vertex>, options: BTTOptions,
     end?: Vec<Rational>, iso?: Matrix<Rational>
   ): Tree<NodeProps> {
   const turnangle = 2*Math.PI/(btt.p+1)
@@ -277,7 +277,7 @@ function makeGraphicsTree(
   })
 }
 
-function displayLattice(v: vertex, btt: BruhatTitsTree) {
+function displayLattice(v: Vertex, btt: BruhatTitsTree) {
   const F = btt.field
 
   const r = v.u

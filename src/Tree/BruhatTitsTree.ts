@@ -17,7 +17,10 @@ type generators = Matrix<Rational>
  * | u  p^n |
  * u is a finite p-adic expansion less than p^n.
  **/
-export type vertex = {u: Rational, n: int}
+export interface Vertex {
+  u: Rational,
+  n: int
+}
 
 export class BruhatTitsTree {
   public p: int
@@ -35,10 +38,10 @@ export class BruhatTitsTree {
     return [this.field.zero, this.field.one]
   }
 
-  private children(vertex: vertex) {
+  private children(vertex: Vertex) {
     const F = this.field
 
-    let c: vertex[] = Seq.Range(1, this.p)
+    let c: Vertex[] = Seq.Range(1, this.p)
       .map(i => this.apply(vertex, i))
       .toArray()
 
@@ -52,7 +55,7 @@ export class BruhatTitsTree {
     return c
   }
 
-  public apply(v: vertex, n: int): vertex {
+  public apply(v: Vertex, n: int): Vertex {
     const F = this.field
     if (n === 0) return {u: v.u, n: v.n+1}
     return {
@@ -61,7 +64,7 @@ export class BruhatTitsTree {
     }
   }
 
-  public applyInf(v: vertex, n: int): vertex {
+  public applyInf(v: Vertex, n: int): Vertex {
     const F = this.field
     return {
       u: F.modPow(v.u, n-1), n: v.n-1
@@ -83,11 +86,11 @@ export class BruhatTitsTree {
   }
 
   // Check whether the end lies in the lattice.
-  public inEnd(v: vertex, end: Vec<Rational>) {
+  public inEnd(v: Vertex, end: Vec<Rational>) {
     return this.vspace.inLattice(this.vertexToIntGens(v), this.toIntVector(end))
   }
 
-  public inInfEnd(v: vertex) {
+  public inInfEnd(v: Vertex) {
     return (this.field.isZero(v.u) && v.n <= 0)
   }
 
@@ -103,11 +106,11 @@ export class BruhatTitsTree {
     else return this.vspace.matrixAlgebra.scale(this.field.fromVal(-a), m)
   }
 
-  public vertexToGens(v: vertex): generators {
+  public vertexToGens(v: Vertex): generators {
     return [[this.field.one, v.u], [this.field.zero, this.field.fromVal(v.n)]]
   }
 
-  public vertexToIntGens(v: vertex): generators {
+  public vertexToIntGens(v: Vertex): generators {
     return this.toIntMatrix(this.vertexToGens(v))
   }
 
@@ -136,17 +139,17 @@ export class BruhatTitsTree {
     return -2 * minV + vDet
   }
 
-  public translationDistance(a: generators, v: vertex): int {
+  public translationDistance(a: generators, v: Vertex): int {
     const M = this.vspace.matrixAlgebra
     return this.distanceToRoot(M.conjugate(a, this.vertexToGens(v)))
   }
 
-  public lengthOfImage(a: generators, v: vertex) {
+  public lengthOfImage(a: generators, v: Vertex) {
     const M = this.vspace.matrixAlgebra
     return this.distanceToRoot(M.multiply(a, this.vertexToGens(v)))
   }
 
-  public make(depth: int, root: vertex = {u: this.field.zero, n: 0}) {
+  public make(depth: int, root: Vertex = {u: this.field.zero, n: 0}) {
     return Tree.make(({v, length}) => {
       return {
         value: v,
