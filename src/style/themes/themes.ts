@@ -8,4 +8,4 @@ const themes = {
   lightLarge: lightLargeTheme,
 }
 
-export const theme = themes.lightLarge
+export const theme = themes.dark
