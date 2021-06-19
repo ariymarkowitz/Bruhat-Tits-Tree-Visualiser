@@ -65,7 +65,7 @@ module.exports = {
   },
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'dist_dev'),
     clean: true,
   },
   optimization: {
@@ -75,7 +75,7 @@ module.exports = {
     title: 'Bruhat-Tits Tree',
     template: 'src/index.html',
     files: {
-      js: [ "dist/bundle.js"],
+      js: [ "dist_dev/bundle.js"],
     }
   }),],
 };
