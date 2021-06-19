@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script>window.MathJaxPromise = new Promise(resolve => {
+      window.MathJax = {
+        startup: {
+          // Don't perform an initial typeset of the page when MathJax loads.
+          // Our React components will trigger typsetting as needed.
+          typeset: false,
+          ready: () => {
+            // Do whatever MathJax would normally do at this point.
+            MathJax.startup.defaultReady();
+            // Resolve the promise.
+            resolve(MathJax);
+          }
+        },
+        options: {
+          enableAssistiveMml: false
+        }
+      }
+    });</script><script id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.1.4/es5/tex-svg.min.js"></script><link rel="stylesheet" href="main.css"><title>Bruhat-Tits Tree</title><script defer="defer" src="bundle.js"></script></head><body><div id="root"></div></body></html>
