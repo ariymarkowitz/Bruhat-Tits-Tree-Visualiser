@@ -135,7 +135,7 @@ const App = () => {
             <label htmlFor='p'>p</label>
           </SidebarLeft>
           <SidebarRight>
-            <NumericInput name={'p'} value={inputP} min={2} max={10} step={primeStep}
+            <NumericInput name={'p'} value={inputP} min={2} max={11} step={primeStep}
               onChange={(_, s) => setInputP(s)} style={false} />
           </SidebarRight>
         </SidebarRow>
