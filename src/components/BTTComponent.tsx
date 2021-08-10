@@ -19,6 +19,7 @@ type BTT = BruhatTitsTree
 interface IsometryInfo {
   matrix: Matrix<Rational>;
   minDist: number;
+  vertex: Vertex;
 }
 
 interface TooltipProps {
@@ -44,8 +45,8 @@ export interface BTTOptions {
   showRootImage?: boolean
 }
 
-interface NodeProps {
-  node: Tree<Vertex>
+interface GraphicsNodeProps {
+  node: Tree<VertexCachedInfo>
   address: number[]
   x: number,
   y: number,
@@ -62,6 +63,13 @@ interface GraphicsProps {
   fillColor: string,
   edgestrokecolor: string
   circlestrokecolor: string
+}
+
+interface VertexCachedInfo {
+  vertex: Vertex,
+  isMinTranslation?: boolean
+  inEnd?: boolean
+  inInfEnd?: boolean
 }
 
 const treeTheme = theme.tree
@@ -84,7 +92,7 @@ export const BTTComponent = ({p, options, onTooltipShow, onTooltipHide}: BTTProp
   )
 }
 
-const BTTNode = (props: NodeProps, key: number, onTooltipShow?: TooltipShowEvent, onTooltipHide?: TooltipHideEvent) => {
+const BTTNode = (props: GraphicsNodeProps, key: number, onTooltipShow?: TooltipShowEvent, onTooltipHide?: TooltipHideEvent) => {
   return <Circle
     x = {props.x}
     y = {props.y}
@@ -102,7 +110,7 @@ const BTTNode = (props: NodeProps, key: number, onTooltipShow?: TooltipShowEvent
   />
 }
 
-const TreeEdge = (props: NodeProps, x: number, y: number, key: number) => {
+const TreeEdge = (props: GraphicsNodeProps, x: number, y: number, key: number) => {
   return <Line
     x = {x}
     y = {y}
@@ -140,7 +148,7 @@ function makeTree(p: number, options: BTTOptions, onTooltipShow?: TooltipShowEve
     [btt, tree, options]
   )
 
-  type TreeNode = {node: Tree<NodeProps>, parent: Tree<NodeProps> | null}
+  type TreeNode = {node: Tree<GraphicsNodeProps>, parent: Tree<GraphicsNodeProps> | null}
   const vertexIter = Tree.iter<TreeNode>(
     (data) => data.node.forest.map(n => ({node: n, parent: data.node})),
     {node: graphicsTree, parent: null}
@@ -160,11 +168,11 @@ function makeTree(p: number, options: BTTOptions, onTooltipShow?: TooltipShowEve
   }
 }
 
-function circlefillcolor(tree: BTT, v: Vertex, options: BTTOptions, iso?: IsometryInfo) {
+function circlefillcolor(btt: BTT, v: Vertex, options: BTTOptions, iso?: IsometryInfo) {
   if (options.showRootImage) {
-    if (iso && tree.lengthOfImage(iso.matrix, v) === 0) {
+    if (iso && btt.isEqualVertex(iso.vertex, v)) {
       return treeTheme.rootImage
-    } else if (!iso && tree.field.isZero(v.u) && v.n === 0) {
+    } else if (!iso && btt.vertexIsRoot(v)) {
       return treeTheme.rootImage
     }
   }
@@ -175,63 +183,39 @@ function circlefillcolor(tree: BTT, v: Vertex, options: BTTOptions, iso?: Isomet
   }
 }
 
-function circlestrokecolor(tree: BTT, v: Vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
-  if (iso) {
-    if (iso.minDist !== 0 && tree.translationDistance(iso.matrix, v) === iso.minDist) {
-      return treeTheme.translationAxis
-    } else if (iso.minDist === 0 && tree.translationDistance(iso.matrix, v) === 0) {
-      return treeTheme.fixedPoints
-    }
+function circlestrokecolor(v: VertexCachedInfo, iso?: IsometryInfo) {
+  if (iso && v.isMinTranslation) {
+    return iso.minDist === 0 ? treeTheme.fixedPoints : treeTheme.translationAxis
   }
-  if (end !== undefined && tree.inEnd(v, end)) {
-    return treeTheme.end
-  } else if (options.showInfEnd && tree.inInfEnd(v)) {
-    return treeTheme.infBranch
-  } else {
-    return treeTheme.vertexStroke
-  }
+  if (v.inEnd) return treeTheme.end
+  if (v.inInfEnd) return treeTheme.infBranch
+  return treeTheme.vertexStroke
 }
 
-function edgestrokecolor(tree: BTT, v1: Vertex, v2: Vertex, options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo) {
-  if (iso) {
-    if (
-      iso.minDist !== 0
-      && tree.translationDistance(iso.matrix, v1) === iso.minDist
-      && tree.translationDistance(iso.matrix, v2) === iso.minDist
-    ) {
-      return treeTheme.translationAxis
-    } else if (
-        iso.minDist === 0
-        && tree.translationDistance(iso.matrix, v1) === 0
-        && tree.translationDistance(iso.matrix, v2) === 0
-    ) {
-      return treeTheme.fixedPoints
-    }
+function edgestrokecolor(v1: VertexCachedInfo, v2: VertexCachedInfo, iso?: IsometryInfo) {
+  if (iso && v1.isMinTranslation && v2.isMinTranslation) {
+    return iso.minDist === 0 ? treeTheme.fixedPoints : treeTheme.translationAxis
   }
-  if (end !== undefined && tree.inEnd(v1, end) && tree.inEnd(v2, end)) {
-    return treeTheme.end
-  } else if (options.showInfEnd && tree.inInfEnd(v1) && tree.inInfEnd(v2)) {
-    return treeTheme.infBranch
-  } else {
-    return treeTheme.edge
-  }
+  if (v1.inEnd && v2.inEnd) return treeTheme.end
+  if (v1.inInfEnd && v2.inInfEnd) return treeTheme.infBranch
+  return treeTheme.edge
 }
 
-function defaultGraphicsProps(tree: BTT, v: Vertex, options: BTTOptions,
+function defaultGraphicsProps(tree: BTT, v: VertexCachedInfo, options: BTTOptions,
   end?: Vec<Rational>, iso?: IsometryInfo): GraphicsProps {
   return {
     radius: treeTheme.vertexRadius,
     branchLength: 240 * Math.pow(tree.p, 0.5),
     branchWidth: treeTheme.branchWidth,
     strokeWidth: treeTheme.vertexStrokeWidth,
-    fillColor: circlefillcolor(tree, v, options, iso),
-    circlestrokecolor: circlestrokecolor(tree, v, options, end, iso),
+    fillColor: circlefillcolor(tree, v.vertex, options, iso),
+    circlestrokecolor: circlestrokecolor(v, iso),
     edgestrokecolor: ''
   }
 }
 
 function updateGraphicsProps(
-  tree: BTT, v: Vertex, parent: Vertex, props: GraphicsProps,
+  tree: BTT, v: VertexCachedInfo, parent: VertexCachedInfo, props: GraphicsProps,
   options: BTTOptions, end?: Vec<Rational>, iso?: IsometryInfo
 ): GraphicsProps {
   return {
@@ -239,22 +223,51 @@ function updateGraphicsProps(
     branchLength: props.branchLength * 0.75 / Math.pow(tree.p, 0.4),
     branchWidth: props.branchWidth * 0.8,
     strokeWidth: Math.max(props.strokeWidth * 0.8, 1),
-    fillColor: circlefillcolor(tree, v, options, iso),
-    circlestrokecolor: circlestrokecolor(tree, v, options, end, iso),
-    edgestrokecolor: edgestrokecolor(tree, v, parent, options, end, iso)
+    fillColor: circlefillcolor(tree, v.vertex, options, iso),
+    circlestrokecolor: circlestrokecolor(v, iso),
+    edgestrokecolor: edgestrokecolor(v, parent, iso)
   }
 }
 
+function makeVertexCachedInfo(v: Vertex, btt: BTT, options: BTTOptions,
+  iso?: IsometryInfo, end?: Vec<Rational>): VertexCachedInfo {
+  return {
+    vertex: v,
+    isMinTranslation: iso
+      ? (iso.minDist !== 0 && btt.translationDistance(iso.matrix, v) === iso.minDist)
+        || iso.minDist === 0 && btt.translationDistance(iso.matrix, v) === 0
+      : undefined,
+    inEnd: end ? btt.inEnd(v, end) : undefined,
+    inInfEnd: options.showInfEnd ? btt.inInfEnd(v) : undefined
+  }
+}
+
+function makeIsoInfo(iso: Matrix<Rational>, btt: BTT): IsometryInfo {
+  return {
+    matrix: iso,
+    minDist: btt.minTranslationDistance(iso),
+    vertex: btt.gensToVertex(iso)
+  }
+}
+
+function makeCachedVertexTree(
+  btt: BTT, tree: Tree<Vertex>, options: BTTOptions,
+  end?: Vec<Rational>, iso?: IsometryInfo
+): Tree<VertexCachedInfo> {
+  return Tree.map(node => makeVertexCachedInfo(node, btt, options, iso, end), tree)
+}
+
 function makeGraphicsTree(
-    btt: BTT, tree: Tree<Vertex>, options: BTTOptions,
-    end?: Vec<Rational>, iso?: Matrix<Rational>
-  ): Tree<NodeProps> {
+  btt: BTT, tree: Tree<Vertex>, options: BTTOptions,
+  end?: Vec<Rational>, iso?: Matrix<Rational>
+): Tree<GraphicsNodeProps> {
   const turnangle = 2*Math.PI/(btt.p+1)
   const rootDisplay = displayLattice(tree.value, btt)
 
-  const isoInfo = iso ? {matrix: iso, minDist: btt.minTranslationDistance(iso)} : undefined
+  const isoInfo = iso ? makeIsoInfo(iso, btt) : undefined
+  const cachedTree = makeCachedVertexTree(btt, tree, options, end, isoInfo)
 
-  return Tree.make((data: NodeProps) => {
+  return Tree.make((data: GraphicsNodeProps) => {
     const forest = data.node.forest.map((child, i) => {
       const graphics = updateGraphicsProps(btt, child.value, data.node.value, data.graphics, options, end, isoInfo) 
 
@@ -262,18 +275,18 @@ function makeGraphicsTree(
       const angle = Math.PI-(i + 1)*turnangle + data.angle
       const x = data.x + graphics.branchLength * Math.cos(angle)
       const y = data.y + graphics.branchLength * Math.sin(angle)
-      const display = displayLattice(child.value, btt)
+      const display = displayLattice(child.value.vertex, btt)
 
       return {node, angle, x, y, display, graphics}
     })
     return {value: data, forest}
   }, {
-    node: tree,
+    node: cachedTree,
     x: 0,
     y: 0,
     angle: Math.PI + turnangle,
     display: rootDisplay,
-    graphics: defaultGraphicsProps(btt, tree.value, options, end, isoInfo)
+    graphics: defaultGraphicsProps(btt, cachedTree.value, options, end, isoInfo)
   })
 }
 

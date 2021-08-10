@@ -1,3 +1,4 @@
+import { RationalField } from './../Field/Rational';
 import { Vec } from './../VectorSpace/VectorSpace';
 import { cache } from "decorator-cache-getter"
 import { Adic } from "../Adic/Adic"
@@ -9,7 +10,7 @@ import { Matrix } from "../VectorSpace/Matrix"
 import * as Tree from "./Tree"
 import { Rational } from "../Field/Rational"
 
-type generators = Matrix<Rational>
+type Generators = Matrix<Rational>
 
 /**
  * The reduced form of a p-adic matrix.
@@ -100,25 +101,37 @@ export class BruhatTitsTree {
     else return this.vspace.scale(v, this.field.fromVal(-a))
   }
 
-  public toIntMatrix(m: generators): generators {
+  public toIntMatrix(m: Generators): Generators {
     const a = this.minValuation(m)
     if (a === Infinite) return m
     else return this.vspace.matrixAlgebra.scale(this.field.fromVal(-a), m)
   }
 
-  public vertexToGens(v: Vertex): generators {
+  public vertexToGens(v: Vertex): Generators {
     return [[this.field.one, v.u], [this.field.zero, this.field.fromVal(v.n)]]
   }
 
-  public vertexToIntGens(v: Vertex): generators {
+  public vertexToIntGens(v: Vertex): Generators {
     return this.toIntMatrix(this.vertexToGens(v))
   }
 
-  public minValuation(m: generators): ExtendedInt {
+  public gensToVertex(g: Generators): Vertex {
+    const F = this.field
+    let m = this.vspace.matrixAlgebra.clone(g)
+    if (F.isZero(m[0][0])) {
+      m = [m[1], m[0]]
+    }
+    const n = F.valuation(F.subtract(m[1][1], F.divide(m[1][0], m[0][0])))
+    if (n === Infinite) throw new Error('Matrix is singular')
+    const u = F.modPow(F.divide(m[0][1], m[0][0]), n)
+    return {u, n}
+  }
+
+  public minValuation(m: Generators): ExtendedInt {
     return EIntOrd.minAll(m.flat(1).map(e => this.field.valuation(e)))
   }
 
-  public getIntMatrix(m: generators): generators {
+  public getIntMatrix(m: Generators): Generators {
     const F = this.field
     const M = this.vspace.matrixAlgebra
 
@@ -128,7 +141,7 @@ export class BruhatTitsTree {
     return M.scale(F.fromVal(-minVal), m)
   }
 
-  public distanceToRoot(m: generators): int {
+  public distanceToRoot(m: Generators): int {
     const F = this.field
     const M = this.vspace.matrixAlgebra
 
@@ -139,14 +152,27 @@ export class BruhatTitsTree {
     return -2 * minV + vDet
   }
 
-  public translationDistance(a: generators, v: Vertex): int {
+  public translationDistance(a: Generators, v: Vertex): int {
     const M = this.vspace.matrixAlgebra
     return this.distanceToRoot(M.conjugate(a, this.vertexToGens(v)))
   }
 
-  public lengthOfImage(a: generators, v: Vertex) {
+  public lengthOfImage(a: Generators, v: Vertex) {
     const M = this.vspace.matrixAlgebra
     return this.distanceToRoot(M.multiply(a, this.vertexToGens(v)))
+  }
+
+  public isSameLattice(a: Generators, b: Generators) {
+    const M = this.vspace.matrixAlgebra
+    return this.distanceToRoot(M.multiply(M.invert(a), b))
+  }
+
+  public isEqualVertex(a: Vertex, b: Vertex) {
+    return RationalField.equals(a.u, b.u) && a.n === b.n
+  }
+
+  public vertexIsRoot(v: Vertex) {
+    return this.field.isZero(v.u) && v.n === 0
   }
 
   public make(depth: int, root: Vertex = {u: this.field.zero, n: 0}) {
