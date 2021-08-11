@@ -20,7 +20,7 @@ We may write this similar to decimal form, eg: 11.1 in ℚ2 is 3.5 in base 10. F
 
 The neighbours of a vertex are the possible ways to add to the next term in the expansion, together with one neighbour that removes the last term in the expansion. For example, in the Bruhat-Tits tree over ℚ2 the vertex corresponding to 1.000... has neighbours 01.000...,  11.000..., and .000...
 
-Note that 2 pieces of information are needed to represent a vertex: The p-adic integer u, and n such that p^n is the next term in the expansion. We see that the vertex 1\*2^0, for example, is different from the vertex 1\*2^0 + 0\*2^0. We represent this as [u]\_n in the visualiser (this can be seen when hovering over a node).
+Note that 2 pieces of information are needed to represent a vertex: The p-adic integer u, and n such that p^n is the next term in the expansion. We see that the vertex 1\*2^0, for example, is different from the vertex 1\*2^0 + 0\*2^1. We represent this as [u]\_n in the visualiser (this can be seen when hovering over a node).
 
 ## Isometries of the tree
 
