@@ -17,9 +17,8 @@ type Tree<T> = Tree.Tree<T>
 type BTT = BruhatTitsTree
 
 interface IsometryInfo {
-  matrix: Matrix<Rational>;
-  minDist: number;
-  vertex: Vertex;
+  matrix: Matrix<Rational>,
+  minDist: number
 }
 
 interface TooltipProps {
@@ -32,8 +31,8 @@ type TooltipHideEvent = () => void
 
 interface BTTProps {
   p: number,
-  options: BTTOptions
-  onTooltipShow?: TooltipShowEvent
+  options: BTTOptions,
+  onTooltipShow?: TooltipShowEvent,
   onTooltipHide?: TooltipHideEvent
 }
 
@@ -170,7 +169,7 @@ function makeTree(p: number, options: BTTOptions, onTooltipShow?: TooltipShowEve
 
 function circlefillcolor(btt: BTT, v: Vertex, options: BTTOptions, iso?: IsometryInfo) {
   if (options.showRootImage) {
-    if (iso && btt.isEqualVertex(iso.vertex, v)) {
+    if (iso && btt.isSameClass(iso.matrix, btt.vertexToGens(v))) {
       return treeTheme.rootImage
     } else if (!iso && btt.vertexIsRoot(v)) {
       return treeTheme.rootImage
@@ -245,8 +244,7 @@ function makeVertexCachedInfo(v: Vertex, btt: BTT, options: BTTOptions,
 function makeIsoInfo(iso: Matrix<Rational>, btt: BTT): IsometryInfo {
   return {
     matrix: iso,
-    minDist: btt.minTranslationDistance(iso),
-    vertex: btt.gensToVertex(iso)
+    minDist: btt.minTranslationDistance(iso)
   }
 }
 
@@ -291,10 +289,7 @@ function makeGraphicsTree(
 }
 
 function displayLattice(v: Vertex, btt: BruhatTitsTree) {
-  const F = btt.field
-
   const r = v.u
-
   const n = r.den === 1 ? `${r.num}` : `\\frac{${r.num}}{${r.den}}`
   return `\\left[${n}\\right]_{${v.n}}`
 }

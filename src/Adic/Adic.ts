@@ -1,10 +1,10 @@
-import { Rational as Reduced, RationalField } from '../Field/Rational';
+import { Rational, RationalField } from '../Field/Rational';
 import { DVField } from "../Field/DVField";
-import { int } from "../utils/int";
+import { int, mod } from "../utils/int";
 import { cache } from 'decorator-cache-getter';
 import { ExtendedInt, Infinite } from '../Order/ExtendedInt';
 
-export class Adic extends DVField<Reduced> {
+export class Adic extends DVField<Rational> {
   private _p: int
   public get p() {
     return this._p
@@ -18,15 +18,15 @@ export class Adic extends DVField<Reduced> {
     this._p = p
   }
 
-  public get zero(): Reduced {
+  public get zero(): Rational {
     return RationalField.zero
   }
 
-  public get one(): Reduced {
+  public get one(): Rational {
     return RationalField.one
   }
 
-  public valuation(x: Reduced): ExtendedInt {
+  public valuation(x: Rational): ExtendedInt {
     if (this.isZero(x)) return Infinite
     
     const num = this.valuationNonZeroInt(x.num)
@@ -44,18 +44,18 @@ export class Adic extends DVField<Reduced> {
     return v
   }
 
-  public splitNonZero(x: Reduced): {u: Reduced, v: int} {
+  public splitNonZero(x: Rational): {u: Rational, v: int} {
     const splitNum = this.splitNonZeroInt(x.num)
     if (splitNum.u > 0) {
       return {
-        u: Reduced(splitNum.u, x.den),
+        u: Rational(splitNum.u, x.den),
         v: splitNum.v
       }
     }
     else {
       const splitDen = this.splitNonZeroInt(x.den)
       return {
-        u: Reduced(splitDen.u, x.den),
+        u: Rational(splitDen.u, x.den),
         v: -splitNum.v
       }
     }
@@ -71,66 +71,74 @@ export class Adic extends DVField<Reduced> {
     return {u: n, v}
   }
 
-  public equals(a: Reduced, b: Reduced): boolean {
+  public equals(a: Rational, b: Rational): boolean {
     return RationalField.equals(a, b)
   }
 
-  public fromInt(n: int): Reduced {
+  public fromInt(n: int): Rational {
     return RationalField.fromInt(n)
   }
 
   // Returns p^a.
-  public fromVal(n: ExtendedInt): Reduced {
+  public fromVal(n: ExtendedInt): Rational {
     if (n === Infinite) return this.zero
     else if (n === 0) return this.one
-    else if (n > 0) return Reduced(Math.pow(this.p, n), 1)
-    else return Reduced(1, Math.pow(this.p, -n))
+    else if (n > 0) return Rational(Math.pow(this.p, n), 1)
+    else return Rational(1, Math.pow(this.p, -n))
   }
 
-  public fromRational(r: Reduced): Reduced {
+  public fromRational(r: Rational): Rational {
     return r
   }
 
-  public add(a: Reduced, b: Reduced): Reduced {
+  public add(a: Rational, b: Rational): Rational {
     return RationalField.add(a, b)
   }
 
-  public subtract(a: Reduced, b: Reduced): Reduced {
+  public subtract(a: Rational, b: Rational): Rational {
     return RationalField.subtract(a, b)
   }
 
-  public negate(a: Reduced): Reduced {
+  public negate(a: Rational): Rational {
     return RationalField.negate(a)
   }
 
-  public multiply(a: Reduced, b: Reduced): Reduced {
+  public multiply(a: Rational, b: Rational): Rational {
     return RationalField.multiply(a, b)
   }
 
-  public unsafeDivide(a: Reduced, b: Reduced): Reduced {
+  public unsafeDivide(a: Rational, b: Rational): Rational {
     return RationalField.unsafeDivide(a, b)
   }
 
-  public unsafeInvert(a: Reduced): Reduced {
+  public unsafeInvert(a: Rational): Rational {
     return RationalField.unsafeInvert(a)
   }
 
-  public nonZeroPow(a: Reduced, n: int): Reduced {
+  public nonZeroPow(a: Rational, n: int): Rational {
     return RationalField.nonZeroPow(a, n)
   }
 
-  public remainder(a: Reduced, b: Reduced) {
+  public remainder(a: Rational, b: Rational) {
     return RationalField.remainder(a, b)
   }
 
-  public modPow(a: Reduced, n: int): Reduced {
+  public modPow(a: Rational, n: int): Rational {
     if (this.isZero(a)) return a
     return this.remainder(a, this.fromVal(n))
   }
 
+  public inValuationRing(a: Rational) {
+    return a.den % this.p !== 0
+  }
+
+  public isIntegerUnit(a: Rational) {
+    return a.num % this.p !== 0 && a.den % this.p !== 0
+  }
+
   public toString(): string
-  public toString(n: Reduced): string
-  public toString(n?: Reduced): string {
+  public toString(n: Rational): string
+  public toString(n?: Rational): string {
     if (n === undefined) {
       return `${this.p}-adic Field`
     }

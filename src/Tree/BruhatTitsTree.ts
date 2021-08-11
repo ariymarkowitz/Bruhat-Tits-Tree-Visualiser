@@ -102,7 +102,7 @@ export class BruhatTitsTree {
   }
 
   public toIntMatrix(m: Generators): Generators {
-    const a = this.minValuation(m)
+    const a = this.vspace.minValuation(m)
     if (a === Infinite) return m
     else return this.vspace.matrixAlgebra.scale(this.field.fromVal(-a), m)
   }
@@ -115,27 +115,33 @@ export class BruhatTitsTree {
     return this.toIntMatrix(this.vertexToGens(v))
   }
 
-  public gensToVertex(g: Generators): Vertex {
+  // Broken :(
+  // modPow works using the usual Euclidean function on the integers,
+  // so it does not correctly reduce rationals.
+  // Fixing it seems nontrivial.
+  public _gensToVertex(g: Generators): Vertex {
     const F = this.field
+    const V = this.vspace
+
     let m = this.vspace.matrixAlgebra.clone(g)
-    if (F.isZero(m[0][0])) {
+    // Guarantees that m[1][0]/m[0][0] is in Zp.
+    if (EIntOrd.gt(F.valuation(m[0][0]), F.valuation(m[1][0]))) {
       m = [m[1], m[0]]
     }
-    const n = F.valuation(F.subtract(m[1][1], F.divide(m[1][0], m[0][0])))
-    if (n === Infinite) throw new Error('Matrix is singular')
+    const _n = F.valuation(F.subtract(m[1][1], F.multiply(m[0][1], F.divide(m[1][0], m[0][0]))))
+    if (_n === Infinite) throw new Error('Matrix is singular')
+    // Would have already failed if m[0][0] is 0.
+    const n = _n - (F.valuation(m[0][0]) as int)
+    
     const u = F.modPow(F.divide(m[0][1], m[0][0]), n)
     return {u, n}
-  }
-
-  public minValuation(m: Generators): ExtendedInt {
-    return EIntOrd.minAll(m.flat(1).map(e => this.field.valuation(e)))
   }
 
   public getIntMatrix(m: Generators): Generators {
     const F = this.field
     const M = this.vspace.matrixAlgebra
 
-    const minVal = this.minValuation(m)
+    const minVal = this.vspace.minValuation(m)
     if (minVal === Infinite) throw new Error('Matrix is zero')
 
     return M.scale(F.fromVal(-minVal), m)
@@ -146,7 +152,7 @@ export class BruhatTitsTree {
     const M = this.vspace.matrixAlgebra
 
     const vDet = F.valuation(M.determinant(m))
-    const minV = this.minValuation(m)
+    const minV = this.vspace.minValuation(m)
     if (vDet === Infinite || minV === Infinite) throw new Error('Matrix is zero')
 
     return -2 * minV + vDet
@@ -162,9 +168,10 @@ export class BruhatTitsTree {
     return this.distanceToRoot(M.multiply(a, this.vertexToGens(v)))
   }
 
-  public isSameLattice(a: Generators, b: Generators) {
+  public isSameClass(a: Generators, b: Generators) {
+    const V = this.vspace
     const M = this.vspace.matrixAlgebra
-    return this.distanceToRoot(M.multiply(M.invert(a), b))
+    return V.isTrivialLattice(this.toIntMatrix(M.multiply(M.invert(a), b)))
   }
 
   public isEqualVertex(a: Vertex, b: Vertex) {

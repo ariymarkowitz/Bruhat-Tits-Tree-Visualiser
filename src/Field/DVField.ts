@@ -9,4 +9,8 @@ export abstract class DVField<FieldElement> extends Field<FieldElement> {
   public inValuationRing(a: FieldElement): boolean {
     return EIntOrd.gte(this.valuation(a), 0)
   }
+
+  public isIntegerUnit(a: FieldElement): boolean {
+    return this.valuation(a) === 0
+  }
 }
