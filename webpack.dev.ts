@@ -1,8 +1,8 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-import path from 'path';
-import { theme } from './src/style/themes/themes';
-const sass = require('sass');
-const sassUtils = require('node-sass-utils')(sass);
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+import path from 'path'
+import { theme } from './src/style/themes/themes'
+const sass = require('sass')
+const sassUtils = require('node-sass-utils')(sass)
 
 module.exports = {
   mode: 'development',
@@ -43,14 +43,14 @@ module.exports = {
               sassOptions: {
                 functions: {
                   "get($keys)": function(_keys: any) {
-                    const keys = _keys.getValue().split(".");
-                    let result: any = theme;
-                    let i;
+                    const keys = _keys.getValue().split(".")
+                    let result: any = theme
+                    let i
                     for (i = 0; i < keys.length; i++) {
-                      result = result[keys[i]];
+                      result = result[keys[i]]
                     }
-                    result = sassUtils.castToSass(result);
-                    return result;
+                    result = sassUtils.castToSass(result)
+                    return result
                   }
                 },
               }
@@ -78,4 +78,4 @@ module.exports = {
       js: [ "dist_dev/bundle.js"],
     }
   }),],
-};
+}

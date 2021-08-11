@@ -1,6 +1,6 @@
-import { cache } from 'decorator-cache-getter';
-import { gcd, int, mod } from '../utils/int';
-import { Field } from './Field';
+import { cache } from 'decorator-cache-getter'
+import { gcd, int, mod } from '../utils/int'
+import { Field } from './Field'
 
 export interface Rational {
   num: int
@@ -69,7 +69,7 @@ class RationalFieldSingleton extends Field<Rational> {
   }
 
   public equals(a: Rational, b: Rational): boolean {
-    return a.num == b.num && a.den == b.den;
+    return a.num == b.num && a.den == b.den
   }
 
   public nonZeroPow(a: Rational, n: int) {

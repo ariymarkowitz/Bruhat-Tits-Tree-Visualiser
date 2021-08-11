@@ -1,6 +1,6 @@
 // Adapted from https://gist.github.com/GiacoCorsiglia/1619828473f4b34d3d914a16fcbf10f3.
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react"
 
 interface MathProps {
   tex: string,
@@ -40,7 +40,7 @@ export function MathJax({ tex, display = false, beforeTypeset, onTypeset }: Math
       })
       .catch(function (err: Error) {
         console.error(err)
-      });
+      })
     })
   }, [tex, display, ready])
 

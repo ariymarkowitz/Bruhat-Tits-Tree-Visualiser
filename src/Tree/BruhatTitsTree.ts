@@ -1,8 +1,8 @@
-import { RationalField } from './../Field/Rational';
-import { Vec } from './../VectorSpace/VectorSpace';
+import { RationalField } from './../Field/Rational'
+import { Vec } from './../VectorSpace/VectorSpace'
 import { cache } from "decorator-cache-getter"
 import { Adic } from "../Adic/Adic"
-import { EIntOrd, ExtendedInt, Infinite } from "../Order/ExtendedInt"
+import { EIntOrd, Infinite } from "../Order/ExtendedInt"
 import { Seq } from "../utils/Seq"
 import { int } from "../utils/int"
 import { DVVectorSpace } from "../VectorSpace/DVVectorSpace"

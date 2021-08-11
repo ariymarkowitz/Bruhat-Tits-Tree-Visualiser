@@ -1,17 +1,17 @@
-import { KonvaEventObject } from "konva/lib/Node";
-import "konva/lib/shapes/Circle";
-import "konva/lib/shapes/Line";
-import "konva/lib/shapes/Rect";
-import React, { useMemo } from "react";
-import { Circle, Group, Layer, Line, Stage } from "react-konva/lib/ReactKonvaCore";
-import { theme } from "../style/themes/themes";
-import { BruhatTitsTree, Vertex } from '../Tree/BruhatTitsTree';
-import * as Tree from "../Tree/Tree";
-import { Seq } from "../utils/Seq";
-import { mod } from "../utils/int";
-import { Matrix } from "../VectorSpace/Matrix";
-import { Rational } from "../Field/Rational";
-import { Vec } from "../VectorSpace/VectorSpace";
+import { KonvaEventObject } from "konva/lib/Node"
+import "konva/lib/shapes/Circle"
+import "konva/lib/shapes/Line"
+import "konva/lib/shapes/Rect"
+import React, { useMemo } from "react"
+import { Circle, Group, Layer, Line, Stage } from "react-konva/lib/ReactKonvaCore"
+import { theme } from "../style/themes/themes"
+import { BruhatTitsTree, Vertex } from '../Tree/BruhatTitsTree'
+import * as Tree from "../Tree/Tree"
+import { Seq } from "../utils/Seq"
+import { mod } from "../utils/int"
+import { Matrix } from "../VectorSpace/Matrix"
+import { Rational } from "../Field/Rational"
+import { Vec } from "../VectorSpace/VectorSpace"
 
 type Tree<T> = Tree.Tree<T>
 type BTT = BruhatTitsTree

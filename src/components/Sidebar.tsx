@@ -1,6 +1,6 @@
-import React, { Fragment } from "react";
-import { DivProps, InputProps } from "react-html-props";
-import { AddClass } from "../utils/AddClass";
+import React, { Fragment } from "react"
+import { DivProps, InputProps } from "react-html-props"
+import { AddClass } from "../utils/AddClass"
 
 export const Sidebar = AddClass('div', 'sidebar')
 export const SidebarRow = AddClass('div', 'sidebar-row')

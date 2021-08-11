@@ -1,5 +1,5 @@
-import { EIntOrd, ExtendedInt } from '../Order/ExtendedInt';
-import { Field } from "./Field";
+import { EIntOrd, ExtendedInt } from '../Order/ExtendedInt'
+import { Field } from "./Field"
 
 // A field with a discrete valuation.
 export abstract class DVField<FieldElement> extends Field<FieldElement> {

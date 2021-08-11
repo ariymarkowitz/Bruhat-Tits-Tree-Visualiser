@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import NumericInput from "react-numeric-input";
-import { isPrime } from '../utils/int';
-import { BTTComponent, BTTOptions } from './BTTComponent';
-import { MatrixInput } from './MatrixInput';
-import { LabelWithCheckbox, Sidebar, SidebarLeft, SidebarRight, SidebarRow } from './Sidebar';
-import { Tooltip } from './Tooltip';
+import React, { useEffect, useMemo, useState } from 'react'
+import NumericInput from "react-numeric-input"
+import { isPrime } from '../utils/int'
+import { BTTComponent, BTTOptions } from './BTTComponent'
+import { MatrixInput } from './MatrixInput'
+import { LabelWithCheckbox, Sidebar, SidebarLeft, SidebarRight, SidebarRow } from './Sidebar'
+import { Tooltip } from './Tooltip'
 
 function primeStep(component: NumericInput, direction: string) {
   const n = component.state.value
@@ -191,7 +191,7 @@ const App = () => {
       </Sidebar>
       <Tooltip x={tooltipPos.x} y={tooltipPos.y} text={tooltipText} visible={tooltipVisible}/>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App

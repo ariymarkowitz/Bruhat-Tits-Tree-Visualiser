@@ -1,5 +1,5 @@
 import React from "react"
-import { MathJax } from "./MathJax";
+import { MathJax } from "./MathJax"
 
 interface MatrixInputProps {
   value: string[],

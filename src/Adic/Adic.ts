@@ -1,8 +1,8 @@
-import { Rational, RationalField } from '../Field/Rational';
-import { DVField } from "../Field/DVField";
-import { int, mod } from "../utils/int";
-import { cache } from 'decorator-cache-getter';
-import { ExtendedInt, Infinite } from '../Order/ExtendedInt';
+import { Rational, RationalField } from '../Field/Rational'
+import { DVField } from "../Field/DVField"
+import { int } from "../utils/int"
+import { cache } from 'decorator-cache-getter'
+import { ExtendedInt, Infinite } from '../Order/ExtendedInt'
 
 export class Adic extends DVField<Rational> {
   private _p: int
