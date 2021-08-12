@@ -42,7 +42,7 @@ Note that 2 pieces of information are needed to represent a vertex: The p-adic i
 
 ## Isometries of the tree
 
-Since the vertices are lattices, the group GL(2, ℚp) of invertible 2x2 matrices acts on the tree by left multiplication. This action can be considered a discrete version of the isometries of the hyperbolic plane (which can be identified with PGL(2, ℝ)), and has similar properties. For example, there are 2 classes of isometries: Elliptic isometries that fix at least one point, and hyperbolic isometries that do not fix any points. Hyperbolic isometries do stabilise a single axis, called the translation axis; these are the set of points translated the minimum amount. In Euclidean space, a translation moves all points the same distance. In hyperbolic space and on the Bruhat-Tits tree, points farther away from the translation axis will be moved a larger amount.
+Since the vertices are equivalince classes of lattices, the group GL(2, ℚp) of invertible 2x2 matrices acts on the tree by left multiplication. This action can be considered a discrete version of the isometries of the hyperbolic plane (which can be identified with PGL(2, ℝ)), and has similar properties. For example, there are 2 classes of isometries: Elliptic isometries that fix at least one point, and hyperbolic isometries that do not fix any points. Hyperbolic isometries do stabilise a single axis, called the translation axis; these are the set of points translated the minimum amount. In Euclidean space, a translation moves all points the same distance. In hyperbolic space and on the Bruhat-Tits tree, points farther away from the translation axis will be moved a larger amount.
 
 ## Boundary of the tree
 
