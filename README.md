@@ -2,7 +2,7 @@
 
 https://ariymarkowitz.github.io/Bruhat-Tits-Tree-Visualiser/
 
-This a a visualiser of the Bruhat-Tits tree over ℚp, and the action of GL(2, ℚp) on the tree.
+This is a visualiser of the Bruhat-Tits tree over ℚp, and the action of GL(2, ℚp) on the tree.
 
 <img src=https://github.com/ariymarkowitz/Bruhat-Tits-Tree-Visualiser/blob/master/images/canvas.png width='800px'>
 
