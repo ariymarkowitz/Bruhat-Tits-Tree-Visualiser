@@ -1,15 +1,9 @@
 {
+  "extends": "@tsconfig/svelte/tsconfig.json",
+
+  "include": ["src/**/*"],
+  "exclude": ["node_modules/*", "__sapper__/*", "public/*"],
   "compilerOptions": {
-    "jsx": "react",
-    "outDir": "dist_b",
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "module": "es6",
-    "target": "es2019",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
     "experimentalDecorators": true,
     "strictNullChecks": true
   }
