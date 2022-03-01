@@ -1,28 +1,44 @@
+<script lang='ts' context='module'>
+  export type ChangeEvent = CustomEvent<{state: number}>
+</script>
+
 <script lang='ts'>
+  import { createEventDispatcher } from "svelte"
+
+  const dispatch = createEventDispatcher()
+
   export let min: number = 1
   export let max: number = 100
   export let valid: (n: number) => boolean = n => true
   export let init: number = min
 
-  // The value visible outside of the input.
-  export let value: number = init
-  // The value to display in the input field.
-  export let display: string = init.toString()
+  // The numeric state of the field.
+  export let state: number = init
+  // The value displayed in the field.
+  export let value: string = init.toString()
 
   // The value used by the increment buttons.
-  let incrementValue: number = value
-  let input: HTMLInputElement
+  let incrementState: number = state
+  let input: string
 
   export const set = (n: number) => {
-    value = n
-    display = n.toString()
+    if (state !== n) {
+      dispatch('change', {
+        state: n
+      });
+      state = n
+      value = n.toString()
+    }
   }
 
   function setRaw(v: string): boolean {
     if (isValidInput(v)) {
-      display = v
+      value = v
       if (isValidValue(v)) {
-        value = Number(v)
+        dispatch('change', {
+          state: Number(v)
+        });
+        state = Number(v)
       }
       return true
     } else {
@@ -30,15 +46,15 @@
     }
   }
 
-  $: if (input) input.value = display.toString()
+  $: input = value.toString()
   // Update `incrementvalue` if `display` is nonempty.
   // Update `value` if `incrementValue` is valid.
-  $: if (display !== '') {
-    incrementValue = Number(display)
+  $: if (value !== '') {
+    incrementState = Number(value)
   }
   
   function increment() {
-    for (let i = incrementValue + 1; i <= max; i++) {
+    for (let i = incrementState + 1; i <= max; i++) {
       if (valid(i)) {
         set(i)
         return
@@ -47,7 +63,7 @@
   }
 
   function decrement() {
-    for (let i = incrementValue - 1; i >= min; i--) {
+    for (let i = incrementState - 1; i >= min; i--) {
       if (valid(i)) {
         set(i)
         return
@@ -58,7 +74,7 @@
   function validateInput(e) {
     const input = e.target.value
     if (!setRaw(input)) {
-      e.target.value = display
+      e.target.value = value
     }
   }
 
@@ -79,7 +95,7 @@
 </script>
 
 <div class='number-input'>
-  <input type='text' bind:this={input} on:input|preventDefault={validateInput}/>
+  <input type='text' bind:value={input} on:input|preventDefault={validateInput}/>
   <div class='number-input-buttons'>
     <div class='number-input-up' on:click={increment}><i></i></div>
     <div class='number-input-down' on:click={decrement}><i></i></div>
