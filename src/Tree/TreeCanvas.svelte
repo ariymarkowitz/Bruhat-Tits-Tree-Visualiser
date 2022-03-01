@@ -4,18 +4,24 @@
   import { onMount } from "svelte"
   import { TreeRenderer } from "./TreeRenderer"
 
+  export let p: number
+  export let depth: number
+
   export let width: number
   export let height: number
   let canvas: HTMLCanvasElement
 
   let dpr: number = window.devicePixelRatio
 
-  onMount(() => {
-    let tree = new TreeRenderer(2, 9, [[1, 0], [0, 3]], width, height)
+  function render(p: number, depth: number, canvas: HTMLCanvasElement) {
+    if (!canvas) return
+    let tree = new TreeRenderer(p, depth, [[1, 0], [0, 3]], width, height)
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+    
+    ctx.save()
     ctx.scale(dpr, dpr)
-
-    tree.render(ctx, 0);
+    tree.render(ctx, 0)
+    ctx.restore()
 
     // let f = 0
     // let t = 0
@@ -41,7 +47,9 @@
     // }
 
     // return () => cancelAnimationFrame(frame)
-  })
+  }
+
+  $: render(p, depth, canvas)
 </script>
 
 <canvas

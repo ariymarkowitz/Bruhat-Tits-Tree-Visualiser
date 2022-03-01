@@ -2,16 +2,38 @@
 	import { isPrime } from './algebra/utils/int'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
 	import NumberInput from './UI/NumberInput.svelte'
+
+	let p: number = 2
+
+	let depth = 7
+	let depthInput: number = depth
+	let depthDisplay: string
+
+	let inputDepthState: [number, number] = [depth, p]
+
+	function validateP(p: number) {
+		return isPrime(p)
+	}
+
+	$: {
+		updateDepthInput(depthInput)
+	}
+	function updateDepthInput(depth: number) {
+		inputDepthState = [depth, p]
+	}
+
+	$: depth = Math.max(2, Math.min(inputDepthState[0], Math.floor(inputDepthState[0] * (inputDepthState[1]+1) / (p+1))))
+	$: depthDisplay = depth.toString()
 </script>
 
 <main>
 	<div class='container'>
 		<div class='tree-container'>
-			<TreeCanvas width={800} height={800} />
+			<TreeCanvas width={800} height={800} p={p} depth={depth} />
 		</div>
 		<div class='sidebar'>
-			<div class='sidebar-row'>p<NumberInput min={2} max={11} valid={n => isPrime(n)}/></div>
-			<div class='sidebar-row'>Depth<NumberInput min={1} max={10}/></div>
+			<div class='sidebar-row'>p<NumberInput min={2} max={11} init={p} valid={validateP} bind:value={p}/></div>
+			<div class='sidebar-row'>Depth<NumberInput min={1} max={10} init={depthInput} bind:value={depthInput} bind:display={depthDisplay}/></div>
 			<hr />
 			<div class='sidebar-row'>
 				<input type='checkbox' />End<input type='text' />
