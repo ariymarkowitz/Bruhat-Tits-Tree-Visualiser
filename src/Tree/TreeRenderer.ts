@@ -231,11 +231,11 @@ export class TreeRenderer {
 
   interpGlobalStates(state1: GlobalState, state2: GlobalState, t: number): GlobalState {
     return {
-      x: lerp(this.originGlobalState.x, this.imageGlobalState.x, t),
-      y: lerp(this.originGlobalState.y, this.imageGlobalState.y, t),
-      zeroAngle: angleLerp(this.originGlobalState.zeroAngle, this.imageGlobalState.zeroAngle, t),
-      depth: lerp(this.originGlobalState.depth, this.imageGlobalState.depth, t),
-      edgeDepth: lerp(this.originGlobalState.edgeDepth, this.imageGlobalState.edgeDepth, t)
+      x: lerp(state1.x, state2.x, t),
+      y: lerp(state1.y, state2.y, t),
+      zeroAngle: angleLerp(state1.zeroAngle, state2.zeroAngle, t),
+      depth: lerp(state1.depth, state2.depth, t),
+      edgeDepth: lerp(state1.edgeDepth, state2.edgeDepth, t)
     }
   }
 
