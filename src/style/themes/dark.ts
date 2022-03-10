@@ -1,9 +1,9 @@
 export default {
   colors: {
-    background: 'rgb(9, 9, 15)',
+    background: '#000',
     textColor: '#eee',
     border: 'rgba(255, 255, 255, 0.6)',
-    focusBorder: 'rgb(255, 255, 255)',
+    focusBorder: '#fff',
   },
   tree: {
     type0: '#ddd',

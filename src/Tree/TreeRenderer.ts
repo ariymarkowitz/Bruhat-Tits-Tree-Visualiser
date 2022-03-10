@@ -4,6 +4,8 @@ import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
 import type { Matrix } from "../algebra/VectorSpace/Matrix"
 import type { Adj } from '../algebra/Tree/UnrootedTree'
 import { angleLerp, lerp } from '../algebra/utils/math'
+import { theme } from '../style/themes/themes'
+import { mix } from 'color2k'
 
 interface LocalState {
   depth: number
@@ -28,6 +30,7 @@ interface VertexGraphicsState {
   x: number,
   y: number,
   scale: number
+  color: string
 }
 
 interface EdgeGraphicsState {
@@ -83,7 +86,7 @@ export class TreeRenderer {
     this.setLocalState(this.initVertex, initLocalState)
     this.setImage(this.initVertex, this.btt.action(this.iso, this.initVertex))
 
-    // Set the states of each rendered vertex and edges and compute the images.
+    // Set the states of each rendered vertex and (directed) edges.
     this.btt.iter((state, current, update) => {
       const newState: LocalState = {
         depth: state.depth + 1,
@@ -118,6 +121,7 @@ export class TreeRenderer {
       return state.isLeaf
     }, this.initVertex)
 
+    // Set the state of the images of the edges.
     this.btt.iter((_, current, update) => {
       const state = this.getLocalState(update.vertex)
 
@@ -145,6 +149,7 @@ export class TreeRenderer {
       edgeDepth: 0
     }
 
+    // Set the global state of the image.
     this.imageGlobalState = this.btt.reducePath((globalState: GlobalState, v: Vertex, adj: Adj<Vertex, number>) => {
       const localState = this.getLocalState(adj.vertex)
       const edgeState = this.getEdgeState(v, adj.vertex)
@@ -202,12 +207,12 @@ export class TreeRenderer {
   }
 
   accumulate(state: GlobalState, local: LocalState, edge: EdgeState): GlobalState {
-    const scale = Math.pow(0.6 * Math.pow(1/this.p, 0.5) / Math.pow(1/2, 0.5), edge.depth)
+    const scale = Math.pow(0.8 * Math.pow(1/this.p, 0.45), edge.depth - 1) * Math.pow(this.p, 0.2)
     const angle = state.zeroAngle - 2*Math.PI/(this.p+1)*edge.forward
 
     return {
-      x: state.x + 300 * scale * Math.cos(angle),
-      y: state.y + 300 * scale * Math.sin(angle),
+      x: state.x + 160 * scale * Math.cos(angle),
+      y: state.y + 160 * scale * Math.sin(angle),
       zeroAngle: angle + 2*Math.PI/(this.p+1)*edge.backward + Math.PI,
       depth: local.depth,
       edgeDepth: edge.depth
@@ -239,11 +244,16 @@ export class TreeRenderer {
     }
   }
 
-  makeVertexGraphicsState(state: GlobalState) {
+  vertexType(depth: number) {
+    return Math.abs(1 - (depth + 1) % 2)
+  }
+
+  makeVertexGraphicsState(state: GlobalState): VertexGraphicsState {
     return {
       x: state.x,
       y: state.y,
-      scale: Math.pow(0.6, state.depth * 0.9)
+      scale: Math.pow(0.75, state.depth),
+      color: mix(theme.tree.type0, theme.tree.type1, this.vertexType(state.depth))
     }
   }
 
@@ -253,20 +263,23 @@ export class TreeRenderer {
       y1: state1.y,
       x2: state2.x,
       y2: state2.y,
-      scale: Math.pow(0.6, state2.edgeDepth * 0.9)
+      scale: Math.pow( 0.8 / Math.pow(this.p, 0.4), state2.edgeDepth - 1)
     }
   }
 
   drawVertex(context: CanvasRenderingContext2D, state: VertexGraphicsState) {
-    context.fillStyle = 'white'
+    context.fillStyle = state.color
+    context.lineWidth = theme.tree.vertexStrokeWidth * state.scale
+    context.strokeStyle = theme.tree.vertexStroke
     context.beginPath()
-    context.arc(state.x, state.y, 20 * state.scale, 0, 2 * Math.PI, false)
+    context.arc(state.x, state.y, theme.tree.vertexRadius * state.scale, 0, 2 * Math.PI, false)
     context.fill()
+    context.stroke()
   }
 
   drawEdge(context: CanvasRenderingContext2D, state: EdgeGraphicsState) {
-    context.strokeStyle = 'white'
-    context.lineWidth = 10 * state.scale
+    context.strokeStyle = theme.tree.edge
+    context.lineWidth = theme.tree.branchWidth * state.scale
     context.beginPath()
     context.moveTo(state.x1, state.y1)
     context.lineTo(state.x2, state.y2)
@@ -278,13 +291,20 @@ export class TreeRenderer {
   }
 
   render(context: CanvasRenderingContext2D, t: number) {
-    context.fillStyle = 'black'
-    context.fillRect(0, 0, context.canvas.width, context.canvas.height)
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+
+    const vertexCanvas = document.createElement('canvas')
+    vertexCanvas.width = context.canvas.width
+    vertexCanvas.height = context.canvas.height
+
+    const vertexContext = vertexCanvas.getContext('2d')
+    if (vertexContext === null) {throw new Error('Failed to create canvas')}
+    vertexContext.scale(devicePixelRatio, devicePixelRatio)
 
     const i = this.interpolateTime(t)
     const initGlobalState: GlobalState = this.interpGlobalStates(this.originGlobalState, this.imageGlobalState, i)
 
-    this.drawVertex(context, this.makeVertexGraphicsState(initGlobalState))
+    this.drawVertex(vertexContext, this.makeVertexGraphicsState(initGlobalState))
 
     this.btt.iter((state, current, update) => {
       const prevImage = this.getImage(current)
@@ -304,10 +324,12 @@ export class TreeRenderer {
       const vertexGraphicsState = this.makeVertexGraphicsState(newState)
       const edgeGraphicsState = this.makeEdgeGraphicsState(state, newState)
 
-      this.drawVertex(context, vertexGraphicsState)
+      this.drawVertex(vertexContext, vertexGraphicsState)
       this.drawEdge(context, edgeGraphicsState)
       
       return {value: newState, stop: localState.isLeaf}
     }, initGlobalState, this.initVertex)
+
+    context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/devicePixelRatio, vertexCanvas.height/devicePixelRatio)
   }
 }
