@@ -1,7 +1,11 @@
 <script lang='ts'>
 	import { isPrime } from './algebra/utils/int'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
+import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte';
+import type { TreeOptions } from './Tree/TreeRenderer';
+import MatrixInput from './UI/MatrixInput.svelte';
 	import NumberInput, { ChangeEvent } from './UI/NumberInput.svelte'
+import RationalInput from './UI/RationalInput.svelte';
 
 	let p: number = 2
 
@@ -9,6 +13,18 @@
 	let depthInputValue: string
 
 	let depthState: [number, number] = [depth, p]
+
+	let endInput: [number, number] | undefined
+	let end: [number, number] | undefined
+	let showEnd: boolean = false
+	$: end = endInput && [endInput[1], endInput[0]]
+
+	let isometry: [number, number][][] | undefined
+	let showIsometry: boolean = false
+
+	let treeOptions: TreeOptions
+
+	let animate: boolean = false
 
 	function validateP(p: number) {
 		return isPrime(p)
@@ -20,29 +36,33 @@
 
 	$: depth = Math.max(2, Math.min(depthState[0], Math.floor(depthState[0] * (depthState[1]+1) / (p+1))))
 	$: depthInputValue = depth.toString()
+	$: treeOptions = {end, showEnd, isometry, showIsometry}
 </script>
 
 <main>
 	<div class='container'>
 		<div class='tree-container'>
-			<TreeCanvas width={800} height={800} p={p} depth={depth} />
+			{#if animate}
+			<TreeCanvasAnim width={800} height={800} p={p} depth={depth} options={treeOptions}/>
+			{:else}
+			<TreeCanvas width={800} height={800} p={p} depth={depth} options={treeOptions}/>
+			{/if}
 		</div>
 		<div class='sidebar'>
 			<div class='sidebar-row'>p<NumberInput min={2} max={11} init={p} valid={validateP} bind:state={p}/></div>
 			<div class='sidebar-row'>Depth<NumberInput min={1} max={10} init={depth} bind:value={depthInputValue} on:change={onDepthChange}/></div>
 			<hr />
 			<div class='sidebar-row'>
-				<input type='checkbox' />End<input type='text' />
+				<input type='checkbox' bind:checked={showEnd} />End<RationalInput allowInf={true} bind:state={endInput}/>
 			</div>
 			<div class='sidebar-row'>
-				<input type='checkbox' />Show end at infinity
-			</div>
-			<div class='sidebar-row'>
-				<input type='checkbox' />Isometry
+				<input type='checkbox' bind:checked={showIsometry}/>Isometry
+				<MatrixInput bind:state={isometry}/>
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' />Show image of origin
 			</div>
+			<button on:click={e => animate = !animate}>{#if animate}Stop animation{:else}Animate!{/if}</button>
 		</div>
 	</div>
 </main>
@@ -179,6 +199,33 @@
 				position: absolute;
 				top: 50%;
 				left: 50%;
+			}
+		}
+	}
+	.matrix-input-container {
+		display: flex;
+		gap: 0.5em;
+		align-items: center;
+		margin-left: -5px;
+
+		.matrix-input {
+			display: inline-grid;
+			grid-template-columns: repeat(2, 1fr);
+			grid-template-rows: repeat(2, 1fr);
+			gap: 2px;
+			width: 100px;
+			height: 80px;
+		
+			input {
+				background: none;
+				color: inherit;
+				border: 1px dashed $borderColor;
+				padding: 2px;
+				text-align: center;
+			}
+		
+			input:focus {
+				border-color: $focusBorderColor;
 			}
 		}
 	}

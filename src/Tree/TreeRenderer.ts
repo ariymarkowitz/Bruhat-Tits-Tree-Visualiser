@@ -1,44 +1,62 @@
 import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
-import type { Rational } from "../algebra/Field/Rational"
+import { Rational, RationalField } from "../algebra/Field/Rational"
 import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
 import type { Matrix } from "../algebra/VectorSpace/Matrix"
 import type { Adj } from '../algebra/Tree/UnrootedTree'
-import { angleLerp, lerp } from '../algebra/utils/math'
+import { angleLerp, boolLerp, boolOrLerp, lerp, radialLerp } from '../algebra/utils/math'
 import { theme } from '../style/themes/themes'
 import { mix } from 'color2k'
+import type { Vec } from '../algebra/VectorSpace/VectorSpace'
+
+export interface TreeOptions {
+  end?: [number, number]
+  isometry?: Matrix<[number, number]>
+  showIsometry: boolean
+  showEnd: boolean
+}
 
 interface LocalState {
   depth: number
   isLeaf: boolean
+  type: number
+  inEnd: boolean
+  isMinTranslation: boolean
 }
 
 interface EdgeState {
   depth: number
-  forward: number,
+  forward: number
   backward: number
 }
 
 interface GlobalState {
-  x: number,
-  y: number,
-  zeroAngle: number,
-  depth: number,
+  x: number
+  y: number
+  zeroAngle: number
+  depth: number
   edgeDepth: number
 }
 
 interface VertexGraphicsState {
-  x: number,
-  y: number,
+  x: number
+  y: number
+  scale: number
+  color: string
+  strokeColor: string
+}
+
+interface EdgeGraphicsState {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
   scale: number
   color: string
 }
 
-interface EdgeGraphicsState {
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  scale: number
+interface IsoInfo {
+  iso: Matrix<Rational>
+  minDist: number
 }
 
 export class TreeRenderer {
@@ -47,7 +65,12 @@ export class TreeRenderer {
 
   p: number
   depth: number
-  iso: Matrix<Rational>
+  options: TreeOptions
+  end?: Vec<Rational>
+
+  showIsometry: boolean
+  isoInfo: IsoInfo
+
   btt: BruhatTitsTree
   
   states: Map<string, LocalState>
@@ -61,16 +84,35 @@ export class TreeRenderer {
 
   initVertex: Vertex
 
-  constructor(p: number, depth: number, isometry: Matrix<number>, width: number, height: number) {
+  constructor(p: number, depth: number, options: TreeOptions, width: number, height: number) {
     this.width = width
     this.height = height
 
     this.p = p
 
     this.btt = new BruhatTitsTree(p)
+    const V = this.btt.vspace
+    const M = V.matrixAlgebra
 
     this.depth = depth
-    this.iso = this.btt.vspace.matrixAlgebra.fromInts(isometry)
+
+    this.options = options
+    this.end = options.end ? V.fromInts(options.end) : undefined
+
+    let iso: Matrix<Rational>
+    if (options.isometry) {
+      iso = options.isometry.map(v => v.map(e => Rational(e[0], e[1])))
+      if (M.isSingular(iso)) {
+        iso = M.one
+        this.showIsometry = false
+      } else {
+        this.showIsometry = options.showIsometry
+      }
+    } else {
+      iso = M.one
+      this.showIsometry = false
+    }
+    this.isoInfo = this.makeIsoInfo(iso)
 
     this.states = new Map()
     this.images = new Map()
@@ -78,23 +120,17 @@ export class TreeRenderer {
 
     this.initVertex = this.btt.origin
 
-    let initLocalState: LocalState = {
-      depth: 0,
-      isLeaf: depth < 1
-    }
+    let initLocalState: LocalState = this.calculateLocalState(this.initVertex, 0, depth < 1)
 
     this.setLocalState(this.initVertex, initLocalState)
-    this.setImage(this.initVertex, this.btt.action(this.iso, this.initVertex))
+    this.setImage(this.initVertex, this.btt.action(this.isoInfo.iso, this.initVertex))
 
     // Set the states of each rendered vertex and (directed) edges.
     this.btt.iter((state, current, update) => {
-      const newState: LocalState = {
-        depth: state.depth + 1,
-        isLeaf: state.depth + 1 >= depth
-      }
+      const newState: LocalState = this.calculateLocalState(update.vertex, state.depth + 1, state.depth + 1 >= depth)
       this.setLocalState(update.vertex, newState)
 
-      const image = this.btt.action(this.iso, update.vertex)
+      const image = this.btt.action(this.isoInfo.iso, update.vertex)
       this.setImage(update.vertex, image)
 
       this.setEdgeState(current, update.vertex, {
@@ -112,11 +148,7 @@ export class TreeRenderer {
       const state = this.getLocalState(vertex)
       const image = this.getImage(vertex)
 
-      this.setVertexMapOnce(this.states, image, {
-        // Just an approximation; it would be more difficult to figure out the real depth.
-        depth: depth + 1,
-        isLeaf: true
-      })
+      this.setVertexMapOnce(this.states, image, this.calculateLocalState(image, depth + 1, true))
 
       return state.isLeaf
     }, this.initVertex)
@@ -156,6 +188,23 @@ export class TreeRenderer {
 
       return this.accumulate(globalState, localState, edgeState)
     }, this.initVertex, this.getImage(this.initVertex), this.originGlobalState)
+  }
+
+  calculateLocalState(v: Vertex, depth: number, isLeaf: boolean): LocalState {
+    return {
+      depth,
+      isLeaf,
+      type: depth % 2,
+      inEnd: this.end ? this.btt.inEnd(v, this.end) : false,
+      isMinTranslation: this.btt.translationDistance(this.isoInfo.iso, v) === this.isoInfo.minDist
+    }
+  }
+
+  makeIsoInfo(iso: Matrix<Rational>): IsoInfo {
+    return {
+      iso,
+      minDist: this.btt.minTranslationDistance(iso)
+    }
   }
 
   setVertexMapOnce<T>(map: Map<string, T>, vertex: Vertex, value: T) {
@@ -222,15 +271,18 @@ export class TreeRenderer {
   interpLocalStates(state1: LocalState, state2: LocalState, t: number): LocalState {
     return {
       depth: lerp(state1.depth, state2.depth, t),
-      isLeaf: (t < 1 && state1.isLeaf ) || (t > 0 && state2.isLeaf)
+      isLeaf: boolOrLerp(state1.isLeaf, state2.isLeaf, t),
+      type: lerp(state1.type, state2.type, t),
+      inEnd: boolLerp(state1.inEnd, state2.inEnd, t),
+      isMinTranslation: boolLerp(state1.isMinTranslation, state2.isMinTranslation, t)
     }
   }
 
   interpEdgeStates(state1: EdgeState, state2: EdgeState, t: number): EdgeState {
     return {
       depth: lerp(state1.depth, state2.depth, t),
-      forward: lerp(state1.forward, state2.forward, t),
-      backward: lerp(state1.backward, state2.backward, t),
+      forward: radialLerp(state1.forward, state2.forward, t, this.p+1),
+      backward: radialLerp(state1.backward, state2.backward, t, this.p+1),
     }
   }
 
@@ -244,33 +296,51 @@ export class TreeRenderer {
     }
   }
 
-  vertexType(depth: number) {
-    return Math.abs(1 - (depth + 1) % 2)
+  vertexColor(state: LocalState): string {
+    return mix(theme.tree.type0, theme.tree.type1, state.type)
   }
 
-  makeVertexGraphicsState(state: GlobalState): VertexGraphicsState {
+  vertexStrokeColor(state: LocalState): string {
+    if (this.showIsometry && state.isMinTranslation) {
+      return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
+    }
+    if (state.inEnd) return theme.tree.end
+    return theme.tree.vertexStroke
+  }
+
+  edgeColor(state1: LocalState, state2: LocalState): string {
+    if (this.showIsometry && state1.isMinTranslation && state2.isMinTranslation) {
+      return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
+    }
+    if (state1.inEnd && state2.inEnd) return theme.tree.end
+    return theme.tree.edge
+  }
+
+  makeVertexGraphicsState(local: LocalState, global: GlobalState): VertexGraphicsState {
     return {
-      x: state.x,
-      y: state.y,
-      scale: Math.pow(0.75, state.depth),
-      color: mix(theme.tree.type0, theme.tree.type1, this.vertexType(state.depth))
+      x: global.x,
+      y: global.y,
+      scale: Math.pow(0.75, global.depth),
+      color: this.vertexColor(local),
+      strokeColor: this.vertexStrokeColor(local)
     }
   }
 
-  makeEdgeGraphicsState(state1: GlobalState, state2: GlobalState): EdgeGraphicsState {
+  makeEdgeGraphicsState(local1: LocalState, global1: GlobalState, local2: LocalState, global2: GlobalState): EdgeGraphicsState {
     return {
-      x1: state1.x,
-      y1: state1.y,
-      x2: state2.x,
-      y2: state2.y,
-      scale: Math.pow( 0.8 / Math.pow(this.p, 0.4), state2.edgeDepth - 1)
+      x1: global1.x,
+      y1: global1.y,
+      x2: global2.x,
+      y2: global2.y,
+      scale: Math.pow( 0.8 / Math.pow(this.p, 0.4), global2.edgeDepth - 1),
+      color: this.edgeColor(local1, local2)
     }
   }
 
   drawVertex(context: CanvasRenderingContext2D, state: VertexGraphicsState) {
     context.fillStyle = state.color
+    context.strokeStyle = state.strokeColor
     context.lineWidth = theme.tree.vertexStrokeWidth * state.scale
-    context.strokeStyle = theme.tree.vertexStroke
     context.beginPath()
     context.arc(state.x, state.y, theme.tree.vertexRadius * state.scale, 0, 2 * Math.PI, false)
     context.fill()
@@ -278,7 +348,7 @@ export class TreeRenderer {
   }
 
   drawEdge(context: CanvasRenderingContext2D, state: EdgeGraphicsState) {
-    context.strokeStyle = theme.tree.edge
+    context.strokeStyle = state.color
     context.lineWidth = theme.tree.branchWidth * state.scale
     context.beginPath()
     context.moveTo(state.x1, state.y1)
@@ -302,11 +372,17 @@ export class TreeRenderer {
     vertexContext.scale(devicePixelRatio, devicePixelRatio)
 
     const i = this.interpolateTime(t)
+
+    const initLocalState1 = this.getLocalState(this.initVertex)
+    const initLocalState2 = this.getLocalState(this.getImage(this.initVertex))
+    const initLocalState: LocalState = this.interpLocalStates(initLocalState1, initLocalState2, i)
+
     const initGlobalState: GlobalState = this.interpGlobalStates(this.originGlobalState, this.imageGlobalState, i)
 
-    this.drawVertex(vertexContext, this.makeVertexGraphicsState(initGlobalState))
+    this.drawVertex(vertexContext, this.makeVertexGraphicsState(initLocalState, initGlobalState))
 
     this.btt.iter((state, current, update) => {
+      const {local: prevLocalState, global: prevGlobalState} = state
       const prevImage = this.getImage(current)
       const image = this.getImage(update.vertex)
 
@@ -316,19 +392,20 @@ export class TreeRenderer {
       const edgeState = this.getEdgeState(current, update.vertex)
       const imageEdgeState = this.getEdgeState(prevImage, image)
 
-      const newState = this.accumulate(
-        state,
-        this.interpLocalStates(localState, imageLocalState, i),
+      const newLocalState = this.interpLocalStates(localState, imageLocalState, i)
+      const newGlobalState = this.accumulate(
+        prevGlobalState,
+        newLocalState,
         this.interpEdgeStates(edgeState, imageEdgeState, i)
       )
-      const vertexGraphicsState = this.makeVertexGraphicsState(newState)
-      const edgeGraphicsState = this.makeEdgeGraphicsState(state, newState)
+      const vertexGraphicsState = this.makeVertexGraphicsState(newLocalState, newGlobalState)
+      const edgeGraphicsState = this.makeEdgeGraphicsState(prevLocalState, prevGlobalState, newLocalState, newGlobalState)
 
       this.drawVertex(vertexContext, vertexGraphicsState)
       this.drawEdge(context, edgeGraphicsState)
       
-      return {value: newState, stop: localState.isLeaf}
-    }, initGlobalState, this.initVertex)
+      return {value: {local: newLocalState, global: newGlobalState}, stop: localState.isLeaf}
+    }, {local: initLocalState, global: initGlobalState}, this.initVertex)
 
     context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/devicePixelRatio, vertexCanvas.height/devicePixelRatio)
   }

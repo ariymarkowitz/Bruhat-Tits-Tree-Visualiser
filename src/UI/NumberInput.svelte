@@ -46,7 +46,7 @@
     }
   }
 
-  $: input = value.toString()
+  $: input = value
   // Update `incrementvalue` if `display` is nonempty.
   // Update `value` if `incrementValue` is valid.
   $: if (value !== '') {

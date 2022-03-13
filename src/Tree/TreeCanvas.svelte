@@ -2,20 +2,22 @@
   import JSZip from 'jszip'
   import { saveAs } from 'file-saver'
   import { onMount } from "svelte"
-  import { TreeRenderer } from "./TreeRenderer"
+  import { TreeOptions, TreeRenderer } from "./TreeRenderer"
 
   export let p: number
   export let depth: number
 
   export let width: number
   export let height: number
-  let canvas: HTMLCanvasElement
 
+  export let options: TreeOptions
+
+  let canvas: HTMLCanvasElement
   let dpr: number = window.devicePixelRatio
 
-  function render(p: number, depth: number, canvas: HTMLCanvasElement) {
+  function render(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement) {
     if (!canvas) return
-    let tree = new TreeRenderer(p, depth, [[1, 0], [0, 3]], width, height)
+    let tree = new TreeRenderer(p, depth, options, width, height)
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     
     ctx.save()
@@ -49,7 +51,7 @@
     // return () => cancelAnimationFrame(frame)
   }
 
-  $: render(p, depth, canvas)
+  $: render(p, depth, options, canvas)
 </script>
 
 <canvas
