@@ -7,14 +7,14 @@
 
   export let width: number
   export let height: number
+  export let resolution: number = 1
 
   export let options: TreeOptions
 
   let tree: TreeRenderer
-  $: tree = new TreeRenderer(p, depth, options, width, height)
+  $: tree = new TreeRenderer(p, depth, options, width, height, resolution)
 
   let canvas: HTMLCanvasElement
-  let dpr: number = window.devicePixelRatio
 
   onMount(() => {
     if (!canvas) return
@@ -25,6 +25,7 @@
 
     let frame = requestAnimationFrame(anim)
     function anim(){
+      let dpr = window.devicePixelRatio * resolution
       ctx.save()
       ctx.scale(dpr, dpr)
       tree.render(ctx, t)
@@ -40,8 +41,8 @@
 <canvas
   style={`width: ${width}px; height: ${height}px`}
   bind:this={canvas}
-  width={width*dpr}
-  height={height*dpr}
+  width={width*window.devicePixelRatio * resolution}
+  height={height*window.devicePixelRatio * resolution}
 ></canvas>
 
 <style>

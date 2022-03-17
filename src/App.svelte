@@ -1,11 +1,11 @@
 <script lang='ts'>
 	import { isPrime } from './algebra/utils/int'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
-import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte';
-import type { TreeOptions } from './Tree/TreeRenderer';
-import MatrixInput from './UI/MatrixInput.svelte';
+	import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte'
+	import type { TreeOptions } from './Tree/TreeRenderer'
+	import MatrixInput from './UI/MatrixInput.svelte'
 	import NumberInput, { ChangeEvent } from './UI/NumberInput.svelte'
-import RationalInput from './UI/RationalInput.svelte';
+	import RationalInput from './UI/RationalInput.svelte'
 
 	let p: number = 2
 
@@ -23,6 +23,10 @@ import RationalInput from './UI/RationalInput.svelte';
 	let showIsometry: boolean = false
 
 	let treeOptions: TreeOptions
+
+	let resolutionInput: string = '1'
+	let resolution: number = 1
+	$: resolution = Number(resolutionInput)
 
 	let animate: boolean = false
 
@@ -43,7 +47,7 @@ import RationalInput from './UI/RationalInput.svelte';
 	<div class='container'>
 		<div class='tree-container'>
 			{#if animate}
-			<TreeCanvasAnim width={800} height={800} p={p} depth={depth} options={treeOptions}/>
+			<TreeCanvasAnim width={800} height={800} p={p} depth={depth} options={treeOptions} resolution={resolution}/>
 			{:else}
 			<TreeCanvas width={800} height={800} p={p} depth={depth} options={treeOptions}/>
 			{/if}
@@ -62,7 +66,16 @@ import RationalInput from './UI/RationalInput.svelte';
 			<div class='sidebar-row'>
 				<input type='checkbox' />Show image of origin
 			</div>
-			<button on:click={e => animate = !animate}>{#if animate}Stop animation{:else}Animate!{/if}</button>
+			<div class="sidebar-row">
+				<button on:click={e => animate = !animate}>{#if animate}Stop animation{:else}Animate!{/if}</button>
+			</div>
+			<div class="sidebar-row">
+				Resolution <select bind:value={resolutionInput}>
+					<option>0.25</option>
+					<option>0.5</option>
+					<option>1</option>
+				</select>
+			</div>
 		</div>
 	</div>
 </main>
@@ -108,7 +121,7 @@ import RationalInput from './UI/RationalInput.svelte';
 		align-items: center;
 	}
 
-	input[type='text'] {
+	input[type='text'], select, button {
 		font: inherit;
 		background-color: inherit;
 		color: inherit;
@@ -122,6 +135,10 @@ import RationalInput from './UI/RationalInput.svelte';
 			outline: none;
 			border-color: $focusBorderColor;
 		}
+	}
+
+	option {
+		background-color: $bgColor;
 	}
 
 	input[type='checkbox'] {

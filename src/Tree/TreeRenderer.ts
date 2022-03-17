@@ -62,6 +62,7 @@ interface IsoInfo {
 export class TreeRenderer {
   width: number
   height: number
+  resolution: number
 
   p: number
   depth: number
@@ -84,9 +85,10 @@ export class TreeRenderer {
 
   initVertex: Vertex
 
-  constructor(p: number, depth: number, options: TreeOptions, width: number, height: number) {
+  constructor(p: number, depth: number, options: TreeOptions, width: number, height: number, resolution: number = 1) {
     this.width = width
     this.height = height
+    this.resolution = resolution
 
     this.p = p
 
@@ -138,7 +140,7 @@ export class TreeRenderer {
         forward: update.edge,
         backward: this.btt.reverse(current, update).edge
       })
-  
+
       return {value: newState, stop: newState.isLeaf}
     }, initLocalState, this.initVertex)
 
@@ -185,7 +187,6 @@ export class TreeRenderer {
     this.imageGlobalState = this.btt.reducePath((globalState: GlobalState, v: Vertex, adj: Adj<Vertex, number>) => {
       const localState = this.getLocalState(adj.vertex)
       const edgeState = this.getEdgeState(v, adj.vertex)
-
       return this.accumulate(globalState, localState, edgeState)
     }, this.initVertex, this.getImage(this.initVertex), this.originGlobalState)
   }
@@ -240,6 +241,11 @@ export class TreeRenderer {
 
   edgeKey(v1: Vertex, v2: Vertex): string {
     return `${this.btt.vertexToString(v1)} ${this.btt.vertexToString(v2)}`
+  }
+
+  hasEdgeState(v1: Vertex, v2: Vertex): boolean {
+    const key = this.edgeKey(v1, v2)
+    return (this.edges.has(key))
   }
 
   setEdgeState(v1: Vertex, v2: Vertex, value: EdgeState) {
@@ -361,7 +367,8 @@ export class TreeRenderer {
   }
 
   render(context: CanvasRenderingContext2D, t: number) {
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+    const dpi = this.resolution * window.devicePixelRatio
+    context.clearRect(0, 0, context.canvas.width / this.resolution, context.canvas.height / this.resolution)
 
     const vertexCanvas = document.createElement('canvas')
     vertexCanvas.width = context.canvas.width
@@ -369,7 +376,7 @@ export class TreeRenderer {
 
     const vertexContext = vertexCanvas.getContext('2d')
     if (vertexContext === null) {throw new Error('Failed to create canvas')}
-    vertexContext.scale(devicePixelRatio, devicePixelRatio)
+    vertexContext.scale(dpi, dpi)
 
     const i = this.interpolateTime(t)
 
@@ -407,6 +414,6 @@ export class TreeRenderer {
       return {value: {local: newLocalState, global: newGlobalState}, stop: localState.isLeaf}
     }, {local: initLocalState, global: initGlobalState}, this.initVertex)
 
-    context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/devicePixelRatio, vertexCanvas.height/devicePixelRatio)
+    context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/dpi, vertexCanvas.height/dpi)
   }
 }

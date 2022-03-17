@@ -25,6 +25,7 @@ export abstract class UnrootedTree<V, E> {
     for (let i=0; i < path.length; i++) {
       const adj = path[i]
       accum = f(accum, v, adj, i)
+      v = adj.vertex
     }
     return accum
   }
