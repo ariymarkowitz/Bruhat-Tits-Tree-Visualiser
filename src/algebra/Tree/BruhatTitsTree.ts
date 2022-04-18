@@ -72,7 +72,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
       const next = F.modPow(b.u, currentVal + 1)
       const edge = F.divide(F.subtract(next, current), F.fromVal(currentVal)).num
       list.push({
-        vertex: {u: current, n: currentVal + 1},
+        vertex: {u: next, n: currentVal + 1},
         edge
       })
 
