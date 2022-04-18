@@ -2,10 +2,10 @@
   export let allowInf: boolean = false
   export let emptyIsZero: boolean = false
 
-  // The numeric state of the field.
-  export let state: [number, number] | undefined = undefined
   // The value displayed in the field.
   export let value: string = ''
+  // The numeric state of the field.
+  export let state: [number, number] | undefined = parse(value)
 
   let input: string
   $: input = value
