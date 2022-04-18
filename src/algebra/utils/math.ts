@@ -16,7 +16,7 @@ export function angleLerp(a: number, b: number, t: number) {
   return radialLerp(a, b, t, 2*Math.PI)
 }
 
-export function boolLerp(a: boolean, b: boolean, t: number) {
+export function discreteLerp<T>(a: T, b: T, t: number) {
   return (t < 1) ? a : b
 }
 

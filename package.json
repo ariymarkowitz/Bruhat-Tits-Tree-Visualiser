@@ -13,6 +13,7 @@
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-typescript": "^8.0.0",
     "@tsconfig/svelte": "^2.0.0",
+    "@types/flatbush": "^3.3.0",
     "autoprefixer": "^10.4.2",
     "decorator-cache-getter": "^1.0.0",
     "node-sass": "^7.0.1",
@@ -33,6 +34,7 @@
   "dependencies": {
     "color2k": "^2.0.0",
     "file-saver": "^2.0.5",
+    "flatbush": "^4.0.0",
     "jszip": "^3.7.1",
     "sirv-cli": "^1.0.0",
     "svelte-canvas": "^0.7.0"

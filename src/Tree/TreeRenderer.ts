@@ -1,18 +1,20 @@
 import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
-import { Rational, RationalField } from "../algebra/Field/Rational"
+import { Rational } from "../algebra/Field/Rational"
 import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
 import type { Matrix } from "../algebra/VectorSpace/Matrix"
 import type { Adj } from '../algebra/Tree/UnrootedTree'
-import { angleLerp, boolLerp, boolOrLerp, lerp, radialLerp } from '../algebra/utils/math'
+import { angleLerp, discreteLerp, boolOrLerp, lerp, radialLerp } from '../algebra/utils/math'
 import { theme } from '../style/themes/themes'
 import { mix } from 'color2k'
 import type { Vec } from '../algebra/VectorSpace/VectorSpace'
+import Flatbush from 'flatbush';
 
 export interface TreeOptions {
   end?: [number, number]
   isometry?: Matrix<[number, number]>
   showIsometry: boolean
   showEnd: boolean
+  hitbox?: boolean
 }
 
 /**
@@ -24,6 +26,7 @@ interface LocalState {
   type: number
   inEnd: boolean
   isMinTranslation: boolean
+  display: string
 }
 
 /**
@@ -46,6 +49,7 @@ interface GlobalState {
   zeroAngle: number
   depth: number
   edgeDepth: number
+  display: string
 }
 
 /**
@@ -57,6 +61,7 @@ interface VertexGraphicsState {
   scale: number
   color: string
   strokeColor: string
+  display: string
 }
 
 /**
@@ -128,6 +133,9 @@ export class TreeRenderer {
   imageGlobalState: GlobalState
 
   initVertex: Vertex
+
+  hitBoxes: Flatbush
+  hitBoxValues: Array<String>
 
   constructor(p: number, depth: number, options: TreeOptions, width: number, height: number, resolution: number = 1) {
     this.width = width
@@ -240,7 +248,8 @@ export class TreeRenderer {
       zeroAngle: 0,
       angle: 0, //2*Math.PI*(1/(this.p+1) - 1/4),
       depth: 0,
-      edgeDepth: 0
+      edgeDepth: 0,
+      display: this.getLocalState(this.initVertex).display
     }
 
     // Set the global state of the image of the origin.
@@ -253,13 +262,18 @@ export class TreeRenderer {
     this.imageGlobalState.angle = this.imageGlobalState.zeroAngle
   }
 
+  get numberOfVertices(): number {
+    return (this.p**(this.depth)*(this.p + 1) - 2)/(this.p - 1)
+  }
+
   calculateLocalState(v: Vertex, depth: number, isLeaf: boolean): LocalState {
     return {
       depth,
       isLeaf,
       type: depth % 2,
       inEnd: this.end ? this.btt.inEnd(v, this.end) : false,
-      isMinTranslation: this.btt.translationDistance(this.isoInfo.iso, v) === this.isoInfo.minDist
+      isMinTranslation: this.btt.translationDistance(this.isoInfo.iso, v) === this.isoInfo.minDist,
+      display: this.btt.vertexToString(v)
     }
   }
 
@@ -349,7 +363,8 @@ export class TreeRenderer {
       zeroAngle: angle + Math.PI + edge.backward * 2*Math.PI/(this.p + 1),
       angle,
       depth: local.depth,
-      edgeDepth: edge.depth
+      edgeDepth: edge.depth,
+      display: local.display
     }
   }
 
@@ -358,8 +373,9 @@ export class TreeRenderer {
       depth: lerp(state1.depth, state2.depth, t),
       isLeaf: boolOrLerp(state1.isLeaf, state2.isLeaf, t),
       type: lerp(state1.type, state2.type, t),
-      inEnd: boolLerp(state1.inEnd, state2.inEnd, t),
-      isMinTranslation: boolLerp(state1.isMinTranslation, state2.isMinTranslation, t)
+      inEnd: discreteLerp(state1.inEnd, state2.inEnd, t),
+      isMinTranslation: discreteLerp(state1.isMinTranslation, state2.isMinTranslation, t),
+      display: discreteLerp(state1.display, state2.display, t)
     }
   }
 
@@ -378,7 +394,8 @@ export class TreeRenderer {
       zeroAngle: angleLerp(state1.zeroAngle, state2.zeroAngle, t),
       angle: angleLerp(state1.angle, state2.angle, t),
       depth: lerp(state1.depth, state2.depth, t),
-      edgeDepth: lerp(state1.edgeDepth, state2.edgeDepth, t)
+      edgeDepth: lerp(state1.edgeDepth, state2.edgeDepth, t),
+      display: state1.display
     }
   }
 
@@ -394,7 +411,7 @@ export class TreeRenderer {
     if (this.showIsometry && state.isMinTranslation) {
       return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
     }
-    if (state.inEnd) return theme.tree.end
+    if (this.options.showEnd && state.inEnd) return theme.tree.end
     return theme.tree.vertexStroke
   }
 
@@ -402,7 +419,7 @@ export class TreeRenderer {
     if (this.showIsometry && state1.isMinTranslation && state2.isMinTranslation) {
       return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
     }
-    if (state1.inEnd && state2.inEnd) return theme.tree.end
+    if (this.options.showEnd && state1.inEnd && state2.inEnd) return theme.tree.end
     return theme.tree.edge
   }
 
@@ -412,7 +429,8 @@ export class TreeRenderer {
       y: global.y,
       scale: Math.pow(0.75, global.depth),
       color: this.vertexColor(local),
-      strokeColor: this.vertexStrokeColor(local)
+      strokeColor: this.vertexStrokeColor(local),
+      display: local.display
     }
   }
 
@@ -428,13 +446,19 @@ export class TreeRenderer {
   }
 
   drawVertex(context: CanvasRenderingContext2D, state: VertexGraphicsState) {
+    const radius = theme.tree.vertexRadius * state.scale
     context.fillStyle = state.color
     context.strokeStyle = state.strokeColor
     context.lineWidth = theme.tree.vertexStrokeWidth * state.scale
     context.beginPath()
-    context.arc(state.x, state.y, theme.tree.vertexRadius * state.scale, 0, 2 * Math.PI, false)
+    context.arc(state.x, state.y, radius, 0, 2 * Math.PI)
     context.fill()
     context.stroke()
+
+    if (this.options.hitbox) {
+      const i = this.hitBoxes.add(state.x - radius, state.y - radius, state.x + radius, state.y + radius)
+      this.hitBoxValues[i] = state.display
+    }
   }
 
   drawEdge(context: CanvasRenderingContext2D, state: EdgeGraphicsState) {
@@ -470,6 +494,11 @@ export class TreeRenderer {
 
     const initGlobalState: GlobalState = this.interpGlobalStates(this.originGlobalState, this.imageGlobalState, i)
 
+    if (this.options.hitbox) {
+      this.hitBoxes = new Flatbush(this.numberOfVertices, 4, Int32Array)
+      this.hitBoxValues = new Array(this.numberOfVertices)
+    }
+
     this.drawVertex(vertexContext, this.makeVertexGraphicsState(initLocalState, initGlobalState))
 
     this.btt.iter((state, current, update) => {
@@ -503,5 +532,7 @@ export class TreeRenderer {
     }, {local: initLocalState, global: initGlobalState}, this.initVertex)
 
     context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/dpi, vertexCanvas.height/dpi)
+
+    this.hitBoxes.finish()
   }
 }

@@ -12,8 +12,12 @@
   let canvas: HTMLCanvasElement
   let dpr: number = window.devicePixelRatio
 
+  let target: String | undefined = undefined
+  let mousemove = (e: MouseEvent) => {}
+
   function render(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement) {
     if (!canvas) return
+    options = {...options, hitbox: true}
     let tree = new TreeRenderer(p, depth, options, width, height)
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     
@@ -22,30 +26,22 @@
     tree.render(ctx, 0)
     ctx.restore()
 
-    // let f = 0
-    // let t = 0
-
-    // const zip = new JSZip();
-
-    // let frame = requestAnimationFrame(anim)
-    // function anim(){
-    //   tree.render(ctx, t)
-    //   const imgURL = canvas.toDataURL('image/png')
-    //   zip.file(`${f}.png`, imgURL.split('base64,')[1],{base64:true})
-
-    //   if (t >= tree.loopTime) {
-    //     zip.generateAsync({type:"blob"})
-    //     .then(function (blob) {
-    //         saveAs(blob, "tree.zip");
-    //     });
-    //   } else {
-    //     f += 1
-    //     t += 1000 / 60
-    //     frame = requestAnimationFrame(anim);
-    //   }
-    // }
-
-    // return () => cancelAnimationFrame(frame)
+    mousemove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      const x = e.x - rect.left
+      const y = e.y - rect.top
+      const results = tree.hitBoxes.search(x, y, x, y)
+      if (results.length > 0) {
+        const i = results[0]
+        const newTarget = tree.hitBoxValues[i]
+        if (target !== newTarget) {
+          target = newTarget
+          console.log(target)
+        }
+      } else {
+        target = undefined
+      }
+    }
   }
 
   $: render(p, depth, options, canvas)
@@ -56,6 +52,7 @@
   bind:this={canvas}
   width={width*dpr}
   height={height*dpr}
+  on:mousemove={mousemove}
 ></canvas>
 
 <style>
