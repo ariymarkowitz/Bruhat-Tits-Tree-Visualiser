@@ -533,6 +533,8 @@ export class TreeRenderer {
 
     context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/dpi, vertexCanvas.height/dpi)
 
-    this.hitBoxes.finish()
+    if (this.hitBoxes) {
+      this.hitBoxes.finish()
+    }
   }
 }
