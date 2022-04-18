@@ -1,8 +1,3 @@
-/**
- * Like a Tree, but the children contains all adjacent edges.
- * When iterating over recursively, the parent has to be kept track of to avoid backtracking.
- */
-
 interface step<T> {
   value: T,
   stop: boolean
@@ -10,6 +5,10 @@ interface step<T> {
 
 export interface Adj<V, E> {vertex: V, edge: E}
 
+/**
+ * Like a Tree, but the children contains all adjacent edges.
+ * When iterating over recursively, the parent has to be kept track of to avoid backtracking.
+ */
 export abstract class UnrootedTree<V, E> {
   public abstract neigbours(node: V): Adj<V, E>[]
   public abstract reverseEdge(parent: V, child: V, edge: E): E
