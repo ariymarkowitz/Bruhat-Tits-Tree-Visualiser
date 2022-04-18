@@ -13,10 +13,13 @@ import type { Vec } from './../VectorSpace/VectorSpace'
 type Generators = Matrix<Rational>
 
 /**
- * The reduced form of a p-adic matrix.
+ * The reduced form of a p-adic matrix of the form:
+ * ```
  * | 1  0   |
  * | u  p^n |
- * u is a finite p-adic expansion less than p^n.
+ * ```
+ * u is a finite p-adic expansion less than p^n,
+ * ie. 0 <= u*p^m <= u*p^(m+n), where valuation(u) == m.
  **/
 export interface Vertex {
   u: Rational,
