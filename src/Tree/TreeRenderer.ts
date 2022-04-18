@@ -49,7 +49,6 @@ interface GlobalState {
   zeroAngle: number
   depth: number
   edgeDepth: number
-  display: string
 }
 
 /**
@@ -248,8 +247,7 @@ export class TreeRenderer {
       zeroAngle: 0,
       angle: 0, //2*Math.PI*(1/(this.p+1) - 1/4),
       depth: 0,
-      edgeDepth: 0,
-      display: this.getLocalState(this.initVertex).display
+      edgeDepth: 0
     }
 
     // Set the global state of the image of the origin.
@@ -364,7 +362,6 @@ export class TreeRenderer {
       angle,
       depth: local.depth,
       edgeDepth: edge.depth,
-      display: local.display
     }
   }
 
@@ -395,7 +392,6 @@ export class TreeRenderer {
       angle: angleLerp(state1.angle, state2.angle, t),
       depth: lerp(state1.depth, state2.depth, t),
       edgeDepth: lerp(state1.edgeDepth, state2.edgeDepth, t),
-      display: state1.display
     }
   }
 
