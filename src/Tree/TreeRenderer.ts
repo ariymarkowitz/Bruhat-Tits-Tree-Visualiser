@@ -113,6 +113,8 @@ export class TreeRenderer {
    * The angles of each vertex, relative to the parent.
    * This is stored in the vertex instead of the edge to avoid
    * the need for parent edges.
+   * 
+   * A full circle is `this.p+1`.
    */
   angles: Map<string, number>
   /**
