@@ -2,6 +2,7 @@
 	import { isPrime } from './algebra/utils/int'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
 	import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte'
+import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte';
 	import type { TreeOptions } from './Tree/TreeRenderer'
 	import MatrixInput from './UI/MatrixInput.svelte'
 	import NumberInput, { ChangeEvent } from './UI/NumberInput.svelte'
@@ -28,7 +29,11 @@
 	let resolution: number = 1
 	$: resolution = Number(resolutionInput)
 
-	let animate: boolean = false
+	const STATIC = Symbol("Static")
+	const ANIMATE = Symbol("Animate")
+	const DOWNLOAD = Symbol("Download")
+	type AnimationType = typeof ANIMATE | typeof DOWNLOAD | typeof STATIC
+	let animate: AnimationType = STATIC
 
 	function validateP(p: number) {
 		return isPrime(p)
@@ -46,8 +51,11 @@
 <main>
 	<div class='container'>
 		<div class='tree-container'>
-			{#if animate}
+			{#if animate == ANIMATE}
 			<TreeCanvasAnim width={800} height={800} p={p} depth={depth} options={treeOptions} resolution={resolution}/>
+			{:else if animate == DOWNLOAD}
+			<TreeCanvasAnimDownload width={800} height={800} p={p} depth={depth} options={treeOptions} resolution={resolution}
+			on:download-complete={_ => animate = STATIC}/>
 			{:else}
 			<TreeCanvas width={800} height={800} p={p} depth={depth} options={treeOptions}/>
 			{/if}
@@ -67,7 +75,14 @@
 				<input type='checkbox' />Show image of origin
 			</div>
 			<div class="sidebar-row">
-				<button on:click={e => animate = !animate}>{#if animate}Stop animation{:else}Animate!{/if}</button>
+				<button on:click={e => animate = (animate == ANIMATE ? STATIC : ANIMATE)}>
+					{#if animate == ANIMATE}Stop animation{:else}Animate!{/if}
+				</button>
+			</div>
+			<div class="sidebar-row">
+				<button on:click={e => animate = (animate == DOWNLOAD ? STATIC : DOWNLOAD)}>
+					{#if animate == DOWNLOAD}Cancel download{:else}Download animation{/if}
+				</button>
 			</div>
 			<div class="sidebar-row">
 				Resolution <select bind:value={resolutionInput}>

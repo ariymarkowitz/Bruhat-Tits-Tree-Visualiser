@@ -1,7 +1,4 @@
 <script lang='ts'>
-  import JSZip from 'jszip'
-  import { saveAs } from 'file-saver'
-  import { onMount } from "svelte"
   import { TreeOptions, TreeRenderer } from "./TreeRenderer"
 
   export let p: number
