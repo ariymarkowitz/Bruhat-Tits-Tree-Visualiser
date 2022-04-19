@@ -4,6 +4,7 @@
 	import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte'
 import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte';
 	import type { TreeOptions } from './Tree/TreeRenderer'
+import Latex from './UI/Latex.svelte';
 	import MatrixInput from './UI/MatrixInput.svelte'
 	import NumberInput, { ChangeEvent } from './UI/NumberInput.svelte'
 	import RationalInput from './UI/RationalInput.svelte'
@@ -43,7 +44,7 @@ import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte';
 		depthState = [event.detail.state, p]
 	}
 
-	$: depth = Math.max(2, Math.min(depthState[0], Math.floor(depthState[0] * (depthState[1]+1) / (p+1))))
+	$: depth = Math.max(1, Math.min(depthState[0], Math.floor(depthState[0] * (depthState[1]+1) / (p+1))))
 	$: depthInputValue = depth.toString()
 	$: treeOptions = {end, showEnd, isometry, showIsometry}
 </script>
@@ -69,7 +70,11 @@ import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte';
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' bind:checked={showIsometry}/>Isometry
-				<MatrixInput bind:state={isometry}/>
+				<div class='combined-elements'>
+					<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
+					<MatrixInput bind:state={isometry}/>
+					<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
+				</div>
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' />Show image of origin
@@ -238,7 +243,6 @@ import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte';
 		display: flex;
 		gap: 0.5em;
 		align-items: center;
-		margin-left: -5px;
 
 		.matrix-input {
 			display: inline-grid;
@@ -260,5 +264,12 @@ import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte';
 				border-color: $focusBorderColor;
 			}
 		}
+	}
+	
+	.combined-elements {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 0.2em;
 	}
 </style>
