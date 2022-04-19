@@ -6,7 +6,8 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "deploy": "npm run build && gh-pages -d public"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
@@ -17,6 +18,7 @@
     "@types/katex": "^0.14.0",
     "autoprefixer": "^10.4.2",
     "decorator-cache-getter": "^1.0.0",
+    "gh-pages": "^3.2.3",
     "katex": "^0.15.3",
     "node-sass": "^7.0.1",
     "rollup": "^2.3.4",
@@ -37,8 +39,6 @@
     "color2k": "^2.0.0",
     "file-saver": "^2.0.5",
     "flatbush": "^4.0.0",
-    "jszip": "^3.7.1",
-    "sirv-cli": "^1.0.0",
-    "svelte-canvas": "^0.7.0"
+    "jszip": "^3.7.1"
   }
 }
