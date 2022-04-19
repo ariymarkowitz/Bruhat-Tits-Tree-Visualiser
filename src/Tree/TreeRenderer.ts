@@ -77,11 +77,13 @@ interface EdgeGraphicsState {
   y2: number
   scale: number
   color: string
+  subdivide: boolean
 }
 
 interface IsoInfo {
   iso: Matrix<Rational>
   minDist: number
+  isReflection: boolean
 }
 
 export interface HitBoxInfo {
@@ -290,7 +292,8 @@ export class TreeRenderer {
   makeIsoInfo(iso: Matrix<Rational>): IsoInfo {
     return {
       iso,
-      minDist: this.btt.minTranslationDistance(iso)
+      minDist: this.btt.minVertexTranslationDistance(iso),
+      isReflection: this.btt.isReflection(iso)
     }
   }
 
@@ -420,7 +423,7 @@ export class TreeRenderer {
   }
 
   vertexStrokeColor(state: LocalState): string {
-    if (this.showIsometry && state.isMinTranslation) {
+    if (this.showIsometry && !this.isoInfo.isReflection && state.isMinTranslation) {
       return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
     }
     if (this.options.showEnd && state.inEnd) return theme.tree.end
@@ -428,7 +431,7 @@ export class TreeRenderer {
   }
 
   edgeColor(state1: LocalState, state2: LocalState): string {
-    if (this.showIsometry && state1.isMinTranslation && state2.isMinTranslation) {
+    if (this.showIsometry && !this.isoInfo.isReflection && state1.isMinTranslation && state2.isMinTranslation) {
       return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
     }
     if (this.options.showEnd && state1.inEnd && state2.inEnd) return theme.tree.end
@@ -453,7 +456,8 @@ export class TreeRenderer {
       x2: global2.x,
       y2: global2.y,
       scale: Math.pow( 0.8 / Math.pow(this.p, 0.4), global2.edgeDepth - 1),
-      color: this.edgeColor(local1, local2)
+      color: this.edgeColor(local1, local2),
+      subdivide: this.showIsometry && this.isoInfo.isReflection && local1.isMinTranslation && local2.isMinTranslation 
     }
   }
 
@@ -480,6 +484,17 @@ export class TreeRenderer {
     context.moveTo(state.x1, state.y1)
     context.lineTo(state.x2, state.y2)
     context.stroke()
+
+    // If the midpoint is fixed, draw a small circle denoting the fixed point.
+    if (state.subdivide) {
+      context.fillStyle = theme.tree.fixedPoints
+      context.lineWidth = theme.tree.vertexStrokeWidth * state.scale
+      const radius = theme.tree.vertexRadius * state.scale*0.7
+      context.beginPath()
+      context.arc((state.x1 + state.x2)/2, (state.y1 + state.y2)/2, radius, 0, 2 * Math.PI)
+      context.fill()
+      context.stroke()
+    }
   }
 
   interpolateTime(t): number {

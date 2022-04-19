@@ -111,18 +111,39 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     }
   }
 
-  public minTranslationDistance(m: Matrix<Rational>): int {
-    const M = this.vspace.matrixAlgebra
+  public minVertexTranslationDistance(m: Matrix<Rational>): int {
     const F = this.field
-
+    const M = this.vspace.matrixAlgebra
+    const vTr = F.valuation(M.trace(m))
     const vDet = F.valuation(M.determinant(m))
     if (vDet === Infinite) throw new Error('Matrix is singular')
+    if (vTr === Infinite) return mod(vDet, 2)
+    const result = vDet - 2*vTr
+    if (result >= 0) {
+      return result
+    } else {
+      return mod(result, 2)
+    }
+  }
 
-    const a = EIntOrd.min(
-      F.valuation(M.trace(m)),
-      Math.floor(vDet/2)
-    )
-    return -2*a + vDet
+  public minTranslationDistance(m: Matrix<Rational>): int {
+    const F = this.field
+    const M = this.vspace.matrixAlgebra
+    const vTr = F.valuation(M.trace(m))
+    const vDet = F.valuation(M.determinant(m))
+    if (vDet === Infinite) throw new Error('Matrix is singular')
+    if (vTr === Infinite) return 0
+    return Math.max(vDet - 2*vTr, 0)
+  }
+
+  public isReflection(m: Generators): boolean {
+    const F = this.field
+    const M = this.vspace.matrixAlgebra
+    const vTr = F.valuation(M.trace(m))
+    const vDet = F.valuation(M.determinant(m))
+    if (vDet === Infinite) throw new Error('Matrix is singular')
+    if (vTr === Infinite) return vDet % 2 !== 0
+    return 2*vTr > vDet && vDet % 2 !== 0
   }
 
   // Check whether the end lies in the lattice.
@@ -210,7 +231,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
 
     const vDet = F.valuation(M.determinant(m))
     const minV = this.vspace.minValuation(m)
-    if (vDet === Infinite || minV === Infinite) throw new Error('Matrix is zero')
+    if (vDet === Infinite || minV === Infinite) throw new Error('Matrix is singular')
 
     return -2 * minV + vDet
   }
