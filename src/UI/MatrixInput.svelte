@@ -1,7 +1,7 @@
 <script lang='ts'>
 import RationalInput from "./RationalInput.svelte";
 
-export let state: [number, number][][] | undefined
+export let state: [number, number][][] | undefined = undefined
 let state00: [number, number] | undefined
 let state01: [number, number] | undefined
 let state10: [number, number] | undefined
