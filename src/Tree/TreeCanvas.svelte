@@ -76,10 +76,11 @@
     position:absolute;
     visibility: hidden;
     z-index: 1;
+    pointer-events: none;
   }
 
   .tooltip-content {
-    font-size: 12px;
+    font-size: 14px;
     background-color: black;
     border: 1px solid white;
     color: white;
