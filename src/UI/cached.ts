@@ -14,7 +14,6 @@ export function cached<T>(value?: T, eq: (a: T, b: T) => boolean = (a, b) => a =
       if (!(old && eq(old, value))) {
         old = value
         store.set(value)
-        console.log(value)
       }
     }
   }

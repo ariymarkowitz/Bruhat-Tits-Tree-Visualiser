@@ -5,9 +5,11 @@ import type { Matrix } from "../algebra/VectorSpace/Matrix"
 import type { Adj } from '../algebra/Tree/UnrootedTree'
 import { angleLerp, discreteLerp, boolOrLerp, lerp, radialLerp } from '../algebra/utils/math'
 import { theme } from '../style/themes/themes'
-import { mix } from 'color2k'
+import { parseToRgba } from 'color2k'
 import type { Vec } from '../algebra/VectorSpace/VectorSpace'
 import Flatbush from 'flatbush';
+import { cache } from 'decorator-cache-getter'
+import { mixRgba } from '../utils/color'
 
 export interface TreeOptions {
   end?: [number, number]
@@ -414,7 +416,7 @@ export class TreeRenderer {
     if (this.options.highlight && state.key === this.options.highlight) {
       return theme.tree.highlightVertex
     }
-    return mix(theme.tree.type0, theme.tree.type1, state.type)
+    return mixRgba(this.type0Color, this.type1Color, state.type)
   }
 
   vertexStrokeColor(state: LocalState): string {
@@ -546,5 +548,13 @@ export class TreeRenderer {
     if (this.hitBoxes) {
       this.hitBoxes.finish()
     }
+  }
+
+  @cache get type0Color() {
+    return parseToRgba(theme.tree.type0)
+  }
+
+  @cache get type1Color() {
+    return parseToRgba(theme.tree.type1)
   }
 }

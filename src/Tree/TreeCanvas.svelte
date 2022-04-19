@@ -45,12 +45,9 @@ import { cached } from '../UI/cached';
       const results = tree.hitBoxes.search(x, y, x, y)
       if (results.length > 0) {
         const i = results[0]
-        const newTarget = tree.hitBoxMap[i]
-        if ($hitBoxInfo?.display !== newTarget.display) {
-          hitBoxInfo.set(newTarget)
-          tooltip.style.left = `${e.pageX}px`
-          tooltip.style.top = `${e.pageY - 10}px`
-        }
+        hitBoxInfo.set(tree.hitBoxMap[i])
+        tooltip.style.left = `${e.pageX}px`
+        tooltip.style.top = `${e.pageY - 10}px`
       } else {
         hitBoxInfo.set(undefined)
       }
