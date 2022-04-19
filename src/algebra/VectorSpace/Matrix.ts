@@ -42,12 +42,24 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return m.map((v, i) => v.map((e, j) => f(e, i, j)))
   }
 
+  public empty(): Matrix<FieldElement> {
+    const cols = new Array(this.dim)
+    for (let i = 0; i < this.dim; i++) {
+      cols[i] = new Array(this.dim)
+    }
+    return cols
+  }
+
   public fill(f: (col: int, row: int) => FieldElement): Matrix<FieldElement>{
-    return Seq.Range(this.dim)
-      .map(col => Seq.Range(this.dim)
-        .map(row => f(row, col))
-        .toArray())
-      .toArray()
+    const cols = new Array(this.dim)
+    for (let i = 0; i < this.dim; i++) {
+      const row = new Array(this.dim)
+      for (let j = 0; j < this.dim; j++) {
+        row[j] = f(i, j)
+      }
+      cols[i] = row
+    }
+    return cols
   }
 
   public column(i: int, m: Matrix<FieldElement>): Vec<FieldElement> {
@@ -100,12 +112,13 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
 
   public multiply(m1: Matrix<FieldElement>, m2: Matrix<FieldElement>): Matrix<FieldElement> {
     const F = this.field
-    return Seq.Range(this.dim)
-      .map(col => Seq.Range(this.dim)
-        .map(row => Seq.Range(this.dim)
-          .reduce(F.zero, (sum, i) => F.add(sum, F.multiply(m1[i][row], m2[col][i])))
-        ).toArray()
-      ).toArray()
+    return this.fill((col, row) => {
+      let sum = F.zero
+      for (let i = 0; i < this.dim; i++) {
+        sum = F.add(sum, F.multiply(m1[i][row], m2[col][i]))
+      }
+      return sum
+    })
   }
 
   public trace(m: Matrix<FieldElement>): FieldElement {
