@@ -55,25 +55,24 @@ If each vertex is a finite p-adic expansion, then an infinite path can be associ
 ## Inputs
 
 - 'p' sets the field used to ℚp.
-- 'Depth' sets the depth of the tree (maximum distance rendered)
-- 'End' shows an end of the tree (an infinite ray starting from the origin). The input may be an integer or rational number. the input a/b corresponds to the projective point (b, a).
-- 'Show end at infinity' shows the end corresponding to the projective point at infinity (0, 1).
-- 'Isometry' shows the minimum translation set of the isometry induced by a given matrix.
-- 'Show image of origin' displays image of the origin under the provided isometry.
+- 'Depth' sets the depth of the tree (maximum distance rendered).
+- 'End' shows an end of the tree (an infinite ray starting from the origin). The input may be an integer or rational number. the input a/b corresponds to the projective point (b, a). 1/0 gives the end corresponding to the projective point at infinity.
+- 'Isometry' shows the minimum translation set of the isometry induced by a given matrix. The inputs may be rational numbers.
 
 ## Colour scheme
 
 - The provided end is shown as a red ray starting from the origin.
-- The 'end at infinity' is shown in dark red.
 - If an isometry is elliptic (fixes a vertex), then the fixed points are shown in blue.
 - If an isometry is hyperbolic (translates every vertex), then the translation axis is shown in green.
-  - Note: Reflections translate every vertex, and so is shown in green by the visualiser. However the minimal translation set is a pair of neighbouring vertices that are swapped, and the reflection fixes the midpoint between these vertices, and so is actually an elliptic isometry.
-- The image of the origin is coloured pink.
+- If the isometry fixes only the midpoint of an edge, then it will show the fixed point as a blue vertex.
+- The image of the vertex being hovered over is coloured red.
 
 ## Other features
 
-Hovering over a vertex will show a tooltip displaying the vertex as [u]\_n. This corresponds to the lattice containing the array
+- Hovering over a vertex will show a tooltip displaying the vertex as [u]\_n. This corresponds to the lattice containing the array
 ```
 [[1, 0 ],
  [u,p^n]]
 ```
+- Animation!
+- You can also download an animation as a series of images. If you want a video or GIF, they can be stitched together using eg. FFMPEG.
