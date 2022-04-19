@@ -216,6 +216,10 @@ hr {
   color: rgba(255, 255, 255, 0.8);
 }
 
+canvas.svelte-72lpdn {
+  background-color: black;
+}
+
 canvas.svelte-14dmp1l {
   background-color: black;
 }
@@ -241,10 +245,6 @@ canvas.svelte-14dmp1l {
   width: max-content;
   text-align: center;
   padding: 5px;
-}
-
-canvas.svelte-72lpdn {
-  background-color: black;
 }
 
 canvas.svelte-72lpdn {
