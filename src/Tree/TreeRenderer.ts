@@ -134,7 +134,7 @@ export class TreeRenderer {
   initVertex: Vertex
 
   hitBoxes: Flatbush
-  hitBoxValues: Array<String>
+  hitBoxValues: Array<string>
 
   constructor(p: number, depth: number, options: TreeOptions, width: number, height: number, resolution: number = 1) {
     this.width = width
@@ -271,7 +271,7 @@ export class TreeRenderer {
       type: depth % 2,
       inEnd: this.end ? this.btt.inEnd(v, this.end) : false,
       isMinTranslation: this.btt.translationDistance(this.isoInfo.iso, v) === this.isoInfo.minDist,
-      display: this.btt.vertexToString(v)
+      display: this.btt.vertexToLatex(v)
     }
   }
 

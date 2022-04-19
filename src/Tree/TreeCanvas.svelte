@@ -1,4 +1,5 @@
 <script lang='ts'>
+  import Latex from '../UI/Latex.svelte'
   import { TreeOptions, TreeRenderer } from "./TreeRenderer"
 
   export let p: number
@@ -12,8 +13,11 @@
   let canvas: HTMLCanvasElement
   let dpr: number = window.devicePixelRatio
 
-  let target: String | undefined = undefined
+  let target: string | undefined = undefined
   let mousemove = (e: MouseEvent) => {}
+
+  let tooltip: HTMLElement
+  let tooltipText: string
 
   function render(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement) {
     if (!canvas) return
@@ -36,13 +40,16 @@
         const newTarget = tree.hitBoxValues[i]
         if (target !== newTarget) {
           target = newTarget
-          console.log(target)
+          tooltip.style.left = `${e.pageX}px`
+          tooltip.style.top = `${e.pageY - 10}px`
         }
       } else {
         target = undefined
       }
     }
   }
+  $: tooltipText = target || ''
+  $: if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
 
   $: render(p, depth, options, canvas)
 </script>
@@ -54,9 +61,34 @@
   height={height*dpr}
   on:mousemove={mousemove}
 ></canvas>
+<div class='tooltip' bind:this={tooltip}>
+  <div class='tooltip-content'>
+    <Latex bind:text={tooltipText}/>
+  </div>
+</div>
 
 <style>
   canvas {
     background-color: black;
+  }
+
+  .tooltip {
+    position:absolute;
+    visibility: hidden;
+    z-index: 1;
+  }
+
+  .tooltip-content {
+    font-size: 12px;
+    background-color: black;
+    border: 1px solid white;
+    color: white;
+    border-radius: 4px;
+    position: absolute;
+    bottom: 100%;
+    transform:translateX(-50%);
+    width: max-content;
+    text-align: center;
+    padding: 5px;
   }
 </style>

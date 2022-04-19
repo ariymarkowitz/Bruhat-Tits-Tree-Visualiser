@@ -242,4 +242,9 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
   public vertexToString(v: Vertex): string {
     return `${v.u.num}/${v.u.den}_${v.n}`
   }
+
+  public vertexToLatex(v: Vertex): string {
+    const frac = v.u.den === 1 ? `${v.u.num}` : `\\frac{${v.u.num}}{${v.u.den}}`
+    return `\\left[${frac}\\right]_{${v.n}}`
+  }
 }

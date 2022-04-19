@@ -2,9 +2,9 @@
 	import { isPrime } from './algebra/utils/int'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
 	import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte'
-import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte';
+	import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte'
 	import type { TreeOptions } from './Tree/TreeRenderer'
-import Latex from './UI/Latex.svelte';
+	import Latex from './UI/Latex.svelte'
 	import MatrixInput from './UI/MatrixInput.svelte'
 	import NumberInput, { ChangeEvent } from './UI/NumberInput.svelte'
 	import RationalInput from './UI/RationalInput.svelte'
