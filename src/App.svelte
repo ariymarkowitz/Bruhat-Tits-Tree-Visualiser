@@ -66,10 +66,10 @@
 			<div class='sidebar-row'>Depth<NumberInput min={1} max={10} init={depth} bind:value={depthInputValue} on:change={onDepthChange}/></div>
 			<hr />
 			<div class='sidebar-row'>
-				<input type='checkbox' bind:checked={showEnd} />End<RationalInput allowInf={true} bind:state={endInput}/>
+				<input type='checkbox' name='end' bind:checked={showEnd} />End<RationalInput allowInf={true} bind:state={endInput}/>
 			</div>
 			<div class='sidebar-row'>
-				<input type='checkbox' bind:checked={showIsometry}/>Isometry
+				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
 				<div class='combined-elements'>
 					<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
 					<MatrixInput bind:state={isometry}/>
@@ -100,7 +100,11 @@
 	$textColor: white;
 	$bgColor: black;
 	$borderColor: rgba(255, 255, 255, 0.6);
+	$thickBorderColor: rgba(255, 255, 255, 0.8);
 	$focusBorderColor: white;
+	$fixedPoints: #09e;
+	$translationAxis: #0c0;
+	$end: #e03;
 
 	body {
 		color: $textColor;
@@ -124,7 +128,7 @@
 	}
 
 	.sidebar {
-		width: 200px;
+		width: 230px;
 		display: flex;
 		flex-direction: column;
 		gap: 1em;
@@ -159,10 +163,56 @@
 	}
 
 	input[type='checkbox'] {
+		appearance: none;
+		flex-shrink: 0;
+		display: grid;
+  	place-content: center;
 		margin: 0;
 		width: 18px;
 		height: 18px;
-		flex-shrink: 0;
+		border: 2px solid $thickBorderColor;
+		background-color: none;
+	}
+
+	input[type="checkbox"]::before {
+		content: "";
+		width: 10px;
+		height: 10px;
+	}
+
+	input[type="checkbox"]:checked::before {
+		background-color: white;
+	}
+
+	input[type="checkbox"][name="end"]:checked::before {
+		background-color: $end;
+	}
+
+	input[type="checkbox"][name="isometry"]:checked::before {
+		width: 9px;
+		height: 9px;
+		background: none;
+		border-style: solid;
+		border-width: 0px 0px 9px 9px;
+		border-color: transparent transparent $translationAxis transparent;
+		box-sizing: border-box;
+		margin-top: 3px;
+		position: absolute;
+		margin-left: 3px;
+	}
+
+	input[type="checkbox"][name="isometry"]:checked::after {
+		content: "";
+		width: 9px;
+		height: 9px;
+		background: none;
+		border-style: solid;
+		border-width: 9px 9px 0px 0px;
+		border-color: $fixedPoints transparent transparent transparent;
+		box-sizing: border-box;
+		margin-top: 2px;
+		position: absolute;
+		margin-left: 2px;
 	}
 
 	hr {
@@ -174,6 +224,7 @@
 
 	.number-input {
 		display: flex;
+		width: 100%;
 		flex-direction: row;
 		input[type='text'] {
 			border-radius: 4px 0 0 4px;
@@ -245,7 +296,7 @@
 			display: inline-grid;
 			grid-template-columns: repeat(2, 1fr);
 			grid-template-rows: repeat(2, 1fr);
-			gap: 2px;
+			gap: 3px;
 			width: 100px;
 			height: 80px;
 		
@@ -268,5 +319,9 @@
 		flex-direction: row;
 		align-items: center;
 		gap: 0.2em;
+	}
+
+	.latex {
+		color: $thickBorderColor;
 	}
 </style>
