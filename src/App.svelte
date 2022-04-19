@@ -151,7 +151,9 @@
 		padding: 0.7em;
 		box-sizing: border-box;
 		border-radius: 4px;
+	}
 
+	input[type='text'], select {
 		&:focus {
 			outline: none;
 			border-color: $focusBorderColor;
