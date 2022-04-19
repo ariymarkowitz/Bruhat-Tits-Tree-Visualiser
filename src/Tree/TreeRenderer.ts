@@ -15,6 +15,7 @@ export interface TreeOptions {
   showIsometry: boolean
   showEnd: boolean
   hitbox?: boolean
+  highlight?: string
 }
 
 /**
@@ -26,7 +27,8 @@ interface LocalState {
   type: number
   inEnd: boolean
   isMinTranslation: boolean
-  display: string
+  key: string
+  hitBoxInfo: HitBoxInfo
 }
 
 /**
@@ -60,7 +62,7 @@ interface VertexGraphicsState {
   scale: number
   color: string
   strokeColor: string
-  display: string
+  hitBoxInfo: HitBoxInfo
 }
 
 /**
@@ -78,6 +80,11 @@ interface EdgeGraphicsState {
 interface IsoInfo {
   iso: Matrix<Rational>
   minDist: number
+}
+
+export interface HitBoxInfo {
+  display: string
+  imageKey?: string
 }
 
 /**
@@ -134,7 +141,7 @@ export class TreeRenderer {
   initVertex: Vertex
 
   hitBoxes: Flatbush
-  hitBoxValues: Array<string>
+  hitBoxMap: Array<HitBoxInfo>
 
   constructor(p: number, depth: number, options: TreeOptions, width: number, height: number, resolution: number = 1) {
     this.width = width
@@ -175,18 +182,17 @@ export class TreeRenderer {
 
     this.initVertex = this.btt.origin
 
-    let initLocalState: LocalState = this.calculateLocalState(this.initVertex, 0, depth < 1)
-
+    const initImage = this.btt.action(this.isoInfo.iso, this.initVertex)
+    this.setImage(this.initVertex, initImage)
+    let initLocalState: LocalState = this.calculateLocalState(this.initVertex, 0, depth < 1, initImage)
     this.setLocalState(this.initVertex, initLocalState)
-    this.setImage(this.initVertex, this.btt.action(this.isoInfo.iso, this.initVertex))
 
     // Set the states of each rendered vertex and (directed) edges.
     this.btt.iter((state, current, update) => {
-      const newState: LocalState = this.calculateLocalState(update.vertex, state.depth + 1, state.depth + 1 >= depth)
-      this.setLocalState(update.vertex, newState)
-
       const image = this.btt.action(this.isoInfo.iso, update.vertex)
       this.setImage(update.vertex, image)
+      const newState: LocalState = this.calculateLocalState(update.vertex, state.depth + 1, state.depth + 1 >= depth, image)
+      this.setLocalState(update.vertex, newState)
 
       this.setEdgeState(current, update.vertex, {
         depth: newState.depth,
@@ -264,14 +270,18 @@ export class TreeRenderer {
     return (this.p**(this.depth)*(this.p + 1) - 2)/(this.p - 1)
   }
 
-  calculateLocalState(v: Vertex, depth: number, isLeaf: boolean): LocalState {
+  calculateLocalState(v: Vertex, depth: number, isLeaf: boolean, image?: Vertex): LocalState {
     return {
       depth,
       isLeaf,
       type: depth % 2,
       inEnd: this.end ? this.btt.inEnd(v, this.end) : false,
       isMinTranslation: this.btt.translationDistance(this.isoInfo.iso, v) === this.isoInfo.minDist,
-      display: this.btt.vertexToLatex(v)
+      key: this.btt.vertexToString(v),
+      hitBoxInfo: {
+        display: this.btt.vertexToLatex(v),
+        imageKey: image ? this.btt.vertexToString(image) : undefined
+      }
     }
   }
 
@@ -372,7 +382,8 @@ export class TreeRenderer {
       type: lerp(state1.type, state2.type, t),
       inEnd: discreteLerp(state1.inEnd, state2.inEnd, t),
       isMinTranslation: discreteLerp(state1.isMinTranslation, state2.isMinTranslation, t),
-      display: discreteLerp(state1.display, state2.display, t)
+      key: discreteLerp(state1.key, state2.key, t),
+      hitBoxInfo: discreteLerp(state1.hitBoxInfo, state2.hitBoxInfo, t)
     }
   }
 
@@ -400,6 +411,9 @@ export class TreeRenderer {
   }
 
   vertexColor(state: LocalState): string {
+    if (this.options.highlight && state.key === this.options.highlight) {
+      return theme.tree.highlightVertex
+    }
     return mix(theme.tree.type0, theme.tree.type1, state.type)
   }
 
@@ -426,7 +440,7 @@ export class TreeRenderer {
       scale: Math.pow(0.75, global.depth),
       color: this.vertexColor(local),
       strokeColor: this.vertexStrokeColor(local),
-      display: local.display
+      hitBoxInfo: local.hitBoxInfo
     }
   }
 
@@ -453,7 +467,7 @@ export class TreeRenderer {
 
     if (this.options.hitbox) {
       const i = this.hitBoxes.add(state.x - radius, state.y - radius, state.x + radius, state.y + radius)
-      this.hitBoxValues[i] = state.display
+      this.hitBoxMap[i] = state.hitBoxInfo
     }
   }
 
@@ -492,7 +506,7 @@ export class TreeRenderer {
 
     if (this.options.hitbox) {
       this.hitBoxes = new Flatbush(this.numberOfVertices, 4, Int32Array)
-      this.hitBoxValues = new Array(this.numberOfVertices)
+      this.hitBoxMap = new Array(this.numberOfVertices)
     }
 
     this.drawVertex(vertexContext, this.makeVertexGraphicsState(initLocalState, initGlobalState))

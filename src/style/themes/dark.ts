@@ -14,7 +14,7 @@ export default {
     infBranch: '#a34339',
     fixedPoints: '#09e',
     translationAxis: '#0c0',
-    rootImage: '#f57',
+    highlightVertex: '#f57',
     branchWidth: 4,
     vertexStrokeWidth: 2,
     vertexRadius: 10,

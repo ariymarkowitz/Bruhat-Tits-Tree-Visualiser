@@ -76,9 +76,6 @@
 					<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
 				</div>
 			</div>
-			<div class='sidebar-row'>
-				<input type='checkbox' />Show image of origin
-			</div>
 			<div class="sidebar-row">
 				<button on:click={e => animate = (animate == ANIMATE ? STATIC : ANIMATE)}>
 					{#if animate == ANIMATE}Stop animation{:else}Animate!{/if}

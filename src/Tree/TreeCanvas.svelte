@@ -1,6 +1,8 @@
 <script lang='ts'>
+import { cached } from '../UI/cached';
+
   import Latex from '../UI/Latex.svelte'
-  import { TreeOptions, TreeRenderer } from "./TreeRenderer"
+  import { HitBoxInfo, TreeOptions, TreeRenderer } from "./TreeRenderer"
 
   export let p: number
   export let depth: number
@@ -13,15 +15,21 @@
   let canvas: HTMLCanvasElement
   let dpr: number = window.devicePixelRatio
 
-  let target: string | undefined = undefined
+  const hitBoxInfo = cached<HitBoxInfo | undefined>(
+    undefined,
+    (a, b) => a === b || (a !== undefined && b !== undefined && a.display === b.display && a.imageKey === b.imageKey)
+  )
   let mousemove = (e: MouseEvent) => {}
 
   let tooltip: HTMLElement
   let tooltipText: string
 
+  let _options: TreeOptions
+  $: _options = {...options, hitbox: true, highlight: $hitBoxInfo?.imageKey}
+
   function render(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement) {
     if (!canvas) return
-    options = {...options, hitbox: true}
+    options = {...options, hitbox: true, highlight: $hitBoxInfo?.imageKey}
     let tree = new TreeRenderer(p, depth, options, width, height)
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     
@@ -37,21 +45,21 @@
       const results = tree.hitBoxes.search(x, y, x, y)
       if (results.length > 0) {
         const i = results[0]
-        const newTarget = tree.hitBoxValues[i]
-        if (target !== newTarget) {
-          target = newTarget
+        const newTarget = tree.hitBoxMap[i]
+        if ($hitBoxInfo?.display !== newTarget.display) {
+          hitBoxInfo.set(newTarget)
           tooltip.style.left = `${e.pageX}px`
           tooltip.style.top = `${e.pageY - 10}px`
         }
       } else {
-        target = undefined
+        hitBoxInfo.set(undefined)
       }
     }
   }
-  $: tooltipText = target || ''
+  $: tooltipText = $hitBoxInfo?.display || ''
   $: if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
 
-  $: render(p, depth, options, canvas)
+  $: requestAnimationFrame(_ => render(p, depth, _options, canvas))
 </script>
 
 <canvas
