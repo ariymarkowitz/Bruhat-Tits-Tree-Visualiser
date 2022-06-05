@@ -1,5 +1,5 @@
 <script lang='ts'>
-import { cached } from '../UI/cached';
+  import { cached } from '../UI/cached'
 
   import Latex from '../UI/Latex.svelte'
   import { HitBoxInfo, TreeOptions, TreeRenderer } from "./TreeRenderer"
@@ -40,8 +40,8 @@ import { cached } from '../UI/cached';
 
     mousemove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
-      const x = e.x - rect.left
-      const y = e.y - rect.top
+      const x = (e.x - rect.left)*canvas.width/rect.width/dpr
+      const y = (e.y - rect.top)*canvas.height/rect.height/dpr
       const results = tree.hitBoxes.search(x, y, x, y)
       if (results.length > 0) {
         const i = results[0]
@@ -59,8 +59,8 @@ import { cached } from '../UI/cached';
   $: requestAnimationFrame(_ => render(p, depth, _options, canvas))
 </script>
 
-<canvas
-  style={`width: ${width}px; height: ${height}px`}
+<canvas class='tree-canvas'
+  style={`width: 100%; max-width: ${width}px; max-height: ${height}px`}
   bind:this={canvas}
   width={width*dpr}
   height={height*dpr}
@@ -72,11 +72,7 @@ import { cached } from '../UI/cached';
   </div>
 </div>
 
-<style>
-  canvas {
-    background-color: black;
-  }
-
+<style lang="scss">
   .tooltip {
     position:absolute;
     visibility: hidden;
@@ -86,9 +82,9 @@ import { cached } from '../UI/cached';
 
   .tooltip-content {
     font-size: 14px;
-    background-color: black;
-    border: 1px solid white;
-    color: white;
+    background-color: var(--bgColor);
+    border: 1px solid var(--borderColor);
+    color: var(--textColor);
     border-radius: 4px;
     position: absolute;
     bottom: 100%;

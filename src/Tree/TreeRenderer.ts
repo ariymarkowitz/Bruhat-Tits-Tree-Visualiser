@@ -1,15 +1,15 @@
-import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
+import { parseToRgba } from 'color2k'
+import { cache } from 'decorator-cache-getter'
+import Flatbush from 'flatbush'
 import { Rational } from "../algebra/Field/Rational"
 import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
-import type { Matrix } from "../algebra/VectorSpace/Matrix"
+import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
 import type { Adj } from '../algebra/Tree/UnrootedTree'
-import { angleLerp, discreteLerp, boolOrLerp, lerp, radialLerp } from '../algebra/utils/math'
-import { theme } from '../style/themes/themes'
-import { parseToRgba } from 'color2k'
+import { angleLerp, boolOrLerp, discreteLerp, lerp, radialLerp } from '../algebra/utils/math'
+import type { Matrix } from "../algebra/VectorSpace/Matrix"
 import type { Vec } from '../algebra/VectorSpace/VectorSpace'
-import Flatbush from 'flatbush';
-import { cache } from 'decorator-cache-getter'
 import { mixRgba } from '../utils/color'
+import type { Theme } from './../style/themes/themes'
 
 export interface TreeOptions {
   end?: [number, number]
@@ -18,6 +18,7 @@ export interface TreeOptions {
   showEnd: boolean
   hitbox?: boolean
   highlight?: string
+  theme: Theme
 }
 
 /**
@@ -417,25 +418,25 @@ export class TreeRenderer {
 
   vertexColor(state: LocalState): string {
     if (this.options.highlight && state.key === this.options.highlight) {
-      return theme.tree.highlightVertex
+      return this.theme.tree.highlightVertex
     }
     return mixRgba(this.type0Color, this.type1Color, state.type)
   }
 
   vertexStrokeColor(state: LocalState): string {
     if (this.showIsometry && !this.isoInfo.isReflection && state.isMinTranslation) {
-      return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
+      return this.isoInfo.minDist === 0 ? this.theme.tree.fixedPoints : this.theme.tree.translationAxis
     }
-    if (this.options.showEnd && state.inEnd) return theme.tree.end
-    return theme.tree.vertexStroke
+    if (this.options.showEnd && state.inEnd) return this.theme.tree.end
+    return this.theme.tree.vertexStroke
   }
 
   edgeColor(state1: LocalState, state2: LocalState): string {
     if (this.showIsometry && !this.isoInfo.isReflection && state1.isMinTranslation && state2.isMinTranslation) {
-      return this.isoInfo.minDist === 0 ? theme.tree.fixedPoints : theme.tree.translationAxis
+      return this.isoInfo.minDist === 0 ? this.theme.tree.fixedPoints : this.theme.tree.translationAxis
     }
-    if (this.options.showEnd && state1.inEnd && state2.inEnd) return theme.tree.end
-    return theme.tree.edge
+    if (this.options.showEnd && state1.inEnd && state2.inEnd) return this.theme.tree.end
+    return this.theme.tree.edge
   }
 
   makeVertexGraphicsState(local: LocalState, global: GlobalState): VertexGraphicsState {
@@ -462,10 +463,10 @@ export class TreeRenderer {
   }
 
   drawVertex(context: CanvasRenderingContext2D, state: VertexGraphicsState) {
-    const radius = theme.tree.vertexRadius * state.scale
+    const radius = this.theme.tree.vertexRadius * state.scale
     context.fillStyle = state.color
     context.strokeStyle = state.strokeColor
-    context.lineWidth = theme.tree.vertexStrokeWidth * state.scale
+    context.lineWidth = this.theme.tree.vertexStrokeWidth * state.scale
     context.beginPath()
     context.arc(state.x, state.y, radius, 0, 2 * Math.PI)
     context.fill()
@@ -479,7 +480,7 @@ export class TreeRenderer {
 
   drawEdge(context: CanvasRenderingContext2D, state: EdgeGraphicsState) {
     context.strokeStyle = state.color
-    context.lineWidth = theme.tree.branchWidth * state.scale
+    context.lineWidth = this.theme.tree.branchWidth * state.scale
     context.beginPath()
     context.moveTo(state.x1, state.y1)
     context.lineTo(state.x2, state.y2)
@@ -487,9 +488,9 @@ export class TreeRenderer {
 
     // If the midpoint is fixed, draw a small circle denoting the fixed point.
     if (state.subdivide) {
-      context.fillStyle = theme.tree.fixedPoints
-      context.lineWidth = theme.tree.vertexStrokeWidth * state.scale
-      const radius = theme.tree.vertexRadius * state.scale*0.7
+      context.fillStyle = this.theme.tree.fixedPoints
+      context.lineWidth = this.theme.tree.vertexStrokeWidth * state.scale
+      const radius = this.theme.tree.vertexRadius * state.scale*0.7
       context.beginPath()
       context.arc((state.x1 + state.x2)/2, (state.y1 + state.y2)/2, radius, 0, 2 * Math.PI)
       context.fill()
@@ -565,11 +566,15 @@ export class TreeRenderer {
     }
   }
 
+  get theme() {
+    return this.options.theme
+  }
+
   @cache get type0Color() {
-    return parseToRgba(theme.tree.type0)
+    return parseToRgba(this.theme.tree.type0)
   }
 
   @cache get type1Color() {
-    return parseToRgba(theme.tree.type1)
+    return parseToRgba(this.theme.tree.type1)
   }
 }

@@ -1,9 +1,11 @@
 export default {
-  colors: {
+  name: 'Light Large',
+  ui: {
     background: 'white',
     textColor: '#0d0d0d',
     border: 'rgba(0, 0, 0, 0.6)',
     focusBorder: 'rgb(0, 135, 255)',
+    thickBorder: 'rgba(0, 0, 0, 0.8)',
   },
   tree: {
     type0: '#151515',
@@ -14,7 +16,7 @@ export default {
     infBranch: '#a31f12',
     fixedPoints: 'rgb(0, 135, 255)',
     translationAxis: 'rgb(0, 227, 44)',
-    rootImage: '#f57',
+    highlightVertex: '#f57',
     branchWidth: 8,
     vertexStrokeWidth: 4,
     vertexRadius: 14,

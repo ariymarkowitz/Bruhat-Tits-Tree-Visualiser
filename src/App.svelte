@@ -1,5 +1,6 @@
 <script lang='ts'>
 	import { isPrime } from './algebra/utils/int'
+	import { setTheme, theme, themes } from './style/themes/themes'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
 	import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte'
 	import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte'
@@ -8,6 +9,13 @@
 	import MatrixInput from './UI/MatrixInput.svelte'
 	import NumberInput, { ChangeEvent } from './UI/NumberInput.svelte'
 	import RationalInput from './UI/RationalInput.svelte'
+
+	let themeInput: string
+	$: {
+		const newTheme = themes.find(t => t.name === themeInput) || themes[0]
+		theme.set(newTheme)
+	}
+	$: setTheme($theme)
 
 	let p: number = 2
 
@@ -46,7 +54,7 @@
 
 	$: depth = Math.max(1, Math.min(depthState[0], Math.floor(depthState[0] * (depthState[1]+1) / (p+1))))
 	$: depthInputValue = depth.toString()
-	$: treeOptions = {end, showEnd, isometry, showIsometry}
+	$: treeOptions = {end, showEnd, isometry, showIsometry, theme: $theme}
 </script>
 
 <main>
@@ -93,22 +101,20 @@
 					<option>1</option>
 				</select>
 			</div>
+			<div class="sidebar-row">
+				Theme <select bind:value={themeInput}>
+					{#each Object.values(themes) as theme, _}
+						<option>{theme.name}</option>
+					{/each}
+				</select>
+			</div>
 		</div>
 	</div>
 </main>
 <style lang='scss' global>
-	$textColor: white;
-	$bgColor: black;
-	$borderColor: rgba(255, 255, 255, 0.6);
-	$thickBorderColor: rgba(255, 255, 255, 0.8);
-	$focusBorderColor: white;
-	$fixedPoints: #09e;
-	$translationAxis: #0c0;
-	$end: #e03;
-
 	body {
-		color: $textColor;
-		background-color: $bgColor;
+		color: var(--textColor);
+		background-color: var(--bgColor);
 		font: 15px sans-serif;
 		margin: 0;
 	}
@@ -117,13 +123,17 @@
 		display: flex;
 		justify-content: center;
 		flex-direction: row;
-		gap: 10px;
+		gap: 0px 10px;
+		margin: 10px;
+
+		@media screen and (max-width: 600px) {
+			flex-direction: column;
+		}
 	}
 
 	.tree-container {
-		max-width: 900px;
-		width: 100%;
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 	}
 
@@ -132,7 +142,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1em;
-		padding-top: 10px;
+
+		@media screen and (max-width: 600px) {
+			width: 100%;
+		}
 	}
 
 	.sidebar-row {
@@ -147,7 +160,7 @@
 		background-color: inherit;
 		color: inherit;
 		width: 100%;
-		border: 1px solid $borderColor;
+		border: 1px solid var(--borderColor);
 		padding: 0.7em;
 		box-sizing: border-box;
 		border-radius: 4px;
@@ -156,12 +169,12 @@
 	input[type='text'], select {
 		&:focus {
 			outline: none;
-			border-color: $focusBorderColor;
+			border-color: var(--focusBorderColor);
 		}
 	}
 
 	option {
-		background-color: $bgColor;
+		background-color: var(--bgColor);
 	}
 
 	input[type='checkbox'] {
@@ -172,7 +185,7 @@
 		margin: 0;
 		width: 18px;
 		height: 18px;
-		border: 2px solid $thickBorderColor;
+		border: 2px solid var(--thickBorderColor);
 		background-color: none;
 	}
 
@@ -187,7 +200,7 @@
 	}
 
 	input[type="checkbox"][name="end"]:checked::before {
-		background-color: $end;
+		background-color: var(--endColor);
 	}
 
 	input[type="checkbox"][name="isometry"]:checked::before {
@@ -196,7 +209,7 @@
 		background: none;
 		border-style: solid;
 		border-width: 0px 0px 9px 9px;
-		border-color: transparent transparent $translationAxis transparent;
+		border-color: transparent transparent var(--translationAxisColor) transparent;
 		box-sizing: border-box;
 		margin-top: 3px;
 		position: absolute;
@@ -210,7 +223,7 @@
 		background: none;
 		border-style: solid;
 		border-width: 9px 9px 0px 0px;
-		border-color: $fixedPoints transparent transparent transparent;
+		border-color: var(--fixedPointColor) transparent transparent transparent;
 		box-sizing: border-box;
 		margin-top: 2px;
 		position: absolute;
@@ -221,7 +234,7 @@
 		border: none;
 		width: 80%;
 		height: 1px;
-		background-color: $borderColor;
+		background-color: var(--borderColor);
 	}
 
 	.number-input {
@@ -241,7 +254,7 @@
 
 			.number-input-up {
 				flex: 1;
-				border: 1px solid $borderColor;
+				border: 1px solid var(--borderColor);
 				border-left: none;
 
 				border-radius: 0 4px 0 0;
@@ -250,19 +263,19 @@
 
 				i {
 					border-width: 0 .3em .3em;
-					border-color: transparent transparent rgba(255, 255, 255, 0.6);
+					border-color: transparent transparent var(--borderColor);
 					border-style: solid;
 					margin: -0.2em 0 0 -0.3em;
 				}
 
 				&:hover i {
-					border-color: transparent transparent $focusBorderColor;
+					border-color: transparent transparent var(--focusBorderColor);
 				}
 			}
 
 			.number-input-down {
 				flex: 1;
-				border: 1px solid $borderColor;
+				border: 1px solid var(--borderColor);;
 				border-left: none;
 				border-top: none;
 
@@ -272,13 +285,13 @@
 
 				i {
 					border-width: .3em .3em 0;
-					border-color: $borderColor transparent transparent;
+					border-color: var(--borderColor) transparent transparent;
 					border-style: solid;
 					margin: -0.1em 0 0 -0.3em;
 				}
 
 				&:hover i {
-					border-color: $focusBorderColor transparent transparent;
+					border-color: var(--focusBorderColor) transparent transparent;
 				}
 			}
 
@@ -305,13 +318,13 @@
 			input {
 				background: none;
 				color: inherit;
-				border: 1px dashed $borderColor;
+				border: 1px dashed var(--borderColor);;
 				padding: 2px;
 				text-align: center;
 			}
 		
 			input:focus {
-				border-color: $focusBorderColor;
+				border-color: var(--focusBorderColor);;
 			}
 		}
 	}
@@ -324,6 +337,6 @@
 	}
 
 	.latex {
-		color: $thickBorderColor;
+		color: var(--thickBorderColor);;
 	}
 </style>

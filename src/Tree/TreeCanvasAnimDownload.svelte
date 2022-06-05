@@ -66,15 +66,9 @@
   })
 </script>
 
-<canvas
+<canvas class='tree-canvas'
   style={`width: ${width}px; height: ${height}px`}
   bind:this={canvas}
   width={width*window.devicePixelRatio * resolution}
   height={height*window.devicePixelRatio * resolution}
 ></canvas>
-
-<style>
-  canvas {
-    background-color: black;
-  }
-</style>
