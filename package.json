@@ -39,6 +39,8 @@
     "color2k": "^2.0.0",
     "file-saver": "^2.0.5",
     "flatbush": "^4.0.0",
-    "jszip": "^3.7.1"
+    "jszip": "^3.7.1",
+    "sirv-cli": "^1.0.0",
+    "svelte-canvas": "^0.7.0"
   }
 }
