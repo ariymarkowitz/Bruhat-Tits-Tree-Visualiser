@@ -13,7 +13,6 @@ export default {
     vertexStroke: '#60503B',
     edge: '#60503B',
     end: '#ae6642',
-    infBranch: '#a31f12',
     fixedPoints: '#015d6f',
     translationAxis: '#bf3933',
     highlightVertex: '#d2ac88',

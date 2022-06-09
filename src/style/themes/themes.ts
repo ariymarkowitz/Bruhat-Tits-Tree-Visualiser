@@ -20,7 +20,6 @@ export interface Theme {
     vertexStroke: string,
     edge: string,
     end: string,
-    infBranch: string,
     fixedPoints: string,
     translationAxis: string,
     highlightVertex: string,
