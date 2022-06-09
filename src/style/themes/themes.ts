@@ -3,6 +3,7 @@ import { writable } from 'svelte/store';
 import darkTheme from './dark'
 import lightTheme from './light'
 import lightLargeTheme from './light-large'
+import mochaTheme from './mocha'
 
 export interface Theme {
   name: string,
@@ -29,7 +30,7 @@ export interface Theme {
   }
 }
 
-export const themes: Theme[] = [darkTheme, lightTheme, lightLargeTheme]
+export const themes: Theme[] = [darkTheme, lightTheme, lightLargeTheme, mochaTheme]
 
 export function setTheme(theme: Theme) {
   const html = document.documentElement
