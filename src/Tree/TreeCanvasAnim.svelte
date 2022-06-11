@@ -39,7 +39,7 @@
 </script>
 
 <canvas class='tree-canvas'
-  style={`width: ${width}px; height: ${height}px`}
+  style={`width: 100%; max-width: ${width}px; max-height: ${height}px`}
   bind:this={canvas}
   width={width*window.devicePixelRatio * resolution}
   height={height*window.devicePixelRatio * resolution}
