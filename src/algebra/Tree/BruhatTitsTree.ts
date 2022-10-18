@@ -10,7 +10,7 @@ import type { Matrix } from "../VectorSpace/Matrix"
 import { RationalField } from './../Field/Rational'
 import type { Vec } from './../VectorSpace/VectorSpace'
 
-type Generators = Matrix<Rational>
+type Mat = Matrix<Rational>
 
 /**
  * The reduced form of a p-adic matrix of the form:
@@ -126,7 +126,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     }
   }
 
-  public minTranslationDistance(m: Matrix<Rational>): int {
+  public translationLength(m: Matrix<Rational>): int {
     const F = this.field
     const M = this.vspace.matrixAlgebra
     const vTr = F.valuation(M.trace(m))
@@ -136,7 +136,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return Math.max(vDet - 2*vTr, 0)
   }
 
-  public isReflection(m: Generators): boolean {
+  public isReflection(m: Mat): boolean {
     const F = this.field
     const M = this.vspace.matrixAlgebra
     const vTr = F.valuation(M.trace(m))
@@ -146,9 +146,14 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return 2*vTr > vDet && vDet % 2 !== 0
   }
 
+  public isIdentity(m: Mat): boolean {
+    const F = this.field
+    return F.isZero(m[0][1]) && F.isZero(m[1][0]) && F.equals(m[1][1], m[0][0])
+  }
+
   // Check whether the end lies in the lattice.
   public inEnd(v: Vertex, end: Vec<Rational>) {
-    return this.vspace.inLattice(this.vertexToIntGens(v), this.toIntVector(end))
+    return this.vspace.inLattice(this.vertexToIntMat(v), this.toIntVector(end))
   }
 
   public inInfEnd(v: Vertex) {
@@ -161,21 +166,21 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     else return this.vspace.scale(v, this.field.fromVal(-a))
   }
 
-  public toIntMatrix(m: Generators): Generators {
+  public toIntMatrix(m: Mat): Mat {
     const a = this.vspace.minValuation(m)
     if (a === Infinite) return m
     else return this.vspace.matrixAlgebra.scale(this.field.fromVal(-a), m)
   }
 
-  public vertexToGens(v: Vertex): Generators {
+  public vertexToMat(v: Vertex): Mat {
     return [[this.field.one, v.u], [this.field.zero, this.field.fromVal(v.n)]]
   }
 
-  public vertexToIntGens(v: Vertex): Generators {
-    return this.toIntMatrix(this.vertexToGens(v))
+  public vertexToIntMat(v: Vertex): Mat {
+    return this.toIntMatrix(this.vertexToMat(v))
   }
 
-  public gensToVertex(g: Generators): Vertex {
+  public matToVertex(g: Mat): Vertex {
     const F = this.field
     const V = this.vspace
     const M = V.matrixAlgebra
@@ -210,12 +215,42 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return {u, n}
   }
 
-  public action(m: Generators, v: Vertex) {
+  public action(m: Mat, v: Vertex) {
     const M = this.vspace.matrixAlgebra
-    return this.gensToVertex(M.multiply(m, this.vertexToGens(v)))
+    return this.matToVertex(M.multiply(m, this.vertexToMat(v)))
   }
 
-  public getIntMatrix(m: Generators): Generators {
+  public minTranslationVertexNearOrigin(m: Mat): Vertex{
+    // Return origin if possible for the sake of simplicity.
+    // Also handles the case that `a` acts trivially.
+    if (this.translationDistance(m, this.origin) == this.translationLength(m)) {
+      return this.origin
+    }
+    const V = this.vspace
+    const M = this.vspace.matrixAlgebra
+
+    const vecs = [V.fromInts([1, 0]), V.fromInts([0, 1]), V.fromInts([1, 1])].filter(v => !M.isEigenvector(m, v))
+    const verts = vecs.map(v => this.projToMinTranslation(m, v))
+    const dists = verts.map(v => this.distanceToOrigin(this.vertexToMat(v)))
+    const minIndex = verts.reduce((j, _, i) => dists[i] < dists[j] ? i : j, 0)
+    return verts[minIndex]
+  }
+
+  public projToMinTranslation(m: Mat, v: Vec<Rational>): Vertex {
+    const F = this.field
+    const M = this.vspace.matrixAlgebra
+
+    const vtr = F.valuation(M.trace(m))
+    const vdet = F.valuation(M.determinant(m))
+    if (vdet === Infinite) throw new Error('Matrix is singular')
+
+    const mu = EIntOrd.min(EIntOrd.mulInt(vtr, 2), Math.ceil(vdet/2))
+    const B = M.scale(F.fromVal(-mu), m)
+    const vMat = [v, M.apply(B, v)]
+    return this.matToVertex(vMat)
+  }
+
+  public getIntMatrix(m: Mat): Mat {
     const F = this.field
     const M = this.vspace.matrixAlgebra
 
@@ -225,7 +260,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return M.scale(F.fromVal(-minVal), m)
   }
 
-  public distanceToRoot(m: Generators): int {
+  public distanceToOrigin(m: Mat): int {
     const F = this.field
     const M = this.vspace.matrixAlgebra
 
@@ -236,17 +271,17 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return -2 * minV + vDet
   }
 
-  public translationDistance(a: Generators, v: Vertex): int {
+  public translationDistance(a: Mat, v: Vertex): int {
     const M = this.vspace.matrixAlgebra
-    return this.distanceToRoot(M.conjugate(a, this.vertexToGens(v)))
+    return this.distanceToOrigin(M.conjugate(a, this.vertexToMat(v)))
   }
 
-  public lengthOfImage(a: Generators, v: Vertex) {
+  public lengthOfImage(a: Mat, v: Vertex) {
     const M = this.vspace.matrixAlgebra
-    return this.distanceToRoot(M.multiply(a, this.vertexToGens(v)))
+    return this.distanceToOrigin(M.multiply(a, this.vertexToMat(v)))
   }
 
-  public isSameClass(a: Generators, b: Generators) {
+  public isSameClass(a: Mat, b: Mat) {
     const V = this.vspace
     const M = this.vspace.matrixAlgebra
     return V.isTrivialLattice(this.toIntMatrix(M.multiply(M.invert(a), b)))
@@ -256,7 +291,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return RationalField.equals(a.u, b.u) && a.n === b.n
   }
 
-  public vertexIsRoot(v: Vertex) {
+  public vertexIsOrigin(v: Vertex) {
     return this.field.isZero(v.u) && v.n === 0
   }
 

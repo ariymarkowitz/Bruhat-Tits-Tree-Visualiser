@@ -37,6 +37,10 @@ export class VectorSpace<FieldElement, Field extends FieldType<FieldElement> = F
     return v.map(e => this.field.multiply(e, n)) 
   }
 
+  public isZero(v: Vec<FieldElement>) {
+    return v.every(e => this.field.isZero(e))
+  }
+
   @cache
   public get matrixAlgebra(): MatrixAlgebra<FieldElement> {
     return new MatrixAlgebra(this, this.dim)

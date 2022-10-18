@@ -177,6 +177,12 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return this.multiply(this.multiply(this.invert(p), m), p)
   }
 
+  public isEigenvector(m: Matrix<FieldElement>, v: Vec<FieldElement>): boolean {
+    const F = this.field
+    const w = this.apply(m, v)
+    return F.equals(F.multiply(v[0], w[1]), F.multiply(v[1], w[0]))
+  }
+
   public toString(): string {
     return `MatrixAlgebra(${this.dim}, ${this.field})`
   }
