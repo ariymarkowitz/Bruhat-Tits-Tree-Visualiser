@@ -225,14 +225,14 @@ hr {
   color: var(--thickBorderColor);
 }
 
-.tooltip.svelte-ki6p15 {
+.tooltip.svelte-rzrxyk {
   position: absolute;
   visibility: hidden;
   z-index: 1;
   pointer-events: none;
 }
 
-.tooltip-content.svelte-ki6p15 {
+.tooltip-content.svelte-rzrxyk {
   font-size: 14px;
   background-color: var(--bgColor);
   border: 1px solid var(--borderColor);
@@ -241,7 +241,6 @@ hr {
   position: absolute;
   bottom: 100%;
   transform: translateX(-50%);
-  width: -webkit-max-content;
   width: -moz-max-content;
   width: max-content;
   text-align: center;
