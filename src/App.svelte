@@ -84,6 +84,7 @@
 					<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
 				</div>
 			</div>
+			<hr />
 			<div class="sidebar-row">
 				<button on:click={e => animate = (animate == ANIMATE ? STATIC : ANIMATE)}>
 					{#if animate == ANIMATE}Stop animation{:else}Animate!{/if}
@@ -132,6 +133,9 @@
 	}
 
 	.tree-container {
+		max-width: 800px;
+		flex: 1;
+
 		display: flex;
 		flex-direction: column;
 		justify-content: center;

@@ -2,7 +2,7 @@
   import { cached } from '../UI/cached'
 
   import Latex from '../UI/Latex.svelte'
-  import { HitBoxInfo, TreeOptions, TreeRenderer } from "./TreeRenderer"
+  import { InteractionState, TreeOptions, TreeRenderer } from "./TreeRenderer"
 
   export let p: number
   export let depth: number
@@ -15,7 +15,7 @@
   let canvas: HTMLCanvasElement
   let dpr: number = window.devicePixelRatio
 
-  const hitBoxInfo = cached<HitBoxInfo | undefined>(
+  const hitBoxInfo = cached<InteractionState | undefined>(
     undefined,
     (a, b) => a === b || (a !== undefined && b !== undefined && a.display === b.display && a.imageKey === b.imageKey)
   )

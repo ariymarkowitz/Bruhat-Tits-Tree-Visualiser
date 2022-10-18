@@ -21,7 +21,7 @@ export interface TreeOptions {
   theme: Theme
 }
 
-interface InteractionState {
+export interface InteractionState {
   key: string
   display: string
   imageKey: string
@@ -433,25 +433,6 @@ export class TreeRenderer {
 
   interpAbsoluteStates(state1: VertexStateAbsolute, state2: VertexStateAbsolute, t: number): AbsoluteState {
     const angle = angleLerp(state1.absolute.angle, state2.absolute.angle, t)
-    // if (state1.static.isAbsolute && this.isoInfo.isReflection) {
-    //   const midX = (state1.absolute.x + state2.absolute.x)/2
-    //   const midY = (state1.absolute.y + state2.absolute.y)/2
-    //   const dispX = state1.absolute.x - state2.absolute.x
-    //   const dispY = state1.absolute.y - state2.absolute.y
-    //   const dist = Math.sqrt(dispX*dispX + dispY*dispY)/2
-    //   const relAngle = Math.atan2(dispY, dispX)
-    //   return {
-    //     angle,
-    //     x: midX + dist*Math.cos(relAngle + Math.PI*t),
-    //     y: midY + dist*Math.sin(relAngle + Math.PI*t),
-    //   }
-    // } else {
-    //   return {
-    //     angle,
-    //     x: lerp(state1.absolute.x, state2.absolute.x, t),
-    //     y: lerp(state1.absolute.y, state2.absolute.y, t)
-    //   }
-    // }
     return {
       angle,
       x: lerp(state1.absolute.x, state2.absolute.x, t),
