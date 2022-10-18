@@ -52,7 +52,6 @@ interface RelativeState {
  * The state of the vertex that is relative to the canvas.
  */
 interface AbsoluteState {
-  angle: number
   x: number
   y: number
 }
@@ -154,47 +153,39 @@ export class TreeRenderer {
 
     this.btt = new BruhatTitsTree(p)
     const V = this.btt.vspace
-    const M = V.matrixAlgebra
 
     this.depth = depth
 
     this.options = options
     this.end = options.end ? V.fromInts(options.end) : undefined
 
+    this.setupIsometry()
+    this.cacheAllVertices()
+  }
+
+  setupIsometry() {
+    const M = this.btt.vspace.matrixAlgebra
     let iso: Matrix<Rational>
-    if (options.isometry) {
-      iso = options.isometry.map(v => v.map(e => Rational(e[0], e[1])))
+    if (this.options.isometry) {
+      iso = this.options.isometry.map(v => v.map(e => Rational(e[0], e[1])))
       if (M.isSingular(iso)) {
         iso = M.one
         this.showIsometry = false
       } else {
-        this.showIsometry = options.showIsometry
+        this.showIsometry = this.options.showIsometry
       }
     } else {
       iso = M.one
       this.showIsometry = false
     }
-    this.isoInfo = this.makeIsoInfo(iso)
 
-    this.cacheAllVertices()
-  }
-
-  get numberOfVertices(): number {
-    return (this.p**(this.depth)*(this.p + 1) - 2)/(this.p - 1)
-  }
-
-  makeIsoInfo(iso: Matrix<Rational>): IsoInfo {
-    return {
+    this.isoInfo = {
       iso,
       minDist: this.btt.minVertexTranslationDistance(iso),
       isReflection: this.btt.isReflection(iso),
       isIdentity: this.btt.isIdentity(iso)
     }
   }
-
-  /**
-   * Update functions for states.
-   */
 
   edgeState(v: Vertex, adj: Adj<Vertex, number>): EdgeState {
     return {
@@ -230,6 +221,9 @@ export class TreeRenderer {
     return this.btt.vertexToString(v)
   }
 
+  /**
+   * Cache a vertex-indexed map.
+   */
   cache<S, T extends S>(map: Map<string, S>, v: Vertex, value: T): T {
     const key = this.btt.vertexToString(v)
     map.set(key, value)
@@ -270,7 +264,6 @@ export class TreeRenderer {
       absolute: {
         x: parent.absolute.x + Math.cos(angle) * this.edgeLength(current.relative.edgeDepth),
         y: parent.absolute.y + Math.sin(angle) * this.edgeLength(current.relative.edgeDepth),
-        angle,
       }
     }
   }
@@ -313,7 +306,6 @@ export class TreeRenderer {
         angle: 0
       },
       absolute: {
-        angle: 0,
         x: this.width/2,
         y: this.height/2
       }
@@ -409,7 +401,7 @@ export class TreeRenderer {
   }
 
   edgeAngle(edge: number): number {
-    return edge * 2*Math.PI / (this.p + 1)
+    return -edge * 2*Math.PI / (this.p + 1)
   }
 
   interpStaticStates(state1: StaticState, state2: StaticState, t: number): StaticState {
@@ -432,9 +424,8 @@ export class TreeRenderer {
   }
 
   interpAbsoluteStates(state1: VertexStateAbsolute, state2: VertexStateAbsolute, t: number): AbsoluteState {
-    const angle = angleLerp(state1.absolute.angle, state2.absolute.angle, t)
+    const angle = angleLerp(state1.relative.angle, state2.relative.angle, t)
     return {
-      angle,
       x: lerp(state1.absolute.x, state2.absolute.x, t),
       y: lerp(state1.absolute.y, state2.absolute.y, t)
     }
@@ -609,5 +600,9 @@ export class TreeRenderer {
 
   @cache get type1Color() {
     return parseToRgba(this.theme.tree.type1)
+  }
+
+  @cache get numberOfVertices() {
+    return (this.p**(this.depth)*(this.p + 1) - 2)/(this.p - 1)
   }
 }
