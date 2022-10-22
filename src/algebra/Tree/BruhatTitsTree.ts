@@ -244,7 +244,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     const vdet = F.valuation(M.determinant(m))
     if (vdet === Infinite) throw new Error('Matrix is singular')
 
-    const mu = EIntOrd.min(EIntOrd.mulInt(vtr, 2), Math.ceil(vdet/2))
+    const mu = EIntOrd.min(EIntOrd.mulInt(vtr, 2), Math.floor(vdet/2))
     const B = M.scale(F.fromVal(-mu), m)
     const vMat = [v, M.apply(B, v)]
     return this.matToVertex(vMat)
