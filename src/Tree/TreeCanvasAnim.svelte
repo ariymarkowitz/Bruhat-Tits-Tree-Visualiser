@@ -20,17 +20,21 @@
     if (!canvas) return
     if (!tree) return
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-
+    let prevTime = 0
     let t = 0
 
     let frame = requestAnimationFrame(anim)
-    function anim(){
-      let dpr = window.devicePixelRatio * resolution
+    function anim(time: number){
+      // Only update time by 100ms if there is too much time between rendering.
+      t += Math.min(time - prevTime, 1000 / 10)
+      prevTime = time
+
+      const dpr = window.devicePixelRatio * resolution
       ctx.save()
       ctx.scale(dpr, dpr)
       tree.render(ctx, t)
       ctx.restore()
-      t += 1000 / 60
+
       frame = requestAnimationFrame(anim);
     }
 
