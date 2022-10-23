@@ -115,6 +115,10 @@ export class Adic extends DVField<Rational> {
     return RationalField.unsafeInvert(a)
   }
 
+  public dot(a: Rational, b: Rational, c: Rational, d: Rational): Rational {
+    return RationalField.dot(a, b, c, d)
+  }
+
   public nonZeroPow(a: Rational, n: int): Rational {
     return RationalField.nonZeroPow(a, n)
   }

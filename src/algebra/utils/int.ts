@@ -3,8 +3,7 @@ export type int = number
 
 export function mod(a: int, b: int) {
   const result = a % b
-  if (result < 0) return result + b
-  else return result
+  return result < 0 ? result + b : result
 }
 
 export function gcd(a: int, b: int): int {
@@ -14,9 +13,9 @@ export function gcd(a: int, b: int): int {
     [a, b] = [b, a]
   }
   while (true) {
-      if (b == 0) return a
+      if (b === 0) return a
       a %= b
-      if (a == 0) return b
+      if (a === 0) return b
       b %= a
   }
 }

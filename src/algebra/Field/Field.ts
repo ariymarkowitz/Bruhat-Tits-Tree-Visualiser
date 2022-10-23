@@ -57,4 +57,8 @@ export abstract class Field<FieldElement> extends Ring<FieldElement> {
     }
     return this._multiplicativeGroup
   }
+
+  public dot(a: FieldElement, b: FieldElement, c: FieldElement, d: FieldElement): FieldElement {
+    return this.add(this.multiply(a, c), this.multiply(b, d))
+  }
 }

@@ -102,16 +102,32 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return v1.reduce((s, e, i) => this.field.add(s, this.field.multiply(e, v2[i])), this.field.zero)
   }
 
-  public apply(m1: Matrix<FieldElement>, m2: Vec<FieldElement>): Vec<FieldElement> {
+  public apply(m1: Matrix<FieldElement>, v: Vec<FieldElement>): Vec<FieldElement> {
     const F = this.field
-    return Seq.Range(this.dim)
-      .map(row => Seq.Range(this.dim)
-        .reduce(F.zero, (sum, i) => F.add(sum, F.multiply(m1[i][row], m2[i])))
-      ).toArray()
+    if (this.dim === 2) {
+      return [
+        this.field.dot(m1[0][0], m1[1][0], v[0], v[1]),
+        this.field.dot(m1[0][0], m1[1][0], v[0], v[1])
+      ]
+    } else {
+      return Seq.Range(this.dim)
+        .map(row => Seq.Range(this.dim)
+          .reduce(F.zero, (sum, i) => F.add(sum, F.multiply(m1[i][row], v[i])))
+        ).toArray()
+    }
   }
 
   public multiply(m1: Matrix<FieldElement>, m2: Matrix<FieldElement>): Matrix<FieldElement> {
     const F = this.field
+    if (this.dim === 2) {
+      return [[
+        this.field.dot(m1[0][0], m1[1][0], m2[0][0], m2[0][1]),
+        this.field.dot(m1[0][1], m1[1][1], m2[0][0], m2[0][1]),
+      ], [
+        this.field.dot(m1[0][0], m1[1][0], m2[1][0], m2[1][1]),
+        this.field.dot(m1[0][1], m1[1][1], m2[1][0], m2[1][1]),
+      ]]
+    }
     return this.fill((col, row) => {
       let sum = F.zero
       for (let i = 0; i < this.dim; i++) {

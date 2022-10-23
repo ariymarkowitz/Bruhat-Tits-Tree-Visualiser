@@ -72,6 +72,14 @@ class RationalFieldSingleton extends Field<Rational> {
     return a.num == b.num && a.den == b.den
   }
 
+  public dot(a: Rational, b: Rational, c: Rational, d: Rational): Rational {
+    const xnum = a.num*c.num
+    const ynum = b.num*d.num
+    const xden = a.den*c.den
+    const yden = b.den*d.den
+    return this.reduce(xnum * yden + ynum * xden, xden * yden)
+  }
+
   public nonZeroPow(a: Rational, n: int) {
     return Rational(Math.pow(a.num, n), Math.pow(a.den, n))
   }
