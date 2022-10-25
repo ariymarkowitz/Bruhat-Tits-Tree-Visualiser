@@ -107,7 +107,7 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     if (this.dim === 2) {
       return [
         this.field.dot(m1[0][0], m1[1][0], v[0], v[1]),
-        this.field.dot(m1[0][0], m1[1][0], v[0], v[1])
+        this.field.dot(m1[0][1], m1[1][1], v[0], v[1])
       ]
     } else {
       return Seq.Range(this.dim)
