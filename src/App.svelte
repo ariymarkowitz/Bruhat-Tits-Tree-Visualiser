@@ -125,7 +125,7 @@
 		justify-content: center;
 		flex-direction: row;
 		gap: 0px 10px;
-		margin: 10px;
+		padding: 10px;
 
 		@media screen and (max-width: 600px) {
 			flex-direction: column;
