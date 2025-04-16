@@ -2,23 +2,20 @@
   import JSZip from 'jszip'
   import { saveAs } from 'file-saver'
   import { onMount } from "svelte"
-  import { TreeOptions, TreeRenderer } from "./TreeRenderer"
-  import { createEventDispatcher } from 'svelte'
+  import { type TreeOptions, TreeRenderer } from "./TreeRenderer"
 
-  const dispatch = createEventDispatcher()
+  type TreeCanvasProps = {
+    p: number
+    depth: number
+    width: number
+    height: number
+    options: TreeOptions
+    resolution?: number
+    oncomplete?: () => void
+  }
+  const { p, depth, width, height, options, resolution = 1, oncomplete = () => {} }: TreeCanvasProps = $props()
 
-  export let p: number
-  export let depth: number
-
-  export let width: number
-  export let height: number
-  export let resolution: number = 1
-
-  export let options: TreeOptions
-
-  let tree: TreeRenderer
-  $: tree = new TreeRenderer(p, depth, options, width, height, resolution)
-
+  let tree: TreeRenderer = $derived(new TreeRenderer(p, depth, options, width, height, resolution))
   let canvas: HTMLCanvasElement
 
   onMount(() => {
@@ -45,7 +42,7 @@
         zip.generateAsync({type:"blob"})
         .then(function (blob) {
             saveAs(blob, "tree.zip")
-            dispatch('download-complete')
+            oncomplete()
         });
         return
       }

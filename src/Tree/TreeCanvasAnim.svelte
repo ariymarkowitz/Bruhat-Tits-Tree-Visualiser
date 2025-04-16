@@ -1,19 +1,18 @@
 <script lang='ts'>
   import { onMount } from "svelte"
-  import { TreeOptions, TreeRenderer } from "./TreeRenderer"
+  import { type TreeOptions, TreeRenderer } from "./TreeRenderer"
 
-  export let p: number
-  export let depth: number
+  type TreeCanvasProps = {
+    p: number
+    depth: number
+    width: number
+    height: number
+    resolution: number
+    options: TreeOptions
+  }
+  const { p, depth, width, height, resolution = 1, options }: TreeCanvasProps = $props()
 
-  export let width: number
-  export let height: number
-  export let resolution: number = 1
-
-  export let options: TreeOptions
-
-  let tree: TreeRenderer
-  $: tree = new TreeRenderer(p, depth, options, width, height, resolution)
-
+  let tree: TreeRenderer = $derived(new TreeRenderer(p, depth, options, width, height, resolution))
   let canvas: HTMLCanvasElement
 
   onMount(() => {

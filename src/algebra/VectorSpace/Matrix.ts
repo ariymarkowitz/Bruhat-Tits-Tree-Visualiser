@@ -1,7 +1,6 @@
-import { cache } from 'decorator-cache-getter'
+import { Memoize } from 'fast-typescript-memoize'
 import type { Field } from '../Field/Field'
 import { Ring } from '../Ring/Ring'
-import type { int } from '../utils/int'
 import { Seq } from '../utils/Seq'
 import type { Vec, VectorSpace } from './VectorSpace'
 
@@ -14,31 +13,31 @@ export type Matrix<FieldElement> = FieldElement[][]
  * This allows the matrix to represent a set of generators for a vector space or lattice.
  */
 export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
-  private _dim: int
-  public get dim(): int {return this._dim}
+  private _dim: number
+  public get dim(): number {return this._dim}
 
   private _vectorSpace: VectorSpace<FieldElement>
   public get vectorSpace(): VectorSpace<FieldElement> { return this._vectorSpace }
 
   public get field(): Field<FieldElement> { return this.vectorSpace.field }
 
-  public constructor(vectorSpace: VectorSpace<FieldElement>, dim: int) {
+  public constructor(vectorSpace: VectorSpace<FieldElement>, dim: number) {
     super()
     this._vectorSpace = vectorSpace
     this._dim = dim
   }
 
-  @cache
+  @Memoize()
   public get zero() {
     return this.fill(() => this.field.zero)
   }
 
-  @cache
+  @Memoize()
   public get one() {
     return this.fill((col, row) => row === col ? this.field.one : this.field.zero)
   }
 
-  public map(m: Matrix<FieldElement>, f: (e: FieldElement, col: int, row: int) => FieldElement): Matrix<FieldElement> {
+  public map(m: Matrix<FieldElement>, f: (e: FieldElement, col: number, row: number) => FieldElement): Matrix<FieldElement> {
     return m.map((v, i) => v.map((e, j) => f(e, i, j)))
   }
 
@@ -50,7 +49,7 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return cols
   }
 
-  public fill(f: (col: int, row: int) => FieldElement): Matrix<FieldElement>{
+  public fill(f: (col: number, row: number) => FieldElement): Matrix<FieldElement>{
     const cols = new Array(this.dim)
     for (let i = 0; i < this.dim; i++) {
       const row = new Array(this.dim)
@@ -62,23 +61,23 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return cols
   }
 
-  public column(i: int, m: Matrix<FieldElement>): Vec<FieldElement> {
+  public column(i: number, m: Matrix<FieldElement>): Vec<FieldElement> {
     return m[i]
   }
 
-  public row(i: int, m: Matrix<FieldElement>): Vec<FieldElement> {
+  public row(i: number, m: Matrix<FieldElement>): Vec<FieldElement> {
     return m.map(v => v[i])
   }
 
-  public replaceRow(m: Matrix<FieldElement>, index: int, newrow: FieldElement[]): Matrix<FieldElement> {
+  public replaceRow(m: Matrix<FieldElement>, index: number, newrow: FieldElement[]): Matrix<FieldElement> {
     return this.map(m, (e, i, j) => j === index ? newrow[i] : e)
   }
 
-  public replaceColumn(m: Matrix<FieldElement>, index: int, newcol: FieldElement[]): Matrix<FieldElement> {
+  public replaceColumn(m: Matrix<FieldElement>, index: number, newcol: FieldElement[]): Matrix<FieldElement> {
     return m.map((v, i) => (i === index) ? newcol : v)
   }
 
-  public fromInts(ints: Matrix<int>): Matrix<FieldElement> {
+  public fromInts(ints: Matrix<number>): Matrix<FieldElement> {
     return ints.map(v => v.map(e => this.field.fromInt(e)))
   }
 
@@ -177,7 +176,7 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return this.fill((col, row) => row === col ? x : this.field.zero)
   }
 
-  public fromInt(n: int): Matrix<FieldElement> {
+  public fromInt(n: number): Matrix<FieldElement> {
     return this.fromScalar(this.field.one)
   }
 

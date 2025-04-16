@@ -1,13 +1,12 @@
 import type { DVField } from "../Field/DVField"
-import { EIntOrd, ExtendedInt } from "../Order/ExtendedInt"
-import type { int } from "../utils/int"
+import { EIntOrd, type ExtendedInt } from "../Order/ExtendedInt"
 import type { Matrix } from "./Matrix"
-import { Vec, VectorSpace } from "./VectorSpace"
+import { VectorSpace, type Vec } from "./VectorSpace"
 
 export class DVVectorSpace<FieldElement, Field extends DVField<FieldElement> = DVField<FieldElement>>
   extends VectorSpace<FieldElement, Field> {
 
-  public constructor(dim: int, field: Field) {
+  public constructor(dim: number, field: Field) {
     super(dim, field)
   }
 

@@ -1,24 +1,24 @@
-import { cache } from 'decorator-cache-getter'
-import { gcd, int, mod } from '../utils/int'
+import { Memoize } from 'fast-typescript-memoize'
+import { gcd, mod } from '../utils/int'
 import { Field } from './Field'
 
 export interface Rational {
-  num: int
-  den: int
+  num: number
+  den: number
 }
 
-export function Rational(num: int, den: int): Rational {
+export function Rational(num: number, den: number): Rational {
   return {num, den}
 }
 
 // A singleton class that represents the rationals.
 class RationalFieldSingleton extends Field<Rational> {
-  @cache public get zero() { return Rational(0, 1) }
-  @cache public get one() { return Rational(1, 1) }
+  @Memoize() public get zero() { return Rational(0, 1) }
+  @Memoize() public get one() { return Rational(1, 1) }
 
   // Generate a canonical representation of a rational number.
   // Every rational number created using this function will have a unique representation.
-  public reduce = (num: int, den: int): Rational => {
+  public reduce = (num: number, den: number): Rational => {
     if (!Number.isInteger(num) || !Number.isInteger(den)) {
       throw new Error('Arguments are not integers')
     }
@@ -80,11 +80,11 @@ class RationalFieldSingleton extends Field<Rational> {
     return this.reduce(xnum * yden + ynum * xden, xden * yden)
   }
 
-  public nonZeroPow(a: Rational, n: int) {
+  public nonZeroPow(a: Rational, n: number) {
     return Rational(Math.pow(a.num, n), Math.pow(a.den, n))
   }
 
-  public fromInt(n: int) {
+  public fromInt(n: number) {
     return Rational(n, 1)
   }
 

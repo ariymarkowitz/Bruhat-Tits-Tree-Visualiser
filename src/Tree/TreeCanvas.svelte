@@ -1,35 +1,44 @@
 <script lang='ts'>
-  import { cached } from '../UI/cached'
+  import Latex from '../ui/Latex.svelte'
+  import { memoize } from '../utils/memoize.svelte';
+  import { type InteractionState, type TreeOptions, TreeRenderer } from "./TreeRenderer"
 
-  import Latex from '../UI/Latex.svelte'
-  import { InteractionState, TreeOptions, TreeRenderer } from "./TreeRenderer"
+  type TreeCanvasProps = {
+    p: number
+    depth: number
+    width: number
+    height: number
+    options: TreeOptions
+  }
 
-  export let p: number
-  export let depth: number
-
-  export let width: number
-  export let height: number
-
-  export let options: TreeOptions
+  const { p, depth, width, height, options }: TreeCanvasProps = $props()
 
   let canvas: HTMLCanvasElement
-  let dpr: number = window.devicePixelRatio
+  let dpr: number = $state(window.devicePixelRatio)
 
-  const hitBoxInfo = cached<InteractionState | undefined>(
+  const hitBoxInfo = memoize<InteractionState | undefined>(
     undefined,
     (a, b) => a === b || (a !== undefined && b !== undefined && a.display === b.display && a.imageKey === b.imageKey)
   )
-  let mousemove = (e: MouseEvent) => {}
+  let mousemove: (e: MouseEvent) => void = $state(_ => {})
 
   let tooltip: HTMLElement
-  let tooltipText: string
+  let tooltipText: string = $derived(hitBoxInfo.get()?.display || '')
+  $effect(() => {
+    if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
+  })
 
-  let _options: TreeOptions
-  $: _options = {...options, hitbox: true, highlight: $hitBoxInfo?.imageKey}
+  let _options: TreeOptions = $derived({
+    ...options,
+    end: options.showEnd ? options.end : undefined,
+    isometry: options.showIsometry ? options.isometry : undefined,
+    hitbox: true,
+    highlight: hitBoxInfo.get()?.imageKey
+  })
 
   function render(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement) {
     if (!canvas) return
-    options = {...options, hitbox: true, highlight: $hitBoxInfo?.imageKey}
+    options = {...options, hitbox: true, highlight: hitBoxInfo.get()?.imageKey}
     let tree = new TreeRenderer(p, depth, options, width, height)
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
     
@@ -53,10 +62,11 @@
       }
     }
   }
-  $: tooltipText = $hitBoxInfo?.display || ''
-  $: if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
 
-  $: requestAnimationFrame(_ => render(p, depth, _options, canvas))
+  function startRender(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement) {
+    requestAnimationFrame(_ => render(p, depth, options, canvas))
+  }
+  $effect(() => startRender(p, depth, _options, canvas))
 </script>
 
 <canvas class='tree-canvas'
@@ -64,15 +74,15 @@
   bind:this={canvas}
   width={width*dpr}
   height={height*dpr}
-  on:mousemove={mousemove}
+  onmousemove={mousemove}
 ></canvas>
 <div class='tooltip' bind:this={tooltip}>
   <div class='tooltip-content'>
-    <Latex bind:text={tooltipText}/>
+    <Latex text={tooltipText}/>
   </div>
 </div>
 
-<style lang="scss">
+<style lang="css">
   .tooltip {
     position:absolute;
     visibility: hidden;

@@ -1,23 +1,22 @@
-import { cache } from "decorator-cache-getter"
+import { Memoize } from 'fast-typescript-memoize'
 import type { Field as FieldType } from "../Field/Field"
-import type { int } from "../utils/int"
 import { MatrixAlgebra } from "./Matrix"
 
 export type Vec<FieldElement> = FieldElement[]
 
 export class VectorSpace<FieldElement, Field extends FieldType<FieldElement> = FieldType<FieldElement>> {
-  private _dim: int
-  public get dim(): int { return this._dim }
+  private _dim: number
+  public get dim(): number { return this._dim }
 
   private _field: Field
   public get field(): Field { return this._field }
 
-  public constructor(dim: int, field: Field) {
+  public constructor(dim: number, field: Field) {
     this._field = field
     this._dim = dim
   }
 
-  public fromInts(ints: Vec<int>): Vec<FieldElement> {
+  public fromInts(ints: Vec<number>): Vec<FieldElement> {
     return ints.map(e => this.field.fromInt(e))
   }
 
@@ -41,7 +40,7 @@ export class VectorSpace<FieldElement, Field extends FieldType<FieldElement> = F
     return v.every(e => this.field.isZero(e))
   }
 
-  @cache
+  @Memoize()
   public get matrixAlgebra(): MatrixAlgebra<FieldElement> {
     return new MatrixAlgebra(this, this.dim)
   }

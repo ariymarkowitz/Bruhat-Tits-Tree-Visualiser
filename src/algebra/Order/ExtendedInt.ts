@@ -1,20 +1,19 @@
-import type { int } from "../utils/int"
 import { Order } from "./Order"
 
 export const Infinite = Symbol('Infinite')
-export type ExtendedInt = int | typeof Infinite
+export type ExtendedInt = number | typeof Infinite
 
 export class ExtendedIntOrd extends Order<ExtendedInt> {
 
-  public lt(a: ExtendedInt, b: ExtendedInt): a is int {
+  public lt(a: ExtendedInt, b: ExtendedInt): a is number {
     return (a !== Infinite) && (b === Infinite || a < b)
   }
   public lte(a: ExtendedInt, b: ExtendedInt): boolean {
     return (b === Infinite) || (a !== Infinite && a <= b)
   }
-  public min(a: ExtendedInt, b: int): int
-  public min(a: int, b: ExtendedInt): int
-  public min(a: int, b: int): int
+  public min(a: ExtendedInt, b: number): number
+  public min(a: number, b: ExtendedInt): number
+  public min(a: number, b: number): number
   public min(a: ExtendedInt, b: ExtendedInt): ExtendedInt
   public min(a: ExtendedInt, b: ExtendedInt) {
     if (a === Infinite) return b
@@ -22,17 +21,17 @@ export class ExtendedIntOrd extends Order<ExtendedInt> {
     return Math.min(a, b)
   }
   public max(a: ExtendedInt, b: ExtendedInt): ExtendedInt
-  public max(a: int, b: int): int
+  public max(a: number, b: number): number
   public max(a: ExtendedInt, b: ExtendedInt) {
     if (a === Infinite) return a
     if (b === Infinite) return b
     return Math.min(a, b)
   }
-  public mulInt(a: ExtendedInt, b: int): ExtendedInt {
+  public mulInt(a: ExtendedInt, b: number): ExtendedInt {
     if (a === Infinite) return a
     return a*b
   }
-  public divInt(a: ExtendedInt, b: int): ExtendedInt {
+  public divInt(a: ExtendedInt, b: number): ExtendedInt {
     if (a === Infinite) return a
     return Math.floor(a/b)
   }

@@ -1,14 +1,14 @@
-import { Adj, UnrootedTree } from './UnrootedTree';
-import { cache } from "decorator-cache-getter"
+import { type Adj, UnrootedTree } from './UnrootedTree';
 import { Adic } from "../Adic/Adic"
 import type { Rational } from "../Field/Rational"
 import { EIntOrd, Infinite } from "../Order/ExtendedInt"
-import { int, inverseMod, mod } from "../utils/int"
+import { inverseMod, mod } from "../utils/int"
 import { Seq } from "../utils/Seq"
 import { DVVectorSpace } from "../VectorSpace/DVVectorSpace"
 import type { Matrix } from "../VectorSpace/Matrix"
 import { RationalField } from './../Field/Rational'
 import type { Vec } from './../VectorSpace/VectorSpace'
+import { Memoize } from 'fast-typescript-memoize';
 
 type Mat = Matrix<Rational>
 
@@ -23,15 +23,15 @@ type Mat = Matrix<Rational>
  **/
 export interface Vertex {
   u: Rational,
-  n: int
+  n: number
 }
 
 export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
-  public p: int
+  public p: number
   public field: Adic
   public vspace: DVVectorSpace<Rational>
 
-  public constructor(p: int) {
+  public constructor(p: number) {
     super()
     this.p = p
     this.field = new Adic(p)
@@ -85,17 +85,17 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return list
   }
 
-  @cache
+  @Memoize()
   public get origin(): Vertex {
     return {u: RationalField.zero, n: 0}
   }
 
-  @cache
+  @Memoize()
   public get infEnd(): Vec<Rational> {
     return [this.field.zero, this.field.one]
   }
 
-  public apply(v: Vertex, n: int): Vertex {
+  public apply(v: Vertex, n: number): Vertex {
     const F = this.field
     if (n === 0) return {u: v.u, n: v.n+1}
     return {
@@ -111,7 +111,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     }
   }
 
-  public minVertexTranslationDistance(m: Matrix<Rational>): int {
+  public minVertexTranslationDistance(m: Matrix<Rational>): number {
     const F = this.field
     const M = this.vspace.matrixAlgebra
     const vTr = F.valuation(M.trace(m))
@@ -126,7 +126,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     }
   }
 
-  public translationLength(m: Matrix<Rational>): int {
+  public translationLength(m: Matrix<Rational>): number {
     const F = this.field
     const M = this.vspace.matrixAlgebra
     const vTr = F.valuation(M.trace(m))
@@ -260,7 +260,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return M.scale(F.fromVal(-minVal), m)
   }
 
-  public distanceToOrigin(m: Mat): int {
+  public distanceToOrigin(m: Mat): number {
     const F = this.field
     const M = this.vspace.matrixAlgebra
 
@@ -271,7 +271,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
     return -2 * minV + vDet
   }
 
-  public translationDistance(a: Mat, v: Vertex): int {
+  public translationDistance(a: Mat, v: Vertex): number {
     const M = this.vspace.matrixAlgebra
     return this.distanceToOrigin(M.conjugate(a, this.vertexToMat(v)))
   }

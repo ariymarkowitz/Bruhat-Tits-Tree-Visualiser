@@ -1,46 +1,29 @@
 {
-  "name": "svelte-app",
-  "version": "1.0.0",
+  "name": "bttree",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
-    "deploy": "npm run build && gh-pages -d public"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "@rollup/plugin-typescript": "^8.0.0",
-    "@tsconfig/svelte": "^2.0.1",
-    "@types/flatbush": "^3.3.0",
-    "@types/katex": "^0.14.0",
-    "autoprefixer": "^10.4.2",
-    "decorator-cache-getter": "^1.0.0",
-    "gh-pages": "^3.2.3",
-    "katex": "^0.15.3",
-    "node-sass": "^7.0.1",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-scss": "^3.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "rollup-plugin-typescript2": "^0.31.2",
-    "sass": "^1.38.1",
-    "svelte": "^3.0.0",
-    "svelte-check": "^2.0.0",
-    "svelte-preprocess": "^4.10.3",
-    "tslib": "^2.0.0",
-    "typescript": "^4.0.0"
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/file-saver": "^2.0.7",
+    "svelte": "^5.20.2",
+    "svelte-check": "^4.1.4",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
   },
   "dependencies": {
-    "color2k": "^2.0.0",
+    "color2k": "^2.0.3",
+    "fast-typescript-memoize": "^1.2.1",
     "file-saver": "^2.0.5",
-    "flatbush": "^4.0.0",
-    "jszip": "^3.7.1",
-    "sirv-cli": "^1.0.0",
-    "svelte-canvas": "^0.7.0"
+    "flatbush": "^4.4.0",
+    "jszip": "^3.10.1",
+    "katex": "^0.16.22"
   }
 }

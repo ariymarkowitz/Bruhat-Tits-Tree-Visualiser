@@ -1,12 +1,9 @@
-// Helps for keeping track of what the number is supposed to represent.
-export type int = number
-
-export function mod(a: int, b: int) {
+export function mod(a: number, b: number) {
   const result = a % b
   return result < 0 ? result + b : result
 }
 
-export function gcd(a: int, b: int): int {
+export function gcd(a: number, b: number): number {
   a = Math.abs(a)
   b = Math.abs(b)
   if (b > a) {
@@ -20,7 +17,7 @@ export function gcd(a: int, b: int): int {
   }
 }
 
-export function inverseMod(a: int, n: int): int {
+export function inverseMod(a: number, n: number): number {
   if (n < 2) throw new Error('n is less than 2')
   let a1 = n, b1 = 1, c1 = 0, a2 = mod(a, n), b2 = 0, c2 = 1
   while (a2 !== 1) {
@@ -31,7 +28,7 @@ export function inverseMod(a: int, n: int): int {
   return mod(c2, n)
 }
 
-export function isPrime(num: int): boolean {
+export function isPrime(num: number): boolean {
   if (num <= 1) return false
   if (num % 2 === 0 && num > 2) return false
   const s = Math.sqrt(num)

@@ -1,5 +1,3 @@
-import { writable } from 'svelte/store';
-
 import darkTheme from './dark'
 import lightTheme from './light'
 import lightLargeTheme from './light-large'
@@ -42,4 +40,3 @@ export function setTheme(theme: Theme) {
   html.style.setProperty('--translationAxisColor', theme.tree.translationAxis)
   html.style.setProperty('--endColor', theme.tree.end)
 }
-export const theme = writable(themes[0])

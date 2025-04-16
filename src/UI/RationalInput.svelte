@@ -1,22 +1,32 @@
 <script lang='ts'>
-  export let allowInf: boolean = false
-  export let emptyIsZero: boolean = false
+  export type RationalInputEvent = CustomEvent<[number, number] | undefined>
 
-  // The value displayed in the field.
-  export let value: string = ''
-  // The numeric state of the field.
-  export let state: [number, number] | undefined = parse(value)
+  type RationalInputProps = Partial<{
+    allowInf: boolean
+    emptyIsZero: boolean
+    onchange: (e: RationalInputEvent) => void
+  }>
 
-  let input: string
-  $: input = value
+  let {
+    allowInf = false,
+    emptyIsZero = false,
+    onchange = _ => {}
+  }: RationalInputProps = $props()
 
-  function validateInput(e) {
-    const newInput = e.target.value
-    if (isValidInput(input)) {
-      value = newInput
-      state = parse(value)
+  let value: string = $state('')
+  let prevInput: string = $state('')
+
+  function onInput() {
+    if (!isValidInput(value)) {
+      value = prevInput
+      return
+    }
+    prevInput = value
+    const parsed = parse(value)
+    if (parsed) {
+      onchange(new CustomEvent('change', { detail: parsed }))
     } else {
-      input = value
+      onchange(new CustomEvent('change', { detail: undefined }))
     }
   }
 
@@ -47,6 +57,15 @@
       return undefined
     }
   }
+
+  function setFromText() {
+    
+  }
+
+  // export function set(input: [number, number] | undefined) {
+  //   value = input ? `${input[0]} / ${input[1]}` : ''
+  // }
+
 </script>
 
-<input type='text' bind:value={input} on:input|preventDefault={validateInput}/>
+<input type='text' bind:value oninput={onInput}/>

@@ -1,6 +1,6 @@
+import { Memoize } from 'fast-typescript-memoize'
 import { FieldMultiplicativeGroup } from "../Group/FieldMultiplicativeGroup"
 import { Ring } from "../Ring/Ring"
-import type { int } from "../utils/int"
 import type { Rational } from "./Rational"
 
 export abstract class Field<FieldElement> extends Ring<FieldElement> {
@@ -29,11 +29,11 @@ export abstract class Field<FieldElement> extends Ring<FieldElement> {
     return this.unsafeDivide(a, b)
   }
 
-  public nonZeroPow(a: FieldElement, n: int): FieldElement {
+  public nonZeroPow(a: FieldElement, n: number): FieldElement {
     return this.multiplicativeGroup.pow(a, n)
   }
 
-  public pow(a: FieldElement, n: int): FieldElement {
+  public pow(a: FieldElement, n: number): FieldElement {
     if (this.isZero(a)) {
       if (n === 0) {
         throw new Error("0 to the power of 0 is undefined.")
@@ -50,12 +50,9 @@ export abstract class Field<FieldElement> extends Ring<FieldElement> {
     return this.divide(this.fromInt(r.num), this.fromInt(r.den))
   }
 
-  private _multiplicativeGroup: FieldMultiplicativeGroup<FieldElement>
-  public get multiplicativeGroup(): FieldMultiplicativeGroup<FieldElement> {
-    if (this._multiplicativeGroup === undefined) {
-      this._multiplicativeGroup = new FieldMultiplicativeGroup(this)
-    }
-    return this._multiplicativeGroup
+  private _multiplicativeGroup!: FieldMultiplicativeGroup<FieldElement>
+  @Memoize() public get multiplicativeGroup(): FieldMultiplicativeGroup<FieldElement> {
+    return new FieldMultiplicativeGroup(this)
   }
 
   public dot(a: FieldElement, b: FieldElement, c: FieldElement, d: FieldElement): FieldElement {

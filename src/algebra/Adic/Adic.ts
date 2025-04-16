@@ -1,19 +1,18 @@
 import { Rational, RationalField } from '../Field/Rational'
 import { DVField } from "../Field/DVField"
-import type { int } from "../utils/int"
-import { cache } from 'decorator-cache-getter'
-import { ExtendedInt, Infinite } from '../Order/ExtendedInt'
+import { type ExtendedInt, Infinite } from '../Order/ExtendedInt'
+import { Memoize } from "fast-typescript-memoize";
+
 
 export class Adic extends DVField<Rational> {
-  private _p: int
+  private _p: number
   public get p() {
     return this._p
   }
 
-  @cache
-  public get uniformizer() {return this.fromInt(this.p) }
+  @Memoize() public get uniformizer() {return this.fromInt(this.p) }
 
-  public constructor(p: int) {
+  public constructor(p: number) {
     super()
     this._p = p
   }
@@ -34,7 +33,7 @@ export class Adic extends DVField<Rational> {
     else return -this.valuationNonZeroInt(x.den)
   }
 
-  private valuationNonZeroInt(n: int): int {
+  private valuationNonZeroInt(n: number): number {
     let v = 0
     while (n % this.p === 0) {
       n /= this.p
@@ -44,7 +43,7 @@ export class Adic extends DVField<Rational> {
     return v
   }
 
-  public splitNonZero(x: Rational): {u: Rational, v: int} {
+  public splitNonZero(x: Rational): {u: Rational, v: number} {
     const splitNum = this.splitNonZeroInt(x.num)
     if (splitNum.u > 0) {
       return {
@@ -61,7 +60,7 @@ export class Adic extends DVField<Rational> {
     }
   }
 
-  private splitNonZeroInt(n: int): {u: int, v: int} {
+  private splitNonZeroInt(n: number): {u: number, v: number} {
     let v = 0
     while (n % this.p === 0) {
       n /= this.p
@@ -75,7 +74,7 @@ export class Adic extends DVField<Rational> {
     return RationalField.equals(a, b)
   }
 
-  public fromInt(n: int): Rational {
+  public fromInt(n: number): Rational {
     return RationalField.fromInt(n)
   }
 
@@ -119,7 +118,7 @@ export class Adic extends DVField<Rational> {
     return RationalField.dot(a, b, c, d)
   }
 
-  public nonZeroPow(a: Rational, n: int): Rational {
+  public nonZeroPow(a: Rational, n: number): Rational {
     return RationalField.nonZeroPow(a, n)
   }
 
@@ -130,7 +129,7 @@ export class Adic extends DVField<Rational> {
   // Does NOT give a unique value in the image of a in Q to Z/p^nZ.
   // Rather, finds the unique 0 <= r < p^n such that a = r + tp^n,
   // where t is an integer.
-  public modPow(a: Rational, n: int): Rational {
+  public modPow(a: Rational, n: number): Rational {
     if (this.isZero(a)) return a
     return this.remainder(a, this.fromVal(n))
   }

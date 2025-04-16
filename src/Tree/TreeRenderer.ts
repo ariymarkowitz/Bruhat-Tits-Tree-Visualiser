@@ -1,15 +1,15 @@
 import { parseToRgba } from 'color2k'
-import { cache } from 'decorator-cache-getter'
 import Flatbush from 'flatbush'
 import { Rational } from "../algebra/Field/Rational"
 import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
 import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
 import type { Adj } from '../algebra/Tree/UnrootedTree'
-import { angleLerp, boolOrLerp, discreteLerp, lerp, radialLerp } from '../algebra/utils/math'
+import { angleLerp, boolOrLerp, discreteLerp, lerp } from '../algebra/utils/math'
 import type { Matrix } from "../algebra/VectorSpace/Matrix"
 import type { Vec } from '../algebra/VectorSpace/VectorSpace'
 import { mixRgba } from '../utils/color'
 import type { Theme } from './../style/themes/themes'
+import { Memoize } from 'fast-typescript-memoize'
 
 export interface TreeOptions {
   end?: [number, number]
@@ -128,21 +128,21 @@ export class TreeRenderer {
   options: TreeOptions
   end?: Vec<Rational>
 
-  showIsometry: boolean
-  isoInfo: IsoInfo
-
   btt: BruhatTitsTree
 
   staticStates: Map<string, StaticState> = new Map()
   states: Map<string, VertexState> = new Map()
 
-  root: Vertex
-  rootImage: Vertex
-
   loopTime = 2000
 
-  hitBoxes: Flatbush
-  hitBoxMap: Array<InteractionState>
+  showIsometry!: boolean
+  isoInfo!: IsoInfo
+
+  root!: Vertex
+  rootImage!: Vertex
+
+  hitBoxes!: Flatbush
+  hitBoxMap!: Array<InteractionState>
 
   constructor(p: number, depth: number, options: TreeOptions, width: number, height: number, resolution: number = 1) {
     this.width = width
@@ -424,7 +424,6 @@ export class TreeRenderer {
   }
 
   interpAbsoluteStates(state1: VertexStateAbsolute, state2: VertexStateAbsolute, t: number): AbsoluteState {
-    const angle = angleLerp(state1.relative.angle, state2.relative.angle, t)
     return {
       x: lerp(state1.absolute.x, state2.absolute.x, t),
       y: lerp(state1.absolute.y, state2.absolute.y, t)
@@ -532,7 +531,7 @@ export class TreeRenderer {
     }
   }
 
-  interpolateTime(t): number {
+  interpolateTime(t: number): number {
     return (1-Math.cos((t * (Math.PI) / this.loopTime) % Math.PI))/2
   }
 
@@ -594,15 +593,15 @@ export class TreeRenderer {
     return this.options.theme
   }
 
-  @cache get type0Color() {
+  @Memoize() get type0Color() {
     return parseToRgba(this.theme.tree.type0)
   }
 
-  @cache get type1Color() {
+  @Memoize() get type1Color() {
     return parseToRgba(this.theme.tree.type1)
   }
 
-  @cache get numberOfVertices() {
+  @Memoize() get numberOfVertices() {
     return (this.p**(this.depth)*(this.p + 1) - 2)/(this.p - 1)
   }
 }
