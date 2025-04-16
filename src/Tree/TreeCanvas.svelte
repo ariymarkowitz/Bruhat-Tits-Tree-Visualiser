@@ -63,10 +63,13 @@
     }
   }
 
-  function startRender(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement) {
-    requestAnimationFrame(_ => render(p, depth, options, canvas))
+  function startRender(p: number, depth: number, options: TreeOptions, canvas: HTMLCanvasElement): number {
+    return requestAnimationFrame(_ => render(p, depth, options, canvas))
   }
-  $effect(() => startRender(p, depth, _options, canvas))
+  $effect(() => {
+    const n = startRender(p, depth, _options, canvas)
+    return () => cancelAnimationFrame(n)
+  })
 </script>
 
 <canvas class='tree-canvas'
