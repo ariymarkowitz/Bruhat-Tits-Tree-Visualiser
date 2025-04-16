@@ -21,25 +21,25 @@
   let prevInput: string = $state(init.toString())
   let numericValue: number = $state(init)
 
-  export const set = (n: number) => {
+  export const set = (n: number): boolean => {
     if (n !== numericValue) {
       numericValue = n
       value = n.toString()
+      return true
     }
+    return false
   }
 
-  function setFromNumber(n: number) {
-    if (n !== numericValue) {
-      numericValue = n
-      value = n.toString()
-      onchange(new CustomEvent('change', { detail: numericValue }));
+  function setInternal(n: number) {
+    if (set(n)) {
+      onchange(new CustomEvent('change', { detail: n }));
     }
   }
   
   function increment() {
     for (let i = numericValue + 1; i <= max; i++) {
       if (valid(i)) {
-        setFromNumber(i)
+        setInternal(i)
         return
       }
     }
@@ -48,7 +48,7 @@
   function decrement() {
     for (let i = numericValue - 1; i >= min; i--) {
       if (valid(i)) {
-        setFromNumber(i)
+        setInternal(i)
         return
       }
     }
