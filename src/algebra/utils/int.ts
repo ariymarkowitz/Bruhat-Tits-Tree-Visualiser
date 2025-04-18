@@ -1,6 +1,6 @@
 export function mod(a: number, b: number) {
   const result = a % b
-  return result < 0 ? result + b : result
+  return result < 0 ? result + Math.abs(b) : Math.abs(result)
 }
 
 export function gcd(a: number, b: number): number {
@@ -18,14 +18,15 @@ export function gcd(a: number, b: number): number {
 }
 
 export function inverseMod(a: number, n: number): number {
-  if (n < 2) throw new Error('n is less than 2')
-  let y1 = 0, y2 = 1
-  while (n !== 1) {
-    if (n === 0) throw new Error('a and n have common divisors')
-    let q = Math.floor(a/n);
-    [a, n, y1, y2] = [n, a % n, y2 - q * y1, y1]
+  let b = n
+  let x1 = 1, x2 = 0
+  while (b !== 1) {
+    if (b === 0) throw new Error('a and n have common divisors')
+    let r = mod(a, b)
+    let q = (a - r) / b;
+    [a, b, x1, x2] = [b, r, x2, x1 - q * x2]
   }
-  return mod(y2, n)
+  return mod(x2, n)
 }
 
 export function isPrime(num: number): boolean {

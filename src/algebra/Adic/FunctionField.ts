@@ -14,7 +14,7 @@ export type FnFldElt = {
   den: number[]
 }
 
-class FunctionField extends DVField<FnFldElt, number[]> {
+export class FunctionField extends DVField<FnFldElt, number[]> {
   public uniformizerInt = [0, 1]
   public residueFieldSize: number
 
@@ -61,8 +61,9 @@ class FunctionField extends DVField<FnFldElt, number[]> {
     }
 
     const {3: s, 4: t} = R.extendedGCD(reducedNum, reducedDen)
-    const coeff = Fp.divide(Fp.negate(R.leadingCoefficient(t)), R.leadingCoefficient(s))
-    return {num: R.multiplyByScalar(s, -coeff), den: R.multiplyByScalar(t, coeff)}
+    // The leading coefficient of the denominator should be 1.
+    const coeff = Fp.invert(R.leadingCoefficient(s))
+    return {num: R.multiplyByScalar(t, -coeff), den: R.multiplyByScalar(s, coeff)}
   }
   
   public valuation(x: FnFldElt): ExtendedInt {
@@ -97,9 +98,9 @@ class FunctionField extends DVField<FnFldElt, number[]> {
   public multiply(a: FnFldElt, b: FnFldElt): FnFldElt {
     const R = this.integralRing
 
-    // Pre-emptively reduce the degrees of the polynomials
-    const deg1 = EIntOrd.min(R.degree(a.num), R.degree(b.den)) as number
-    const deg2 = EIntOrd.min(R.degree(b.num), R.degree(a.den)) as number
+    // Pre-emptively reduce the valuations of the polynomials
+    const deg1 = EIntOrd.min(R.valuation(a.num), R.valuation(b.den)) as number
+    const deg2 = EIntOrd.min(R.valuation(b.num), R.valuation(a.den)) as number
     const an = R.shift(a.num, -deg1)
     const bn = R.shift(b.num, -deg2)
     

@@ -23,6 +23,10 @@ export abstract class EuclideanDomain<RingElement> extends Ring<RingElement> {
     return this.divmod(a, b)[1]
   }
 
+  /**
+   * Returns the GCD of a and b. Note that this is only unique up to
+   * multiplication by a unit.
+   */
   public gcd(a: RingElement, b: RingElement): RingElement {
     while (!this.isZero(b)) {
       [a, b] = [b, this.mod(a, b)]
@@ -31,9 +35,10 @@ export abstract class EuclideanDomain<RingElement> extends Ring<RingElement> {
   }
 
   /**
-   * Returns the extended GCD of a and b, i.e., returns (gcd(a, b), x, y, s, t) such that
-   * gcd(a, b) = a * x + b * y and a * s + b * t = 0, where s and t are coprime.
-   * In particular, t = -a / gcd(a, b) and s = b / gcd(a, b) up to scalar multiples.
+   * Returns the extended GCD of a and b, i.e., returns (gcd(a, b), x, y, s, t)
+   * such that gcd(a, b) = a * x + b * y and a * s + b * t = 0, where s and t
+   * are coprime. In particular, t = -a / gcd(a, b) and s = b / gcd(a, b) up to
+   * scalar multiples.
    */
   public extendedGCD(a: RingElement, b: RingElement): [RingElement, RingElement, RingElement, RingElement, RingElement] {
     let x0 = this.one

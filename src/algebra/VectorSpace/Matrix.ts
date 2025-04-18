@@ -198,7 +198,16 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     return F.equals(F.multiply(v[0], w[1]), F.multiply(v[1], w[0]))
   }
 
-  public toString(): string {
-    return `MatrixAlgebra(${this.dim}, ${this.field})`
+  public toString(): string
+  public toString(a: Matrix<FieldElement>): string
+  public toString(a?: Matrix<FieldElement>): string {
+    if (a === undefined) {
+      return `MatrixAlgebra(${this.field.toString()})`
+    } else {
+      return `[${a.map(v => v.map(e => this.field.toString(e)).join(', ')).join('\\\\')}]`
+    }
+  }
+  public toLatex(m: Matrix<FieldElement>): string {
+    return m.map(v => v.map(e => this.field.toLatex(e)).join(', ')).join('\\\\')
   }
 }

@@ -2,6 +2,7 @@
  * The integers as a ring.
  */
 
+import { mod } from '../utils/int'
 import { EuclideanDomain } from './EuclideanDomain'
 
 export class IntegerRing extends EuclideanDomain<number> {
@@ -34,17 +35,19 @@ export class IntegerRing extends EuclideanDomain<number> {
   
   public divmod(a: number, b: number): [number, number] {
     // Integer division and remainder
-    const quotient = Math.floor(a / b)
-    const remainder = a - quotient * b
-    return [quotient, remainder]
+    // a = b * q + r
+    // where 0 <= r < |b|
+    const r = mod(a, b)
+    const q = (a - r) / b
+    return [q, r]
   }
   
   public div(a: number, b: number): number {
-    return Math.floor(a / b)
+    return b > 0 ? Math.floor(a / b) : Math.ceil(a / b)
   }
 
   public mod(a: number, b: number): number {
-    return a % b
+    return mod(a, b)
   }
 
   public toString(): string;

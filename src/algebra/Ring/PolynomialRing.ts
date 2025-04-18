@@ -34,7 +34,7 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
 
     // Adjust maxLength to account for the result having leading zeros
     if (a.length === b.length) {
-      while (maxLength > 0 && a[maxLength - 1] === -b[maxLength - 1]) {
+      while (maxLength > 0 && a[maxLength - 1] === this.field.negate(b[maxLength - 1])) {
         maxLength--
       }
     }
@@ -101,16 +101,16 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
    * Returns the degree of the polynomial.
    * The degree of a non-zero polynomial is the largest index i such that a[i] != 0.
    */
-  public degree(a: PolyRingElt): ExtendedInt {
+  public degree(a: PolyRingElt): number {
     if (this.isZero(a)) {
-      return Infinite
+      return -Infinity
     }
     for (let i = a.length - 1; i >= 0; i--) {
       if (!this.field.isZero(a[i])) {
         return i
       }
     }
-    return Infinite
+    return -Infinity
   }
 
   /**
@@ -118,9 +118,6 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
    * The valuation of a non-zero polynomial is the smallest index i such that a[i] != 0.
    */
   public valuation(a: PolyRingElt): ExtendedInt {
-    if (this.isZero(a)) {
-      return Infinite
-    }
     for (let i = 0; i < a.length; i++) {
       if (!this.field.isZero(a[i])) {
         return i
@@ -162,7 +159,7 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
       return a
     }
     if (n < 0) {
-      return a.slice(n, a.length)
+      return a.slice(-n, a.length)
     }
     const result = new Array(a.length + n).fill(0)
     for (let i = 0; i < a.length; i++) {
@@ -186,9 +183,9 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
       return [this.zero, this.zero]
     }
     let q = this.zero
-    let deg = this.degree(b) as number
-    while (EIntOrd.gte(this.degree(a), deg)) {
-      const d = (this.degree(a) as number) - deg
+    let deg = this.degree(b)
+    while (this.degree(a) >= deg) {
+      const d = this.degree(a) - deg
       const coeff = this.field.divide(this.leadingCoefficient(a), this.leadingCoefficient(b))
       const term = this.shift(this.multiplyByScalar(b, coeff), d)
       a = this.subtract(a, term)
@@ -203,13 +200,6 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
 
   public mod(a: PolyRingElt, b: PolyRingElt): PolyRingElt {
     return this.divmod(a, b)[1]
-  }
-
-  public gcd(a: PolyRingElt, b: PolyRingElt): PolyRingElt {
-    while (!this.isZero(b)) {
-      [a, b] = [b, this.mod(a, b)]
-    }
-    return a
   }
 
   /**
@@ -238,20 +228,34 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
   public toString(a: PolyRingElt): string;
   public toString(a?: PolyRingElt): string {
     if (a === undefined) {
-      return `PolynomialRing(${a})`
+      return `PolynomialRing(F(${this.field.p}))`
     } else {
+      if (this.isZero(a)) return '0'
       // Render as a_0 + a_1 x + a_2 x^2 + ... + a_n x^n
-      return a.entries()
-      .filter(([_, coef]) => !this.field.isZero(coef))
-      .map(([i, coef]) => `${coef}x^{${i}}`)
+      const F = this.field
+      return a.map((coeff, i) => [coeff, i])
+      .filter(([coeff]) => !this.field.isZero(coeff))
+      .map(([coeff, i]) => {
+        const c = F.toString(coeff)
+        if (i === 0) return c
+        if (i === 1) return c+'x'
+        return c+`x^${i}`
+      })
       .reduce((str, term) => `${str} + ${term}`)
     }
   }
   public toLatex(a: PolyRingElt): string {
+    if (this.isZero(a)) return '0'
     // Render as a_0 + a_1 x + a_2 x^2 + ... + a_n x^n
-    return a.entries()
-      .filter(([_, coef]) => !this.field.isZero(coef))
-      .map(([i, coef]) => `${coef}x^{${i}}`)
+    const F = this.field
+    return a.map((coeff, i) => [coeff, i])
+      .filter(([coeff]) => !F.isZero(coeff))
+      .map(([coeff, i]) => {
+        const c = F.toString(coeff)
+        if (i === 0) return c
+        if (i === 1) return c+'x'
+        return c+`x^{${i}}`
+      })
       .reduce((str, term) => `${str} + ${term}`)
   }
 }

@@ -9,7 +9,7 @@ export class FiniteField extends Field<number>{
   public readonly zero = 0
   public readonly one = 1
 
-  constructor(private p: number) {
+  constructor(public p: number) {
     super()
     if (!Number.isInteger(p) || p <= 0) {
       throw new Error('p must be a positive integer')
@@ -59,5 +59,8 @@ export class FiniteField extends Field<number>{
     } else {
       return String(a)
     }
+  }
+  public toLatex(a: number): string {
+    return String(a)
   }
 }
