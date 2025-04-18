@@ -10,6 +10,7 @@
 	import RationalInput from './ui/RationalInput.svelte'
   import type { DVField } from './algebra/Field/DVField';
   import { Adic } from './algebra/Adic/Adic';
+  import RationalPolyInput from './ui/RationalPolyInput.svelte';
 
 	const inits = {
 		p: 2,
@@ -76,6 +77,9 @@
 			<hr />
 			<div class='sidebar-row'>
 				<input type='checkbox' name='end' bind:checked={showEnd} />End<RationalInput allowInf={true} onchange={e => end = e.detail} />
+			</div>
+			<div class='sidebar-row'>
+				<RationalPolyInput onchange={e => console.log(e.detail)}/>
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry

@@ -58,10 +58,6 @@
     }
   }
 
-  function setFromText() {
-    
-  }
-
   // export function set(input: [number, number] | undefined) {
   //   value = input ? `${input[0]} / ${input[1]}` : ''
   // }
