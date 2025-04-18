@@ -25,7 +25,7 @@ export class ExtendedIntOrd extends Order<ExtendedInt> {
   public max(a: ExtendedInt, b: ExtendedInt) {
     if (a === Infinite) return a
     if (b === Infinite) return b
-    return Math.min(a, b)
+    return Math.max(a, b)
   }
   public mulInt(a: ExtendedInt, b: number): ExtendedInt {
     if (a === Infinite) return a
