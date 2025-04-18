@@ -71,7 +71,7 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
    */
   public integralFromVal(n: ExtendedInt): RingElement {
     if (n === Infinite) return this.integralRing.zero
-    return this.integralRing.pow(this.uniformizerInt, -n)
+    return this.integralRing.pow(this.uniformizerInt, n)
   }
 
   /**

@@ -1,8 +1,7 @@
 import { parseToRgba } from 'color2k'
 import Flatbush from 'flatbush'
-import { Rational } from "../algebra/Field/Rationals"
 import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
-import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
+import { BruhatTtsTree } from '../algebra/Tree/BruhatTitsTree'
 import type { Adj } from '../algebra/Tree/UnrootedTree'
 import { angleLerp, boolOrLerp, discreteLerp, lerp } from '../algebra/utils/math'
 import type { Matrix } from "../algebra/VectorSpace/Matrix"
@@ -10,10 +9,11 @@ import type { Vec } from '../algebra/VectorSpace/VectorSpace'
 import { mixRgba } from '../utils/color'
 import type { Theme } from './../style/themes/themes'
 import { Memoize } from 'fast-typescript-memoize'
+import type { DVField } from '../algebra/Field/DVField'
 
-export interface TreeOptions {
-  end?: [number, number]
-  isometry?: Matrix<[number, number]>
+export interface TreeOptions<FieldElt, RingElt> {
+  end?: [RingElt, RingElt]
+  isometry?: Matrix<FieldElt>
   showIsometry: boolean
   showEnd: boolean
   hitbox?: boolean
@@ -105,8 +105,8 @@ interface EdgeGraphics {
   subdivide: boolean
 }
 
-interface IsoInfo {
-  iso: Matrix<Rational>
+interface IsoInfo<FieldElt> {
+  iso: Matrix<FieldElt>
   minDist: number
   isReflection: boolean
   isIdentity: boolean
@@ -118,17 +118,11 @@ interface IsoInfo {
  * All values that need interpolating are stored in maps,
  * to speed up calculation.
  */
-export class TreeRenderer {
-  width: number
-  height: number
-  resolution: number
-
+export class TreeRenderer<FieldElt, RingElt> {
   p: number
-  depth: number
-  options: TreeOptions
-  end?: Vec<Rational>
+  end?: Vec<FieldElt>
 
-  btt: BruhatTitsTree
+  btt: BruhatTtsTree<FieldElt, RingElt>
 
   staticStates: Map<string, StaticState> = new Map()
   states: Map<string, VertexState> = new Map()
@@ -136,28 +130,27 @@ export class TreeRenderer {
   loopTime = 2000
 
   showIsometry!: boolean
-  isoInfo!: IsoInfo
+  isoInfo!: IsoInfo<FieldElt>
 
-  root!: Vertex
-  rootImage!: Vertex
+  root!: Vertex<FieldElt>
+  rootImage!: Vertex<FieldElt>
 
   hitBoxes!: Flatbush
   hitBoxMap!: Array<InteractionState>
 
-  constructor(p: number, depth: number, options: TreeOptions, width: number, height: number, resolution: number = 1) {
-    this.width = width
-    this.height = height
-    this.resolution = resolution
+  constructor(
+    public field: DVField<FieldElt, RingElt>,
+    public depth: number,
+    public options: TreeOptions<FieldElt, RingElt>,
+    public width: number,
+    public height: number,
+    public resolution: number = 1
+  ) {
+    this.btt = new BruhatTtsTree(field)
+    this.p = this.btt.p
 
-    this.p = p
-
-    this.btt = new BruhatTitsTree(p)
-    const V = this.btt.vspace
-
-    this.depth = depth
-
-    this.options = options
-    this.end = options.end ? V.fromInts(options.end) : undefined
+    const F = this.field
+    this.end = options.end ? options.end.map(F.fromIntegral) : undefined
 
     this.setupIsometry()
     this.cacheAllVertices()
@@ -165,9 +158,9 @@ export class TreeRenderer {
 
   setupIsometry() {
     const M = this.btt.vspace.matrixAlgebra
-    let iso: Matrix<Rational>
+    let iso: Matrix<FieldElt>
     if (this.options.isometry) {
-      iso = this.options.isometry.map(v => v.map(e => Rational(e[0], e[1])))
+      iso = this.options.isometry
       if (M.isSingular(iso)) {
         iso = M.one
         this.showIsometry = false
@@ -187,14 +180,14 @@ export class TreeRenderer {
     }
   }
 
-  edgeState(v: Vertex, adj: Adj<Vertex, number>): EdgeState {
+  edgeState(v: Vertex<FieldElt>, adj: Adj<Vertex<FieldElt>, number>): EdgeState {
     return {
       forward: adj.edge,
       reverse: this.btt.reverseEdge(v, adj.vertex, adj.edge)
     }
   }
 
-  staticStateFromParams(v: Vertex, depth: number): StaticState {
+  staticStateFromParams(v: Vertex<FieldElt>, depth: number): StaticState {
     const image = this.btt.action(this.isoInfo.iso, v)
     return {
       depth,
@@ -210,27 +203,27 @@ export class TreeRenderer {
     }
   }
 
-  staticState(v: Vertex, parentState: StaticState): StaticState {
+  staticState(v: Vertex<FieldElt>, parentState: StaticState): StaticState {
     return this.staticStateFromParams(v, parentState.depth + 1)
   }
 
   /**
    * Get the key of a vertex.
    */
-  cacheKey(v: Vertex): string {
+  cacheKey(v: Vertex<FieldElt>): string {
     return this.btt.vertexToString(v)
   }
 
   /**
    * Cache a vertex-indexed map.
    */
-  cache<S, T extends S>(map: Map<string, S>, v: Vertex, value: T): T {
+  cache<S, T extends S>(map: Map<string, S>, v: Vertex<FieldElt>, value: T): T {
     const key = this.btt.vertexToString(v)
     map.set(key, value)
     return value
   }
 
-  cacheStaticState(v: Vertex, parentState: StaticState): StaticState {
+  cacheStaticState(v: Vertex<FieldElt>, parentState: StaticState): StaticState {
     const key = this.btt.vertexToString(v)
     if (this.staticStates.has(key)) {
       return this.staticStates.get(key)!
@@ -268,7 +261,7 @@ export class TreeRenderer {
     }
   }
 
-  getStartVertex(iso: IsoInfo) {
+  getStartVertex(iso: IsoInfo<FieldElt>) {
     return this.btt.minTranslationVertexNearOrigin(iso.iso)
   }
 
@@ -282,7 +275,7 @@ export class TreeRenderer {
     return state
   }
 
-  cacheState(v: Vertex, parentState: VertexState, edge: EdgeState): VertexState {
+  cacheState(v: Vertex<FieldElt>, parentState: VertexState, edge: EdgeState): VertexState {
     const key = this.cacheKey(v)
     if (this.states.has(key)) return this.states.get(key)!
 
@@ -312,9 +305,9 @@ export class TreeRenderer {
     }
   }
 
-  rootState(v: Vertex): VertexStateAbsolute {
-    interface PathState {
-      vertex: Vertex,
+  rootState(v: Vertex<FieldElt>): VertexStateAbsolute {
+    type PathState = {
+      vertex: Vertex<FieldElt>,
       state: VertexStateAbsolute
     }
 
@@ -336,9 +329,9 @@ export class TreeRenderer {
     return this.cache(this.states, v, state)
   }
 
-  cacheStateFromPath(v: Vertex, state: VertexState, w: Vertex) {
-    interface PathState {
-      vertex: Vertex,
+  cacheStateFromPath(v: Vertex<FieldElt>, state: VertexState, w: Vertex<FieldElt>) {
+    type PathState = {
+      vertex: Vertex<FieldElt>,
       state: VertexState
     }
 
@@ -358,10 +351,10 @@ export class TreeRenderer {
   }
 
   cacheAllVertices() {
-    interface State {
-      vertex: Vertex
+    type State = {
+      vertex: Vertex<FieldElt>
       state: VertexState
-      image: Vertex
+      image: Vertex<FieldElt>
       imageState: VertexState
     }
 
@@ -391,7 +384,7 @@ export class TreeRenderer {
     }, { vertex: this.root, state: state, image: this.rootImage, imageState }, this.root)
   }
 
-  key(v: Vertex): string {
+  key(v: Vertex<FieldElt>): string {
     return this.btt.vertexToString(v)
   }
 

@@ -18,11 +18,13 @@ export abstract class Monoid<MonoidElement> {
     if (n === 0) return this.identity
     let h = this.identity
     while (n > 1) {
-      if (n % 2 === 0) {
+      if (n % 2 !== 0) {
         h = this.multiply(g, h)
         g = this.multiply(g, g)
-        n = (n-1)/2
+        n = n-1
       }
+      g = this.multiply(g, g)
+      n = Math.floor(n / 2)
     }
     return this.multiply(g, h)
   }
