@@ -1,14 +1,19 @@
 import { Rational, Rationals } from '../Field/Rationals'
 import { DVField } from "../Field/DVField"
 import { Integers } from '../Ring/Integers'
+import { Memoize } from 'fast-typescript-memoize'
+import { FiniteField } from '../Field/FiniteField'
+import { mod } from '../utils/int'
 
 
 export class Adic extends DVField<Rational, number> {
-  public uniformizerInt
+  public uniformizerInt: number
+  public residueFieldSize: number
 
   public constructor(public p: number) {
     super()
     this.uniformizerInt = p
+    this.residueFieldSize = p
   }
 
   public get zero(): Rational {
@@ -30,12 +35,21 @@ export class Adic extends DVField<Rational, number> {
   public reduce(num: number, den: number): Rational {
     return Rationals.reduce(num, den)
   }
-
   public fractionUnsafe(num: number, den: number): Rational {
     return {num, den}
   }
 
-  public valuationRing = Integers
+  public integralRing = Integers
+
+  @Memoize() public get residueField(): FiniteField {
+      return new FiniteField(this.p)
+  }
+  public residue(a: number): number {
+    return mod(a, this.p)
+  }
+  public fromResidue(a: number): Rational {
+      return this.fromInt(a)
+  }
 
   public valuationNonZeroInt(n: number): number {
     let v = 0

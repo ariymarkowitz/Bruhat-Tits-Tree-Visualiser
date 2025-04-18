@@ -91,6 +91,10 @@ export class RationalField extends Field<Rational> {
       return `${r.num}/${r.den}`
     }
   }
+
+  public toLatex(r: Rational): string {
+    return `\\frac{${r.num}}{${r.den}}`
+  }
 }
 
 export const Rationals = new RationalField()

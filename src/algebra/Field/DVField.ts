@@ -1,6 +1,7 @@
 import { EIntOrd, Infinite, type ExtendedInt } from '../Order/ExtendedInt'
 import type { EuclideanDomain } from '../Ring/EuclideanDomain'
 import { Field } from "./Field"
+import type { FiniteField } from './FiniteField'
 
 /**
  * A field with a discrete valuation.
@@ -15,9 +16,12 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
    * The uniformizer as an element of the field.
    */
   public get uniformizer(): FieldElement {
-    return this.fractionUnsafe(this.uniformizerInt, this.valuationRing.one)
+    return this.fractionUnsafe(this.uniformizerInt, this.integralRing.one)
   }
-
+  /**
+   * The size of the residue field.
+   */
+  public abstract residueFieldSize: number
   /**
    * The numerator of a field element.
    */
@@ -37,7 +41,7 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
    */
   public abstract fractionUnsafe(num: RingElement, den: RingElement): FieldElement
 
-  public abstract valuationRing: EuclideanDomain<RingElement>
+  public abstract integralRing: EuclideanDomain<RingElement>
   public abstract valuationNonZeroInt(n: RingElement): number
   public valuation(x: FieldElement): ExtendedInt {
     if (this.isZero(x)) return Infinite
@@ -49,15 +53,25 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
     return EIntOrd.gte(this.valuation(a), 0)
   }
   public fromIntegral(a: RingElement): FieldElement {
-    return this.fractionUnsafe(a, this.valuationRing.one)
+    return this.fractionUnsafe(a, this.integralRing.one)
   }
+
+  public abstract residueField: FiniteField
+  /**
+   * Returns the residue of an element of the ring of integers.
+   */
+  public abstract residue(a: RingElement): number
+  /**
+   * Returns a representative of a residue class.
+   */
+  public abstract fromResidue(a: number): FieldElement
 
   /**
    * Returns u^a as an element of the valuation ring, where u is the uniformizer and a is an integer.
    */
   public integralFromVal(n: ExtendedInt): RingElement {
-    if (n === Infinite) return this.valuationRing.zero
-    return this.valuationRing.pow(this.uniformizerInt, -n)
+    if (n === Infinite) return this.integralRing.zero
+    return this.integralRing.pow(this.uniformizerInt, -n)
   }
 
   /**
@@ -79,20 +93,20 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
 
     if (this.valuationNonZeroInt(den) === 0) {
       const v = this.valuationNonZeroInt(num)
-      return {u: this.fractionUnsafe(this.valuationRing.div(num, this.integralFromVal(v)), den), v}
+      return {u: this.fractionUnsafe(this.integralRing.div(num, this.integralFromVal(v)), den), v}
     } else {
       const v = this.valuationNonZeroInt(den)
-      return {u: this.fractionUnsafe(this.valuationRing.div(num, this.integralFromVal(-v)), den), v: -v}
+      return {u: this.fractionUnsafe(this.integralRing.div(num, this.integralFromVal(-v)), den), v: -v}
     }
   }
 
   /**
-   * Returns a mod b, that is q such that a = b \* q + r, where q is in the valuation ring.
+   * Returns a mod b, that is q such that a = b \* q + r, where q is in the ring of integers.
    * This is not a modulus in the sense expected in a local field, because the norm used is not
    * well-defined in the local field.
    */
   public mod(a: FieldElement, b: FieldElement): FieldElement {
-    const R = this.valuationRing
+    const R = this.integralRing
     if (this.isZero(a)) return a
     if (this.den(a) === 1 && this.den(b) === 1) return this.fromIntegral(R.mod(this.num(a), this.num(b)))
     const intA = R.multiply(this.num(a), this.den(b))
@@ -102,7 +116,7 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
   }
 
   /**
-   * Returns a unique representive r satisfying a = q \* u^n + r, where q is in the valuation ring.
+   * Returns a unique representive r satisfying a = q \* u^n + r, where q is in the ring of integers.
    * This is not a modulus in the sense expected in a local field, because the norm used is not
    * well-defined in the local field.
    */
@@ -110,6 +124,11 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
     if (this.isZero(a)) return this.zero
     const {u, v} = this.splitNonZero(a)
     if (v >= n) return this.zero
-    return this.fractionUnsafe(this.valuationRing.div(this.num(u), this.integralFromVal(n - v)), this.den(u))
+    return this.fractionUnsafe(this.integralRing.div(this.num(u), this.integralFromVal(n - v)), this.den(u))
+  }
+
+  public toLatex(a: FieldElement): string {
+    const R = this.integralRing
+    return `\\frac{${R.toLatex(this.num(a))}}{${R.toLatex(this.den(a))}}`
   }
 }

@@ -60,4 +60,5 @@ export abstract class Ring<RingElement> {
 
   public abstract toString(): string
   public abstract toString(a: RingElement): string
+  public abstract toLatex(a: RingElement): string
 }

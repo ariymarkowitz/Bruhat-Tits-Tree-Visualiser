@@ -1,5 +1,5 @@
-import { Monoid } from '../Group/Monoid';
-import type { Ring } from './Ring';
+import { Monoid } from '../Group/Monoid'
+import type { Ring } from './Ring'
 
 export class RingMultiplicativeMonoid<RingElement> extends Monoid<RingElement> {
   constructor(public ring: Ring<RingElement>) {

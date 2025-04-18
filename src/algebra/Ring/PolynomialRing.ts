@@ -1,7 +1,6 @@
 import type { FiniteField } from '../Field/FiniteField'
 import { EIntOrd, Infinite, type ExtendedInt } from '../Order/ExtendedInt'
 import { EuclideanDomain } from './EuclideanDomain'
-import { Ring } from './Ring'
 
 /**
  * The i-th element of the array is the coefficient of the i-th power of x.
@@ -242,19 +241,17 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
       return `PolynomialRing(${a})`
     } else {
       // Render as a_0 + a_1 x + a_2 x^2 + ... + a_n x^n
-      const terms = []
-      for (let i = 0; i < a.length; i++) {
-        if (this.field.isZero(a[i])) continue
-        const coef = this.field.toString(a[i])
-        if (i === 0) {
-          terms.push(coef)
-        } else if (i === 1) {
-          terms.push(`${coef}x`)
-        } else {
-          terms.push(`${coef}x^${i}`)
-        }
-      }
-      return terms.reverse().join(' + ')
+      return a.entries()
+      .filter(([_, coef]) => !this.field.isZero(coef))
+      .map(([i, coef]) => `${coef}x^{${i}}`)
+      .reduce((str, term) => `${str} + ${term}`)
     }
+  }
+  public toLatex(a: PolyRingElt): string {
+    // Render as a_0 + a_1 x + a_2 x^2 + ... + a_n x^n
+    return a.entries()
+      .filter(([_, coef]) => !this.field.isZero(coef))
+      .map(([i, coef]) => `${coef}x^{${i}}`)
+      .reduce((str, term) => `${str} + ${term}`)
   }
 }

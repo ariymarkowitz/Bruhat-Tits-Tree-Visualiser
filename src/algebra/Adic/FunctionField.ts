@@ -15,6 +15,8 @@ export type FnFldElt = {
 }
 
 class FunctionField extends DVField<FnFldElt, number[]> {
+  public uniformizerInt = [0, 1]
+  public residueFieldSize: number
 
   constructor(public p: number) {
     super()
@@ -24,17 +26,16 @@ class FunctionField extends DVField<FnFldElt, number[]> {
     if (!isPrime(p)) {
       throw new Error('p must be prime')
     }
+    this.residueFieldSize = p
   }
   
   @Memoize() public get residueField(): FiniteField {
     return new FiniteField(this.p)
   }
 
-  @Memoize() public get valuationRing(): PolynomialRing {
+  @Memoize() public get integralRing(): PolynomialRing {
     return new PolynomialRing(this.residueField)
   }
-
-  public uniformizerInt = [0]
 
   public num(a: FnFldElt): number[] {
     return a.num
@@ -49,7 +50,7 @@ class FunctionField extends DVField<FnFldElt, number[]> {
   }
 
   public reduce(num: number[], den: number[]): FnFldElt {
-    const R = this.valuationRing
+    const R = this.integralRing
     const Fp = this.residueField
 
     const reducedNum = R.fromInts(num)
@@ -73,7 +74,7 @@ class FunctionField extends DVField<FnFldElt, number[]> {
   }
 
   public valuationNonZeroInt(n: number[]): number {
-    return this.valuationRing.degree(n) as number
+    return this.integralRing.valuation(n) as number
   }
   
   public unsafeInvert(a: FnFldElt): FnFldElt {
@@ -81,7 +82,7 @@ class FunctionField extends DVField<FnFldElt, number[]> {
   }
 
   public add(a: FnFldElt, b: FnFldElt): FnFldElt {
-    const R = this.valuationRing
+    const R = this.integralRing
 
     const c = R.add(R.multiply(a.num, b.den), R.multiply(b.num, a.den))
     const d = R.multiply(a.den, b.den)
@@ -90,11 +91,11 @@ class FunctionField extends DVField<FnFldElt, number[]> {
   }
 
   public negate(a: FnFldElt): FnFldElt {
-    return {num: this.valuationRing.negate(a.num), den: a.den}
+    return {num: this.integralRing.negate(a.num), den: a.den}
   }
 
   public multiply(a: FnFldElt, b: FnFldElt): FnFldElt {
-    const R = this.valuationRing
+    const R = this.integralRing
 
     // Pre-emptively reduce the degrees of the polynomials
     const deg1 = EIntOrd.min(R.degree(a.num), R.degree(b.den)) as number
@@ -111,6 +112,12 @@ class FunctionField extends DVField<FnFldElt, number[]> {
   public fromInt(n: number): FnFldElt {
     return {num: [mod(n, this.p)], den: [1]}
   }
+  public residue(a: number[]): number {
+    return mod(a[0], this.p)
+  }
+  public fromResidue(a: number): FnFldElt {
+    return this.fromInt(a)
+  }
 
   public toString(): string
   public toString(a: FnFldElt): string
@@ -118,8 +125,8 @@ class FunctionField extends DVField<FnFldElt, number[]> {
     if (a === undefined) {
       return 'FunctionField'
     } else {
-      const num = this.valuationRing.toString(a.num)
-      const den = this.valuationRing.toString(a.den)
+      const num = this.integralRing.toString(a.num)
+      const den = this.integralRing.toString(a.den)
       return `(${num}) / (${den})`
     }
   }
