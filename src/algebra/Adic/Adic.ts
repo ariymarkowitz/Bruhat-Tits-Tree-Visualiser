@@ -115,8 +115,14 @@ export class Adic extends DVField<Rational, number> {
     if (this.isZero(n)) {
       return `Adic[${this.p}](0)`
     } else {
-      const {u, v} = this.splitNonZero(n)
-      return `Adic[${this.p}]((${Rationals.toString(u)})e${v})`
+      return Rationals.toString(n)
+    }
+  }
+  public toLatex(n: Rational): string {
+    if (this.isZero(n)) {
+      return '0'
+    } else {
+      return Rationals.toLatex(n)
     }
   }
 }

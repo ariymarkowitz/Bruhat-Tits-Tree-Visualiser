@@ -73,9 +73,11 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
     if (num > 0) return num
     else return -this.valuationNonZeroInt(x.den)
   }
-
   public valuationNonZeroInt(n: number[]): number {
     return this.integralRing.valuation(n) as number
+  }
+  public integralFromVal(n: ExtendedInt): number[] {
+    return this.integralRing.fromValuation(n)
   }
   
   public unsafeInvert(a: FnFldElt): FnFldElt {

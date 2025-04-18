@@ -18,9 +18,8 @@ export abstract class Monoid<MonoidElement> {
     if (n === 0) return this.identity
     let h = this.identity
     while (n > 1) {
-      if (n % 2 !== 0) {
+      if (n % 2 === 1) {
         h = this.multiply(g, h)
-        g = this.multiply(g, g)
         n = n-1
       }
       g = this.multiply(g, g)

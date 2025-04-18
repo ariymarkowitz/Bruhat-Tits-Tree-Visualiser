@@ -64,6 +64,11 @@ describe('PolynomialRing', () => {
     expect(R.valuation([])).toBe(Infinite)
   })
 
+  test('fromValuation', () => {
+    expect(R.fromValuation(2)).toEqual([0, 0, 1])
+    expect(R.fromValuation(Infinite)).toEqual([])
+  })
+
   test('leadingCoefficient', () => {
     expect(R.leadingCoefficient([1, 2, 0, 3])).toBe(3)
     expect(() => R.leadingCoefficient([])).toThrow()

@@ -126,6 +126,13 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
     return Infinite
   }
 
+  public fromValuation(n: ExtendedInt): PolyRingElt {
+    if (n === Infinite) return this.zero
+    const x = Array(n + 1).fill(0)
+    x[n] = 1
+    return x
+  }
+
   public leadingCoefficient(a: PolyRingElt): number {
     if (this.isZero(a)) {
       throw new Error('Leading coefficient of zero polynomial is undefined')

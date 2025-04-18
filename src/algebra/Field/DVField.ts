@@ -80,8 +80,8 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
   public fromVal(n: ExtendedInt): FieldElement {
     if (n === Infinite) return this.zero
     else if (n === 0) return this.one
-    else if (n > 0) return this.pow(this.uniformizer, n)
-    return this.pow(this.uniformizer, -n)
+    const x = this.integralFromVal(Math.abs(n))
+    return n > 0 ? this.fractionUnsafe(x, this.integralRing.one) : this.fractionUnsafe(this.integralRing.one, x)
   }
 
   /**
@@ -96,7 +96,7 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
       return {u: this.fractionUnsafe(this.integralRing.div(num, this.integralFromVal(v)), den), v}
     } else {
       const v = this.valuationNonZeroInt(den)
-      return {u: this.fractionUnsafe(this.integralRing.div(num, this.integralFromVal(-v)), den), v: -v}
+      return {u: this.fractionUnsafe(num, this.integralRing.div(den, this.integralFromVal(v))), v: -v}
     }
   }
 
@@ -121,10 +121,7 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
    * well-defined in the local field.
    */
   public modPow(a: FieldElement, n: number): FieldElement {
-    if (this.isZero(a)) return this.zero
-    const {u, v} = this.splitNonZero(a)
-    if (v >= n) return this.zero
-    return this.fractionUnsafe(this.integralRing.div(this.num(u), this.integralFromVal(n - v)), this.den(u))
+    return this.mod(a, this.fromVal(n))
   }
 
   public toLatex(a: FieldElement): string {

@@ -32,6 +32,13 @@ describe('Integers', () => {
     expect(Integers.multiply(-2, 5)).toBe(-10)
   })
 
+  test('pow', () => {
+    expect(Integers.pow(2, 3)).toBe(8)
+    expect(Integers.pow(-2, 3)).toBe(-8)
+    expect(Integers.pow(0, 2)).toBe(0)
+    expect(Integers.pow(2, 0)).toBe(1)
+  })
+
   test('edNorm', () => {
     expect(Integers.edNorm(7)).toBe(7)
     expect(Integers.edNorm(-7)).toBe(7)
