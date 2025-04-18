@@ -112,9 +112,9 @@ describe('PolynomialRing', () => {
 
   test('toString and toLatex', () => {
     expect(R.toString()).toBe('PolynomialRing(F(5))')
-    expect(R.toString([1, 2, 0, 4])).toBe('1 + 2x + 4x^3')
+    expect(R.toString([1, 2, 0, 1])).toBe('1 + 2x + x^3')
     expect(R.toString([])).toBe('0')
-    expect(R.toLatex([1, 2, 0, 4])).toBe('1 + 2x + 4x^{3}')
+    expect(R.toLatex([1, 1, 0, 4])).toBe('1 + x + 4x^{3}')
     expect(R.toLatex([])).toBe('0')
   })
 })

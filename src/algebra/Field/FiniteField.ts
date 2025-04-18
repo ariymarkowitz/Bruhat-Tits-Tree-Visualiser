@@ -24,19 +24,19 @@ export class FiniteField extends Field<number>{
   }
 
   public add(a: number, b: number) {
-    return (a + b) % this.p
+    return mod(a + b, this.p)
   }
 
   public negate(a: number) {
-    return (this.p - a) % this.p
+    return mod(this.p - a, this.p)
   }
 
   public multiply(a: number, b: number) {
-    return (a * b) % this.p
+    return mod(a * b, this.p)
   }
 
   public divide(a: number, b: number) {
-    return (a * this.invert(b)) % this.p
+    return mod(a * this.invert(b), this.p)
   }
 
   public unsafeInvert(a: number) {

@@ -63,7 +63,7 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
     const {3: s, 4: t} = R.extendedGCD(reducedNum, reducedDen)
     // The leading coefficient of the denominator should be 1.
     const coeff = Fp.invert(R.leadingCoefficient(s))
-    return {num: R.multiplyByScalar(t, -coeff), den: R.multiplyByScalar(s, coeff)}
+    return {num: R.multiplyByScalar(t, Fp.negate(coeff)), den: R.multiplyByScalar(s, coeff)}
   }
   
   public valuation(x: FnFldElt): ExtendedInt {
@@ -104,12 +104,14 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
     const deg1 = EIntOrd.min(R.valuation(a.num), R.valuation(b.den)) as number
     const deg2 = EIntOrd.min(R.valuation(b.num), R.valuation(a.den)) as number
     const an = R.shift(a.num, -deg1)
+    const bd = R.shift(b.den, -deg1)
     const bn = R.shift(b.num, -deg2)
+    const ad = R.shift(a.den, -deg2)
     
-    return this.reduce(R.multiply(an, bn), R.multiply(an, bn))
+    return this.reduce(R.multiply(an, bn), R.multiply(ad, bd))
   }
   
-  public readonly zero = {num: [0], den: [1]}
+  public readonly zero = {num: [], den: [1]}
   public readonly one = {num: [1], den: [1]}
 
   public fromInt(n: number): FnFldElt {
@@ -128,9 +130,22 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
     if (a === undefined) {
       return 'FunctionField'
     } else {
-      const num = this.integralRing.toString(a.num)
-      const den = this.integralRing.toString(a.den)
-      return `(${num}) / (${den})`
+      if (this.isZero(a)) return '0'
+      const R = this.integralRing
+      let num = R.toString(a.num)
+      let den = R.toString(a.den)
+      if (R.degree(a.num) > 0) num = `(${num})`
+      if (R.degree(a.den) > 0) den = `(${den})`
+      if (R.isOne(a.den)) return num
+      return `${num}/${den}`
     }
+  }
+  public toLatex(a: FnFldElt): string {
+    if (this.isZero(a)) return '0'
+    const R = this.integralRing
+    const num = R.toLatex(a.num)
+    const den = R.toLatex(a.den)
+    if (R.isOne(a.den)) return num
+    return `\\frac{${num}}{${den}}`
   }
 }

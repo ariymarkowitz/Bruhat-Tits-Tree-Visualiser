@@ -66,5 +66,6 @@ describe('Rationals', () => {
 
   test('toLatex', () => {
     expect(Rationals.toLatex({ num: 2, den: 3 })).toBe('\\frac{2}{3}')
+    expect(Rationals.toLatex({ num: 2, den: 1 })).toBe('2')
   })
 })

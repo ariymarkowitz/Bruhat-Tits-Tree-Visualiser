@@ -93,6 +93,7 @@ export class RationalField extends Field<Rational> {
   }
 
   public toLatex(r: Rational): string {
+    if (r.den === 1) return `${r.num}`
     return `\\frac{${r.num}}{${r.den}}`
   }
 }

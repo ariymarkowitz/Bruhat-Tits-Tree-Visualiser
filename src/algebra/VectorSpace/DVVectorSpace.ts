@@ -3,7 +3,7 @@ import { EIntOrd, type ExtendedInt } from "../Order/ExtendedInt"
 import type { Matrix } from "./Matrix"
 import { VectorSpace, type Vec } from "./VectorSpace"
 
-export class DVVectorSpace<FieldElement, Field extends DVField<FieldElement> = DVField<FieldElement>>
+export class DVVectorSpace<FieldElement, RingElement, Field extends DVField<FieldElement, RingElement> = DVField<FieldElement, RingElement>>
   extends VectorSpace<FieldElement, Field> {
 
   public constructor(dim: number, field: Field) {
@@ -38,7 +38,7 @@ export class DVVectorSpace<FieldElement, Field extends DVField<FieldElement> = D
   }
 
   public inStandardTree(m: Matrix<FieldElement>) {
-    return this.matrixInValuationRing(m) && m.some(v => v.some(n => this.field.isIntegerUnit(n)))
+    return this.matrixInValuationRing(m) && m.some(v => v.some(n => this.field.valuation(n) === 0))
   }
 
   public isTrivialLattice(m: Matrix<FieldElement>) {

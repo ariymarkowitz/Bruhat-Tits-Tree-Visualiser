@@ -243,7 +243,7 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
       return a.map((coeff, i) => [coeff, i])
       .filter(([coeff]) => !this.field.isZero(coeff))
       .map(([coeff, i]) => {
-        const c = F.toString(coeff)
+        const c = (i > 0 && coeff === 1) ? '' : F.toString(coeff)
         if (i === 0) return c
         if (i === 1) return c+'x'
         return c+`x^${i}`
@@ -258,7 +258,7 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
     return a.map((coeff, i) => [coeff, i])
       .filter(([coeff]) => !F.isZero(coeff))
       .map(([coeff, i]) => {
-        const c = F.toString(coeff)
+        const c = (i > 0 && coeff === 1) ? '' : F.toString(coeff)
         if (i === 0) return c
         if (i === 1) return c+'x'
         return c+`x^{${i}}`

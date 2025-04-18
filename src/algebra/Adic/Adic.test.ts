@@ -67,5 +67,6 @@ describe('Adic', () => {
 
   test('toLatex', () => {
     expect(adic.toLatex({ num: 5, den: 6 })).toBe('\\frac{5}{6}')
+    expect(adic.toLatex({ num: 2, den: 1 })).toBe('2')
   })
 })
