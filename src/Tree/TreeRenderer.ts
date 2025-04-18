@@ -1,6 +1,6 @@
 import { parseToRgba } from 'color2k'
 import Flatbush from 'flatbush'
-import { Rational } from "../algebra/Field/Rational"
+import { Rational } from "../algebra/Field/Rationals"
 import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
 import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
 import type { Adj } from '../algebra/Tree/UnrootedTree'

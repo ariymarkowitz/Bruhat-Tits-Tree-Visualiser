@@ -1,8 +1,8 @@
 import { Memoize } from 'fast-typescript-memoize'
-import { gcd, mod } from '../utils/int'
+import { gcd } from '../utils/int'
 import { Field } from './Field'
 
-export interface Rational {
+export type Rational = {
   num: number
   den: number
 }
@@ -12,13 +12,13 @@ export function Rational(num: number, den: number): Rational {
 }
 
 // A singleton class that represents the rationals.
-class RationalFieldSingleton extends Field<Rational> {
+export class RationalField extends Field<Rational> {
   @Memoize() public get zero() { return Rational(0, 1) }
   @Memoize() public get one() { return Rational(1, 1) }
 
   // Generate a canonical representation of a rational number.
   // Every rational number created using this function will have a unique representation.
-  public reduce = (num: number, den: number): Rational => {
+  public reduce(num: number, den: number): Rational {
     if (!Number.isInteger(num) || !Number.isInteger(den)) {
       throw new Error('Arguments are not integers')
     }
@@ -72,14 +72,6 @@ class RationalFieldSingleton extends Field<Rational> {
     return a.num == b.num && a.den == b.den
   }
 
-  public dot(a: Rational, b: Rational, c: Rational, d: Rational): Rational {
-    const xnum = a.num*c.num
-    const ynum = b.num*d.num
-    const xden = a.den*c.den
-    const yden = b.den*d.den
-    return this.reduce(xnum * yden + ynum * xden, xden * yden)
-  }
-
   public nonZeroPow(a: Rational, n: number) {
     return Rational(Math.pow(a.num, n), Math.pow(a.den, n))
   }
@@ -92,15 +84,6 @@ class RationalFieldSingleton extends Field<Rational> {
     return r
   }
 
-  public remainder(a: Rational, b: Rational): Rational {
-    if (this.isZero(a)) return a
-    if (a.den === 1 && b.den === 1) return this.fromInt(mod(a.num, b.num))
-    const intA = a.num * b.den
-    const intB = b.num * a.den
-    if (intA < intB) return a
-    return this.reduce(mod(intA, intB), a.den * b.den)
-  }
-
   public toString(r?: Rational): string {
     if (r === undefined) {
       return `Rational Field`
@@ -110,4 +93,4 @@ class RationalFieldSingleton extends Field<Rational> {
   }
 }
 
-export const RationalField = new RationalFieldSingleton()
+export const Rationals = new RationalField()

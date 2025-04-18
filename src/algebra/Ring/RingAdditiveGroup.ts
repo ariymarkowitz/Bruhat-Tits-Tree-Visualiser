@@ -15,6 +15,7 @@ export class RingAdditiveGroup<RingElement> extends Group<RingElement> {
   public constructor(field: Ring<RingElement>) {
     super()
     this._ring = field
+    this._identity = field.zero
   }
 
   public multiply(a: RingElement, b: RingElement) {

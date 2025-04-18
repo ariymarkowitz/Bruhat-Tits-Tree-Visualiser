@@ -1,15 +1,14 @@
 import type { Field } from "../Field/Field"
+import type { RingMultiplicativeMonoid } from '../Ring/RingMultiplicativeMonoid'
 import { Group } from "./Group"
 
-export class FieldMultiplicativeGroup<FieldElement> extends Group<FieldElement> {
-  private _field: Field<FieldElement>
-  public get field(): Field<FieldElement> {
-    return this._field
+export class FieldMultiplicativeGroup<FieldElement> extends Group<FieldElement> implements RingMultiplicativeMonoid<FieldElement> {
+  public get ring(): Field<FieldElement> {
+    return this.field
   }
-
-  public constructor(field: Field<FieldElement>) {
+  
+  public constructor(public field: Field<FieldElement>) {
     super()
-    this._field = field
   }
 
   public get identity() {

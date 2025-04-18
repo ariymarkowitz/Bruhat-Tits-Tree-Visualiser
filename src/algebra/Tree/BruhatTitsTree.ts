@@ -1,12 +1,12 @@
 import { type Adj, UnrootedTree } from './UnrootedTree';
 import { Adic } from "../Adic/Adic"
-import type { Rational } from "../Field/Rational"
+import type { Rational } from "../Field/Rationals"
 import { EIntOrd, Infinite } from "../Order/ExtendedInt"
 import { inverseMod, mod } from "../utils/int"
 import { Seq } from "../utils/Seq"
 import { DVVectorSpace } from "../VectorSpace/DVVectorSpace"
 import type { Matrix } from "../VectorSpace/Matrix"
-import { RationalField } from './../Field/Rational'
+import { Rationals } from '../Field/Rationals'
 import type { Vec } from './../VectorSpace/VectorSpace'
 import { Memoize } from 'fast-typescript-memoize';
 
@@ -19,7 +19,7 @@ type Mat = Matrix<Rational>
  * | u  p^n |
  * ```
  * u is a finite p-adic expansion less than p^n,
- * ie. 0 <= u*p^m <= u*p^(m+n), where valuation(u) == m.
+ * ie. 0 <= u\*p^m <= u\*p^(m+n), where valuation(u) == m.
  **/
 export interface Vertex {
   u: Rational,
@@ -53,7 +53,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
   }
 
   public equals(a: Vertex, b: Vertex): boolean {
-    return RationalField.equals(a.u, b.u) && a.n === b.n
+    return Rationals.equals(a.u, b.u) && a.n === b.n
   }
 
   public path(a: Vertex, b: Vertex): Adj<Vertex, number>[] {
@@ -87,7 +87,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
 
   @Memoize()
   public get origin(): Vertex {
-    return {u: RationalField.zero, n: 0}
+    return {u: Rationals.zero, n: 0}
   }
 
   @Memoize()
@@ -288,7 +288,7 @@ export class BruhatTitsTree extends UnrootedTree<Vertex, number> {
   }
 
   public isEqualVertex(a: Vertex, b: Vertex) {
-    return RationalField.equals(a.u, b.u) && a.n === b.n
+    return Rationals.equals(a.u, b.u) && a.n === b.n
   }
 
   public vertexIsOrigin(v: Vertex) {

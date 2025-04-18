@@ -1,39 +1,43 @@
-import { Rational, RationalField } from '../Field/Rational'
+import { Rational, Rationals } from '../Field/Rationals'
 import { DVField } from "../Field/DVField"
-import { type ExtendedInt, Infinite } from '../Order/ExtendedInt'
-import { Memoize } from "fast-typescript-memoize";
+import { Integers } from '../Ring/Integers'
 
 
-export class Adic extends DVField<Rational> {
-  private _p: number
-  public get p() {
-    return this._p
-  }
+export class Adic extends DVField<Rational, number> {
+  public uniformizerInt
 
-  @Memoize() public get uniformizer() {return this.fromInt(this.p) }
-
-  public constructor(p: number) {
+  public constructor(public p: number) {
     super()
-    this._p = p
+    this.uniformizerInt = p
   }
 
   public get zero(): Rational {
-    return RationalField.zero
+    return Rationals.zero
   }
 
   public get one(): Rational {
-    return RationalField.one
+    return Rationals.one
   }
 
-  public valuation(x: Rational): ExtendedInt {
-    if (this.isZero(x)) return Infinite
-    
-    const num = this.valuationNonZeroInt(x.num)
-    if (num > 0) return num
-    else return -this.valuationNonZeroInt(x.den)
+  public num(a: Rational): number {
+    return a.num
   }
 
-  private valuationNonZeroInt(n: number): number {
+  public den(a: Rational): number {
+    return a.den
+  }
+
+  public reduce(num: number, den: number): Rational {
+    return Rationals.reduce(num, den)
+  }
+
+  public fractionUnsafe(num: number, den: number): Rational {
+    return {num, den}
+  }
+
+  public valuationRing = Integers
+
+  public valuationNonZeroInt(n: number): number {
     let v = 0
     while (n % this.p === 0) {
       n /= this.p
@@ -43,47 +47,12 @@ export class Adic extends DVField<Rational> {
     return v
   }
 
-  public splitNonZero(x: Rational): {u: Rational, v: number} {
-    const splitNum = this.splitNonZeroInt(x.num)
-    if (splitNum.u > 0) {
-      return {
-        u: Rational(splitNum.u, x.den),
-        v: splitNum.v
-      }
-    }
-    else {
-      const splitDen = this.splitNonZeroInt(x.den)
-      return {
-        u: Rational(splitDen.u, x.den),
-        v: -splitNum.v
-      }
-    }
-  }
-
-  private splitNonZeroInt(n: number): {u: number, v: number} {
-    let v = 0
-    while (n % this.p === 0) {
-      n /= this.p
-      v += 1
-    }
-
-    return {u: n, v}
-  }
-
   public equals(a: Rational, b: Rational): boolean {
-    return RationalField.equals(a, b)
+    return Rationals.equals(a, b)
   }
 
   public fromInt(n: number): Rational {
-    return RationalField.fromInt(n)
-  }
-
-  // Returns p^a.
-  public fromVal(n: ExtendedInt): Rational {
-    if (n === Infinite) return this.zero
-    else if (n === 0) return this.one
-    else if (n > 0) return Rational(Math.pow(this.p, n), 1)
-    else return Rational(1, Math.pow(this.p, -n))
+    return Rationals.fromInt(n)
   }
 
   public fromRational(r: Rational): Rational {
@@ -91,55 +60,35 @@ export class Adic extends DVField<Rational> {
   }
 
   public add(a: Rational, b: Rational): Rational {
-    return RationalField.add(a, b)
+    return Rationals.add(a, b)
   }
 
   public subtract(a: Rational, b: Rational): Rational {
-    return RationalField.subtract(a, b)
+    return Rationals.subtract(a, b)
   }
 
   public negate(a: Rational): Rational {
-    return RationalField.negate(a)
+    return Rationals.negate(a)
   }
 
   public multiply(a: Rational, b: Rational): Rational {
-    return RationalField.multiply(a, b)
+    return Rationals.multiply(a, b)
   }
 
   public unsafeDivide(a: Rational, b: Rational): Rational {
-    return RationalField.unsafeDivide(a, b)
+    return Rationals.unsafeDivide(a, b)
   }
 
   public unsafeInvert(a: Rational): Rational {
-    return RationalField.unsafeInvert(a)
-  }
-
-  public dot(a: Rational, b: Rational, c: Rational, d: Rational): Rational {
-    return RationalField.dot(a, b, c, d)
+    return Rationals.unsafeInvert(a)
   }
 
   public nonZeroPow(a: Rational, n: number): Rational {
-    return RationalField.nonZeroPow(a, n)
-  }
-
-  public remainder(a: Rational, b: Rational) {
-    return RationalField.remainder(a, b)
-  }
-
-  // Does NOT give a unique value in the image of a in Q to Z/p^nZ.
-  // Rather, finds the unique 0 <= r < p^n such that a = r + tp^n,
-  // where t is an integer.
-  public modPow(a: Rational, n: number): Rational {
-    if (this.isZero(a)) return a
-    return this.remainder(a, this.fromVal(n))
+    return Rationals.nonZeroPow(a, n)
   }
 
   public inValuationRing(a: Rational) {
     return a.den % this.p !== 0
-  }
-
-  public isIntegerUnit(a: Rational) {
-    return a.num % this.p !== 0 && a.den % this.p !== 0
   }
 
   public toString(): string
@@ -153,7 +102,7 @@ export class Adic extends DVField<Rational> {
       return `Adic[${this.p}](0)`
     } else {
       const {u, v} = this.splitNonZero(n)
-      return `Adic[${this.p}]((${RationalField.toString(u)})e${v})`
+      return `Adic[${this.p}]((${Rationals.toString(u)})e${v})`
     }
   }
 }

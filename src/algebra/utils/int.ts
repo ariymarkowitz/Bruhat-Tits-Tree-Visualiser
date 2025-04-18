@@ -19,13 +19,13 @@ export function gcd(a: number, b: number): number {
 
 export function inverseMod(a: number, n: number): number {
   if (n < 2) throw new Error('n is less than 2')
-  let a1 = n, b1 = 1, c1 = 0, a2 = mod(a, n), b2 = 0, c2 = 1
-  while (a2 !== 1) {
-    if (a2 === 0) throw new Error('a and n have common divisors')
-    let mul = Math.floor(a1/a2);
-    [a1, b1, c1, a2, b2, c2] = [a2, b2, c2, a1 - mul*a2, b1 - mul*b2, c1-mul*c2]
+  let y1 = 0, y2 = 1
+  while (n !== 1) {
+    if (n === 0) throw new Error('a and n have common divisors')
+    let q = Math.floor(a/n);
+    [a, n, y1, y2] = [n, a % n, y2 - q * y1, y1]
   }
-  return mod(c2, n)
+  return mod(y2, n)
 }
 
 export function isPrime(num: number): boolean {
