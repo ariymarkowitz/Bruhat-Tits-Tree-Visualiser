@@ -11,9 +11,9 @@
   import RationalPolyInput from './ui/RationalPolyInput.svelte';
 
 	const inits = {
-		characteristic: "nonzero",
+		characteristic: "zero",
 		p: 2,
-		depth: 3,
+		depth: 7,
 		end: undefined,
 		isometry: undefined,
 		resolution: 1,

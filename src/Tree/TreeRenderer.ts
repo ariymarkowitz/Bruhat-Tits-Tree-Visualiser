@@ -1,7 +1,7 @@
 import { parseToRgba } from 'color2k'
 import Flatbush from 'flatbush'
 import type { Vertex } from "../algebra/Tree/BruhatTitsTree"
-import { BruhatTtsTree } from '../algebra/Tree/BruhatTitsTree'
+import { BruhatTitsTree } from '../algebra/Tree/BruhatTitsTree'
 import type { Adj } from '../algebra/Tree/UnrootedTree'
 import { angleLerp, boolOrLerp, discreteLerp, lerp } from '../algebra/utils/math'
 import type { Matrix } from "../algebra/VectorSpace/Matrix"
@@ -122,7 +122,7 @@ export class TreeRenderer<FieldElt, RingElt> {
   p: number
   end?: Vec<FieldElt>
 
-  btt: BruhatTtsTree<FieldElt, RingElt>
+  btt: BruhatTitsTree<FieldElt, RingElt>
 
   staticStates: Map<string, StaticState> = new Map()
   states: Map<string, VertexState> = new Map()
@@ -146,7 +146,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     public height: number,
     public resolution: number = 1
   ) {
-    this.btt = new BruhatTtsTree(field)
+    this.btt = new BruhatTitsTree(field)
     this.p = this.btt.p
 
     const F = this.field

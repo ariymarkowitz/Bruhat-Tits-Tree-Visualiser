@@ -23,9 +23,9 @@ export interface Vertex<FieldElt> {
 }
 
 /**
- * The Bruhat-Tts tree over a discrete valued field.
+ * The Bruhat-Tits tree over a discrete valued field.
  */
-export class BruhatTtsTree<FieldElt, RingElt> extends UnrootedTree<Vertex<FieldElt>, number> {
+export class BruhatTitsTree<FieldElt, RingElt> extends UnrootedTree<Vertex<FieldElt>, number> {
   public vspace: DVVectorSpace<FieldElt, RingElt>
 
   public constructor(public field: DVField<FieldElt, RingElt>) {

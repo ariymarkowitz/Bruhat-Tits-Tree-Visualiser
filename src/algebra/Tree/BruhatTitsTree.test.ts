@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { BruhatTtsTree } from './BruhatTitsTree'
+import { BruhatTitsTree } from './BruhatTitsTree'
 import { Adic } from '../Adic/Adic'
 import { LaurentField } from '../Adic/LaurentField'
 
@@ -8,7 +8,7 @@ describe('BruhatTitsTree', () => {
   describe('with Adic field', () => {
     const p = 3
     const adic = new Adic(p)
-    const tree = new BruhatTtsTree(adic)
+    const tree = new BruhatTitsTree(adic)
 
     test('construction and basic properties', () => {
       expect(tree.p).toBe(p)
@@ -169,7 +169,7 @@ describe('BruhatTitsTree', () => {
   describe('with LaurentField', () => {
     const p = 2
     const field = new LaurentField(p)
-    const tree = new BruhatTtsTree(field)
+    const tree = new BruhatTitsTree(field)
 
     test('construction and basic properties', () => {
       expect(tree.p).toBe(p)
