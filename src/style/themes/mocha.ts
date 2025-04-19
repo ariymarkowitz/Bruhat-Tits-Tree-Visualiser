@@ -6,6 +6,7 @@ export default {
     border: '#60503B',
     focusBorder: '#261702',
     thickBorder: '#60503B',
+    githubColor: 'black',
   },
   tree: {
     type0: '#60503B',

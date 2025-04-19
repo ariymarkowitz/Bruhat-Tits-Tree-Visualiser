@@ -138,4 +138,8 @@
 			</div>
 		</div>
 	</div>
+	<a href="https://github.com/ariymarkowitz/Bruhat-Tits-Tree-Visualiser/" class="github" draggable=false target="_blank" rel="noopener noreferrer">
+    <img src={theme.ui.githubColor === "white" ? "src/github-mark-white.svg" : "src/github-mark.svg"}
+		alt="Link to GitHub" width="40" height="40" draggable=false />
+  </a>
 </main>

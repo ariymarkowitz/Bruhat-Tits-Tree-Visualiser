@@ -11,6 +11,7 @@ export interface Theme {
     border: string,
     focusBorder: string,
     thickBorder: string,
+    githubColor: string,
   },
   tree: {
     type0: string,

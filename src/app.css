@@ -234,3 +234,14 @@ hr {
 .latex {
 	color: var(--thickBorderColor);
 }
+
+.github {
+  position:fixed;
+  bottom: 10px;
+  right: 10px;
+  opacity: 0.5;
+  user-select: none;
+  &:hover {
+    opacity: 1;
+  }
+}
