@@ -148,6 +148,6 @@ export class LaurentField extends DVField<FnFldElt, number[]> {
     const num = R.toLatex(a.num)
     const den = R.toLatex(a.den)
     if (R.isOne(a.den)) return num
-    return `\\frac{${num}}{${den}}`
+    return `\\dfrac{${num}}{${den}}`
   }
 }
