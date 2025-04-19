@@ -1,18 +1,24 @@
 <script lang='ts'>
   import { onMount } from "svelte"
   import { type TreeOptions, TreeRenderer } from "./TreeRenderer"
+  import type { DVField } from '../algebra/Field/DVField';
+  import { Adic } from '../algebra/Adic/Adic';
+  import { FunctionField } from '../algebra/Adic/FunctionField';
 
   type TreeCanvasProps = {
+    characteristic: "zero" | "nonzero"
     p: number
     depth: number
     width: number
     height: number
     resolution: number
-    options: TreeOptions
+    options: TreeOptions<unknown>
   }
-  const { p, depth, width, height, resolution = 1, options }: TreeCanvasProps = $props()
-
-  let tree: TreeRenderer = $derived(new TreeRenderer(p, depth, options, width, height, resolution))
+  const { characteristic, p, depth, width, height, resolution = 1, options }: TreeCanvasProps = $props()
+  let field: DVField<unknown, unknown> = $derived(
+    characteristic === "zero" ? new Adic(p) : new FunctionField(p)
+  )
+  let tree: TreeRenderer<unknown, unknown> = $derived(new TreeRenderer(field, depth, options, width, height, resolution))
   let canvas: HTMLCanvasElement
 
   onMount(() => {

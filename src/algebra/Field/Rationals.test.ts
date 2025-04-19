@@ -62,6 +62,7 @@ describe('Rationals', () => {
   test('toString', () => {
     expect(Rationals.toString()).toBe('Rational Field')
     expect(Rationals.toString({ num: 2, den: 3 })).toBe('2/3')
+    expect(Rationals.toString({ num: 2, den: 1 })).toBe('2')
   })
 
   test('toLatex', () => {

@@ -56,6 +56,12 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
     return this.fractionUnsafe(a, this.integralRing.one)
   }
 
+  public fromInt(n: number): FieldElement {
+    const x = this.integralRing.fromInt(n)
+    if (this.integralRing.isZero(x)) return this.zero
+    return this.fractionUnsafe(x, this.integralRing.one)
+  }
+
   public abstract residueField: FiniteField
   /**
    * Returns the residue of an element of the ring of integers.

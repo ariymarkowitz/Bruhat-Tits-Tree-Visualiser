@@ -61,7 +61,7 @@ describe('Adic', () => {
 
   test('toString', () => {
     expect(adic.toString()).toBe('3-adic Field')
-    expect(adic.toString({ num: 0, den: 1 })).toBe('Adic[3](0)')
+    expect(adic.toString({ num: 0, den: 1 })).toBe('0')
     expect(adic.toString({ num: 5, den: 6 })).toBe('5/6')
   })
 

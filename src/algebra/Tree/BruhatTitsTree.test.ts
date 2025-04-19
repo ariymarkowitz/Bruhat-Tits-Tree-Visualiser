@@ -27,7 +27,7 @@ describe('BruhatTitsTree', () => {
       expect(tree.toString()).toBe('BruhatTitsTree[3-adic Field]')
       
       const vertex = { u: adic.fromInt(5), n: 2 }
-      expect(tree.vertexToString(vertex)).toBe('5/1_2')
+      expect(tree.vertexToString(vertex)).toBe('5_2')
       expect(tree.vertexToLatex(vertex)).toBe('\\left[5\\right]_{2}')
     })
 

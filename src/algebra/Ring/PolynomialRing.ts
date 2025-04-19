@@ -22,11 +22,12 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
   }
 
   public fromInt(n: number): PolyRingElt {
-    return [this.field.fromInt(n)]
+    const x = this.field.fromInt(n)
+    return this.field.isZero(x) ? this.zero : [x]
   }
 
   public fromInts(arr: number[]): PolyRingElt {
-    return this.truncateZeros(arr).map(coef => this.field.fromInt(coef))
+    return this.truncateZeros(arr.map(coef => this.field.fromInt(coef)))
   }
 
   public add(a: PolyRingElt, b: PolyRingElt): PolyRingElt {
@@ -159,15 +160,10 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
   }
 
   public shift(a: PolyRingElt, n: number): PolyRingElt {
-    if (this.isZero(a)) {
-      return this.zero
-    }
-    if (n === 0) {
-      return a
-    }
-    if (n < 0) {
-      return a.slice(-n, a.length)
-    }
+    if (this.isZero(a)) return a
+    if (n === 0) return a
+    if (n < 0) return a.slice(-n, a.length)
+
     const result = new Array(a.length + n).fill(0)
     for (let i = 0; i < a.length; i++) {
       result[i + n] = a[i]

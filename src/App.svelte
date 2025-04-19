@@ -63,14 +63,14 @@
 <main>
 	<div class='container'>
 		<div class='tree-container'>
-			<!-- {#if animate === "animate"}
-			<TreeCanvasAnim width={800} height={800} p={p} depth={depth} options={treeOptions} resolution={resolution}/>
+			{#if animate === "animate"}
+			<TreeCanvasAnim width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions} resolution={resolution}/>
 			{:else if animate === "download"}
-			<TreeCanvasAnimDownload width={800} height={800} p={p} depth={depth} options={treeOptions} resolution={resolution}
+			<TreeCanvasAnimDownload width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions} resolution={resolution}
 			oncomplete={() => animate = "static"}/>
-			{:else} -->
+			{:else}
 			<TreeCanvas width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions}/>
-			<!-- {/if} -->
+			{/if}
 		</div>
 		<div class='sidebar'>
 			<div class='sidebar-row'>

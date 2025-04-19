@@ -204,10 +204,12 @@ export class MatrixAlgebra<FieldElement> extends Ring<Matrix<FieldElement>> {
     if (a === undefined) {
       return `MatrixAlgebra(${this.field.toString()})`
     } else {
-      return `[${a.map(v => v.map(e => this.field.toString(e)).join(', ')).join('\\\\')}]`
+      return `[${a.map(v => `[${v.map(e => this.field.toString(e)).join(', ')}]`).join(', ')}]`
     }
   }
   public toLatex(m: Matrix<FieldElement>): string {
-    return m.map(v => v.map(e => this.field.toLatex(e)).join(', ')).join('\\\\')
+    return `\\begin{bmatrix} ${
+      m.map(v => v.map(e => this.field.toLatex(e)).join(' & ')).join(' \\\\ ')
+    } \\end{bmatrix}`
   }
 }

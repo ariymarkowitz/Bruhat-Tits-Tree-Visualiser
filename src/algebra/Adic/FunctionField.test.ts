@@ -20,6 +20,7 @@ describe('FunctionField', () => {
 
   test('fromInt', () => {
     expect(F.fromInt(4)).toEqual({ num: [1], den: [1] })
+    expect(F.fromInt(0)).toEqual({ num: [], den: [1] })
   })
 
   test('add', () => {

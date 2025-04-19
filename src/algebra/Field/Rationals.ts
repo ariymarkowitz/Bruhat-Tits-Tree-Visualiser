@@ -85,11 +85,9 @@ export class RationalField extends Field<Rational> {
   }
 
   public toString(r?: Rational): string {
-    if (r === undefined) {
-      return `Rational Field`
-    } else {
-      return `${r.num}/${r.den}`
-    }
+    if (r === undefined) return `Rational Field`
+    if (r.den === 1) return `${r.num}`
+    return `${r.num}/${r.den}`
   }
 
   public toLatex(r: Rational): string {

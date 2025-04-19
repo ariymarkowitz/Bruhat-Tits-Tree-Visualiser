@@ -15,7 +15,7 @@ describe('PolynomialRing', () => {
   test('fromInt and fromInts', () => {
     expect(R.fromInt(3)).toEqual([3])
     expect(R.fromInts([1, 2, 0, 0])).toEqual([1, 2])
-    expect(R.fromInts([0, 0, 0])).toEqual([])
+    expect(R.fromInts([0, 5, 0])).toEqual([])
   })
 
   test('add', () => {

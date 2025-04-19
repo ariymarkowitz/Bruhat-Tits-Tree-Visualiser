@@ -119,9 +119,6 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
   public readonly zero = {num: [], den: [1]}
   public readonly one = {num: [1], den: [1]}
 
-  public fromInt(n: number): FnFldElt {
-    return {num: [mod(n, this.p)], den: [1]}
-  }
   public residue(a: number[]): number {
     return this.integralRing.isZero(a) ? 0 : mod(a[0], this.p)
   }
