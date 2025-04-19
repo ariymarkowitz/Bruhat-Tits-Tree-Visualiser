@@ -89,29 +89,27 @@
 			<hr />
 			<div class='sidebar-row'>
 				<input type='checkbox' name='end' bind:checked={showEnd} />End
-				{#if characteristic === "zero"}
-				<RationalInput allowInf={true} onchange={e => char0end = e.detail} />
-				{:else}
-				<RationalPolyInput allowInf={true} onchange={e => charpend = e.detail}/>
-				{/if}
+				<div style:display={characteristic === 'zero' ? '' : 'none'}>
+					<RationalInput allowInf={true} onchange={e => char0end = e.detail} />
+				</div>
+				<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
+					<RationalPolyInput allowInf={true} onchange={e => charpend = e.detail}/>
+				</div>
 			</div>
 			<div class='sidebar-row'>
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
-				{#if characteristic === "zero"}
-					<div class='combined-elements'>
+					<div class='combined-elements' style:display={characteristic === 'zero' ? '' : 'none'}>
 						<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
 						<MatrixInput characteristic={"zero"} onchange={e => char0isometry = e.detail} />
 						<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
 					</div>
-				{:else}
-					<div class='combined-elements'>
+					<div class='combined-elements' style:display={characteristic === 'nonzero' ? '' : 'none'}>
 						<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
 						<MatrixInput characteristic={"nonzero"} onchange={e => charpisometry = e.detail} />
 						<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
 					</div>
-				{/if}
 			</div>
 			<hr />
 			<div class="sidebar-row">

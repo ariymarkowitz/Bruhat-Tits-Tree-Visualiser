@@ -58,10 +58,6 @@
     }
   }
 
-  // export function set(input: [number, number] | undefined) {
-  //   value = input ? `${input[0]} / ${input[1]}` : ''
-  // }
-
 </script>
 
 <input type='text' bind:value oninput={onInput}/>
