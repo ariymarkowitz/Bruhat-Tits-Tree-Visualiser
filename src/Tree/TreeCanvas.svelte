@@ -1,6 +1,6 @@
 <script lang='ts'>
   import { Adic } from '../algebra/Adic/Adic';
-  import { FunctionField } from '../algebra/Adic/FunctionField';
+  import { LaurentField } from '../algebra/Adic/LaurentField';
   import type { DVField } from '../algebra/Field/DVField';
   import Latex from '../ui/Latex.svelte'
   import { memoize } from '../utils/memoize.svelte';
@@ -33,7 +33,7 @@
   })
 
   let field: DVField<unknown, unknown> = $derived(
-    characteristic === "zero" ? new Adic(p) : new FunctionField(p)
+    characteristic === "zero" ? new Adic(p) : new LaurentField(p)
   )
 
   let _options: TreeOptions<unknown> = $derived({

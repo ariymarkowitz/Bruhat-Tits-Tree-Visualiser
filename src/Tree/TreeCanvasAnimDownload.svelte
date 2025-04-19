@@ -5,7 +5,7 @@
   import { type TreeOptions, TreeRenderer } from "./TreeRenderer"
   import type { DVField } from '../algebra/Field/DVField';
   import { Adic } from '../algebra/Adic/Adic';
-  import { FunctionField } from '../algebra/Adic/FunctionField';
+  import { LaurentField } from '../algebra/Adic/LaurentField';
 
   type TreeCanvasProps = {
     characteristic: "zero" | "nonzero"
@@ -19,7 +19,7 @@
   }
   const { characteristic, p, depth, width, height, options, resolution = 1, oncomplete = () => {} }: TreeCanvasProps = $props()
   let field: DVField<unknown, unknown> = $derived(
-    characteristic === "zero" ? new Adic(p) : new FunctionField(p)
+    characteristic === "zero" ? new Adic(p) : new LaurentField(p)
   )
   let tree: TreeRenderer<unknown, unknown> = $derived(new TreeRenderer(field, depth, options, width, height, resolution))
   let canvas: HTMLCanvasElement
