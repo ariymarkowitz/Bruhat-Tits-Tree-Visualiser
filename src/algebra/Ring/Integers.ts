@@ -32,6 +32,10 @@ export class IntegerRing extends EuclideanDomain<number> {
   public edNorm(a: number): number {
     return Math.abs(a)
   }
+
+  public isUnit(a: number): boolean {
+    return a === 1 || a === -1
+  }
   
   public divmod(a: number, b: number): [number, number] {
     // Integer division and remainder

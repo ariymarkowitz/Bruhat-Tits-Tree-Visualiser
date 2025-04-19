@@ -14,6 +14,10 @@ export abstract class EuclideanDomain<RingElement> extends Ring<RingElement> {
    * Returns q and r such that a = b * q + r, where r = 0 or |r| < |b|.
    */ 
   public abstract divmod(a: RingElement, b: RingElement): [RingElement, RingElement]
+  /**
+   * Tests if a is a unit, i.e., if it has a multiplicative inverse.
+   */
+  public abstract isUnit(a: RingElement): boolean
 
   public div(a: RingElement, b: RingElement): RingElement {
     return this.divmod(a, b)[0]
@@ -59,7 +63,7 @@ export abstract class EuclideanDomain<RingElement> extends Ring<RingElement> {
 
   public inverseMod(a: RingElement, b: RingElement): RingElement {
     const [gcd, x] = this.extendedGCD(a, b)
-    if (!this.isOne(gcd)) throw new Error('No inverse exists.')
+    if (!this.isUnit(gcd)) throw new Error('No inverse exists.')
     return this.mod(x, b)
   }
 }

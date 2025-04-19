@@ -175,6 +175,10 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
       return this.degree(a)
   }
 
+  public isUnit(a: PolyRingElt): boolean {
+    return this.degree(a) === 0
+  }
+
   /**
    * Returns q and r such that a = b * q + r, where deg(r) < deg(b).
    */ 
