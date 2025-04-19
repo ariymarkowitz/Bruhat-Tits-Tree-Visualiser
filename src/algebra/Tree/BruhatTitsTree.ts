@@ -26,7 +26,7 @@ export interface Vertex<FieldElt> {
  * The Bruhat-Tts tree over a discrete valued field.
  */
 export class BruhatTtsTree<FieldElt, RingElt> extends UnrootedTree<Vertex<FieldElt>, number> {
-  public vspace: DVVectorSpace<FieldElt>
+  public vspace: DVVectorSpace<FieldElt, RingElt>
 
   public constructor(public field: DVField<FieldElt, RingElt>) {
     super()
@@ -52,7 +52,6 @@ export class BruhatTtsTree<FieldElt, RingElt> extends UnrootedTree<Vertex<FieldE
   public reverseEdge(parent: Vertex<FieldElt>, child: Vertex<FieldElt>, edge: number): number {
     if (edge !== this.p) return this.p
     const F = this.field
-    const R = this.integralRing
     return F.residue(F.num(F.divide(F.subtract(parent.u, child.u), F.fromVal(parent.n))))
   }
 

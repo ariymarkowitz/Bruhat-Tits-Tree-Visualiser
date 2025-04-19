@@ -108,7 +108,7 @@ export abstract class DVField<FieldElement, RingElement> extends Field<FieldElem
   public mod(a: FieldElement, b: FieldElement): FieldElement {
     const R = this.integralRing
     if (this.isZero(a)) return a
-    if (this.den(a) === 1 && this.den(b) === 1) return this.fromIntegral(R.mod(this.num(a), this.num(b)))
+    if (R.isOne(this.den(a)) && R.isOne(this.den(b))) return this.fromIntegral(R.mod(this.num(a), this.num(b)))
     const intA = R.multiply(this.num(a), this.den(b))
     const intB = R.multiply(this.num(b), this.den(a))
     if (R.edNorm(intA) < R.edNorm(intB)) return a

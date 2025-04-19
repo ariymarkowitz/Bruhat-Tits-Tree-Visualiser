@@ -8,13 +8,12 @@
 	import Latex from './ui/Latex.svelte'
 	import MatrixInput from './ui/MatrixInput.svelte'
 	import RationalInput from './ui/RationalInput.svelte'
-  import type { DVField } from './algebra/Field/DVField';
-  import { Adic } from './algebra/Adic/Adic';
   import RationalPolyInput from './ui/RationalPolyInput.svelte';
 
 	const inits = {
+		characteristic: "nonzero",
 		p: 2,
-		depth: 7,
+		depth: 3,
 		end: undefined,
 		isometry: undefined,
 		resolution: 1,
@@ -24,11 +23,11 @@
 	const theme = $derived(themes.find(t => t.name === themeInput) || themes[0])
 	$effect(() => setTheme(theme))
 
+	let characteristic = $state(inits.characteristic) as "zero" | "nonzero"
 	let p = $state(inits.p)
 	function validateP(p: number) {
 		return isPrime(p)
 	}
-	let field: DVField<unknown, unknown> = $derived(new Adic(p))
 
 	let depthElt: StepperInput
 	let depthState: [number, number] = $state([inits.depth, inits.p])
@@ -39,10 +38,12 @@
 	))
 	$effect(() => { depthElt.set(depth) })
 
-	let end: [number, number] | undefined = $state(inits.end)
+	let char0end: [number, number] | undefined = $state(inits.end)
+	let charpend: [number[], number[]] | undefined = $state(inits.end)
 	let showEnd = $state(false)
 
-	let isometry: [number, number][][] | undefined = $state(inits.isometry)
+	let char0isometry: [unknown, unknown][][] | undefined = $state(inits.isometry)
+	let charpisometry: [unknown, unknown][][] | undefined = $state(inits.isometry)
 	let showIsometry = $state(false)
 
 	let resolution: number = $state(inits.resolution)
@@ -50,9 +51,13 @@
 	type AnimationType = "animate" | "download" | "static"
 	let animate: AnimationType = $state("static")
 
-	const treeOptions = $derived({end, showEnd, isometry, showIsometry, theme: theme})
-
-	$inspect(isometry)
+	const treeOptions = $derived({
+		end: characteristic === "zero" ? char0end : charpend,
+		showEnd,
+		isometry: characteristic === "zero" ? char0isometry : charpisometry,
+		showIsometry,
+		theme: theme
+	})
 </script>
 
 <main>
@@ -64,10 +69,17 @@
 			<TreeCanvasAnimDownload width={800} height={800} p={p} depth={depth} options={treeOptions} resolution={resolution}
 			oncomplete={() => animate = "static"}/>
 			{:else} -->
-			<TreeCanvas width={800} height={800} field={field} depth={depth} options={treeOptions}/>
+			<TreeCanvas width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions}/>
 			<!-- {/if} -->
 		</div>
 		<div class='sidebar'>
+			<div class='sidebar-row'>
+				Characteristic
+				<select value={characteristic} oninput={e => characteristic = e.currentTarget.value as "zero" | "nonzero"}>
+					<option value="zero">0</option>
+					<option value="nonzero">p</option>
+				</select>
+			</div>
 			<div class='sidebar-row'>p
 				<StepperInput min={2} max={11} init={p} valid={validateP} onchange={e => p = e.detail} />
 			</div>
@@ -76,18 +88,30 @@
 			</div>
 			<hr />
 			<div class='sidebar-row'>
-				<input type='checkbox' name='end' bind:checked={showEnd} />End<RationalInput allowInf={true} onchange={e => end = e.detail} />
+				<input type='checkbox' name='end' bind:checked={showEnd} />End
+				{#if characteristic === "zero"}
+				<RationalInput allowInf={true} onchange={e => char0end = e.detail} />
+				{:else}
+				<RationalPolyInput allowInf={true} onchange={e => charpend = e.detail}/>
+				{/if}
 			</div>
 			<div class='sidebar-row'>
-				<RationalPolyInput onchange={e => console.log(e.detail)}/>
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
-				<div class='combined-elements'>
-					<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
-					<MatrixInput onchange={e => isometry = e.detail} />
-					<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
-				</div>
+				{#if characteristic === "zero"}
+					<div class='combined-elements'>
+						<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
+						<MatrixInput characteristic={"zero"} onchange={e => char0isometry = e.detail} />
+						<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
+					</div>
+				{:else}
+					<div class='combined-elements'>
+						<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
+						<MatrixInput characteristic={"nonzero"} onchange={e => charpisometry = e.detail} />
+						<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
+					</div>
+				{/if}
 			</div>
 			<hr />
 			<div class="sidebar-row">

@@ -9,6 +9,11 @@ describe('FunctionField', () => {
   const a = { num: [1, 2], den: [1] } // 1 + 2x
   const b = { num: [2, 1], den: [1] } // 2 + x
 
+  test('equals', () => {
+    expect(F.equals(a, b)).toBe(false)
+    expect(F.equals(a, { num: [1, 2], den: [1] })).toBe(true)
+  })
+
   test('reduce', () => {
     expect(F.reduce([1, 2], [1])).toEqual({ num: [1, 2], den: [1] })
   })
@@ -63,7 +68,8 @@ describe('FunctionField', () => {
   })
 
   test('mod', () => {
-    expect(F.mod({ num: [2, 1], den: [1] }, { num: [1, 1], den: [1] })).toEqual(F.fromIntegral([1]))
+    expect(F.mod({ num: [2, 0, 1], den: [1] }, { num: [1, 2], den: [1] })).toEqual(F.zero)
+    expect(F.mod({ num: [1, 1], den: [1] }, { num: [0, 1], den: [1] })).toEqual(F.one)
   })
 
   test('modPow', () => {
@@ -74,6 +80,7 @@ describe('FunctionField', () => {
     expect(F.residue([10])).toBe(1)
     expect(F.residue([-7])).toBe(2)
     expect(F.residue([3])).toBe(0)
+    expect(F.residue([])).toBe(0)
   })
 
   test('toString', () => {

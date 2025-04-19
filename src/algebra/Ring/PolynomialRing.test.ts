@@ -88,7 +88,7 @@ describe('PolynomialRing', () => {
   })
 
   test('edNorm', () => {
-    expect(R.edNorm([0, 0, 3])).toBe(2)
+    expect(R.edNorm([0, 0, 3, 1])).toBe(3)
   })
 
   test('divmod, div, mod', () => {

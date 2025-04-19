@@ -176,7 +176,7 @@ export class PolynomialRing extends EuclideanDomain<PolyRingElt> {
   }
 
   public edNorm(a: PolyRingElt): number {
-      return this.valuation(a) as number
+      return this.degree(a)
   }
 
   /**

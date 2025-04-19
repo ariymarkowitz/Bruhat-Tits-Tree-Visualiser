@@ -45,6 +45,11 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
     return a.den
   }
 
+  public equals(a: FnFldElt, b: FnFldElt): boolean {
+    const R = this.integralRing
+    return R.equals(a.num, b.num) && R.equals(a.den, b.den)
+  }
+
   public fractionUnsafe(num: number[], den: number[]): FnFldElt {
     return {num, den}
   }
@@ -118,7 +123,7 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
     return {num: [mod(n, this.p)], den: [1]}
   }
   public residue(a: number[]): number {
-    return mod(a[0], this.p)
+    return this.integralRing.isZero(a) ? 0 : mod(a[0], this.p)
   }
   public fromResidue(a: number): FnFldElt {
     return this.fromInt(a)

@@ -1,18 +1,21 @@
 <script lang='ts'>
+  import { Adic } from '../algebra/Adic/Adic';
+  import { FunctionField } from '../algebra/Adic/FunctionField';
   import type { DVField } from '../algebra/Field/DVField';
   import Latex from '../ui/Latex.svelte'
   import { memoize } from '../utils/memoize.svelte';
   import { type InteractionState, type TreeOptions, TreeRenderer } from "./TreeRenderer"
 
-  type TreeCanvasProps<FieldElt, RingElt> = {
-    field: DVField<FieldElt, RingElt>
+  type TreeCanvasProps = {
+    characteristic: "zero" | "nonzero"
+    p: number
     depth: number
     width: number
     height: number
-    options: TreeOptions<FieldElt, RingElt>
+    options: TreeOptions<unknown>
   }
 
-  const { field, depth, width, height, options }: TreeCanvasProps<unknown, unknown> = $props()
+  const { characteristic, p, depth, width, height, options }: TreeCanvasProps = $props()
 
   let canvas: HTMLCanvasElement
   let dpr: number = $state(window.devicePixelRatio)
@@ -29,7 +32,11 @@
     if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
   })
 
-  let _options: TreeOptions<any, any> = $derived({
+  let field: DVField<unknown, unknown> = $derived(
+    characteristic === "zero" ? new Adic(p) : new FunctionField(p)
+  )
+
+  let _options: TreeOptions<unknown> = $derived({
     ...options,
     end: options.showEnd ? options.end : undefined,
     isometry: options.showIsometry ? options.isometry : undefined,
@@ -37,7 +44,7 @@
     highlight: hitBoxInfo.get()?.imageKey
   })
 
-  function render<T, U>(field: DVField<T, U>, depth: number, options: TreeOptions<T, U>, canvas: HTMLCanvasElement) {
+  function render<F, R>(field: DVField<F, R>, depth: number, options: TreeOptions<R>, canvas: HTMLCanvasElement) {
     if (!canvas) return
     options = {...options, hitbox: true, highlight: hitBoxInfo.get()?.imageKey}
     let tree = new TreeRenderer(field, depth, options, width, height)
@@ -64,7 +71,7 @@
     }
   }
 
-  function startRender<T, U>(field: DVField<T, U>, depth: number, options: TreeOptions<T, U>, canvas: HTMLCanvasElement): number {
+  function startRender<F, R>(field: DVField<F, R>, depth: number, options: TreeOptions<R>, canvas: HTMLCanvasElement): number {
     return requestAnimationFrame(_ => render(field, depth, options, canvas))
   }
   $effect(() => {

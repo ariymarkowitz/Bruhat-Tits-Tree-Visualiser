@@ -11,9 +11,9 @@ import type { Theme } from './../style/themes/themes'
 import { Memoize } from 'fast-typescript-memoize'
 import type { DVField } from '../algebra/Field/DVField'
 
-export interface TreeOptions<FieldElt, RingElt> {
+export interface TreeOptions<RingElt> {
   end?: [RingElt, RingElt]
-  isometry?: Matrix<FieldElt>
+  isometry?: Matrix<[RingElt, RingElt]>
   showIsometry: boolean
   showEnd: boolean
   hitbox?: boolean
@@ -141,7 +141,7 @@ export class TreeRenderer<FieldElt, RingElt> {
   constructor(
     public field: DVField<FieldElt, RingElt>,
     public depth: number,
-    public options: TreeOptions<FieldElt, RingElt>,
+    public options: TreeOptions<RingElt>,
     public width: number,
     public height: number,
     public resolution: number = 1
@@ -160,7 +160,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     const M = this.btt.vspace.matrixAlgebra
     let iso: Matrix<FieldElt>
     if (this.options.isometry) {
-      iso = this.options.isometry
+      iso = this.options.isometry.map((x) => x.map((y) => this.field.reduce(...y)))
       if (M.isSingular(iso)) {
         iso = M.one
         this.showIsometry = false
