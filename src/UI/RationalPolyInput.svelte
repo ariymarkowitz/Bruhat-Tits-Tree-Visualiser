@@ -35,7 +35,7 @@
       const [_, coeff, xTerm, exp] = match
       const coefficient = coeff === '' || coeff === '+' ? 1 : coeff === '-' ? -1 : Number(coeff)
       const exponent = xTerm === undefined ? 0 : exp === undefined ? 1 : Number(exp)
-      if (exponent < 0) return undefined
+      //if (exponent < 0) return undefined
 
       coefficients.set(exponent, (coefficients.get(exponent) || 0) + coefficient)
     }
