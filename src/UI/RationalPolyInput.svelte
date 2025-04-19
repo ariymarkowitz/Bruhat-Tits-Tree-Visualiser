@@ -50,30 +50,31 @@
     const maps = parts.map(part => parseCoefficients(part))
     if (maps.some(map => map === undefined)) return undefined
 
-    const numerators = maps[0]!
-    const denominators = maps[1] ?? new Map<number, number>([[0, 1]])
+    let numerators = maps[0]!
+    let denominators = maps[1] ?? new Map<number, number>([[0, 1]])
 
+    // Remove zero coefficients
     let nEntries = Array.from(numerators.entries()).filter(([_, value]) => value !== 0)
     let dEntries = Array.from(denominators.entries()).filter(([_, value]) => value !== 0)
     if (nEntries.length === 0 && dEntries.length === 0) return undefined
 
+    // Handle negative exponents
     const nMin = nEntries.length > 0 ? Math.min(...nEntries.map(([key]) => key)) : 0
     const dMin = dEntries.length > 0 ? Math.min(...dEntries.map(([key]) => key)) : 0
-
     const minExp = Math.min(nMin, dMin)
     if (minExp < 0) {
       nEntries = nEntries.map(([key, value]) => [key - minExp, value])
       dEntries = dEntries.map(([key, value]) => [key - minExp, value])
     }
 
-    const n = arrayFromMap(numerators)
-    const d = arrayFromMap(denominators)
+    const n = arrayFromEntries(nEntries)
+    const d = arrayFromEntries(dEntries)
     return allowInf || d.length > 0 ? [n, d] : undefined 
   }
 
-  function arrayFromMap(map: Map<number, number>): number[] {
-    const arr = new Array(Math.max(...map.keys(), -1) + 1).fill(0)
-    for (const [key, value] of map) {
+  function arrayFromEntries(entries: [number, number][]): number[] {
+    const arr = new Array(Math.max(...entries.map(([key]) => key + 1), 0)).fill(0)
+    for (const [key, value] of entries) {
       arr[key] = value
     }
     return arr

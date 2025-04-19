@@ -2,7 +2,6 @@ import { describe, test, expect } from 'vitest'
 import { BruhatTtsTree } from './BruhatTitsTree'
 import { Adic } from '../Adic/Adic'
 import { FunctionField } from '../Adic/FunctionField'
-import { Infinite } from '../Order/ExtendedInt'
 
 describe('BruhatTitsTree', () => {
   // Test with Adic field

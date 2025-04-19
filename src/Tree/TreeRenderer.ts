@@ -150,7 +150,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     this.p = this.btt.p
 
     const F = this.field
-    this.end = options.end ? options.end.map(F.fromIntegral) : undefined
+    this.end = options.end ? options.end.toReversed().map(n => F.fromIntegral(n)) : undefined
 
     this.setupIsometry()
     this.cacheAllVertices()
