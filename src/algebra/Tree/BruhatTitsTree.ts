@@ -41,7 +41,7 @@ export class BruhatTtsTree<FieldElt, RingElt> extends UnrootedTree<Vertex<FieldE
     return this.field.integralRing
   }
 
-  public neigbours(node: Vertex<FieldElt>): Adj<Vertex<FieldElt>, number>[] {
+  public neighbors(node: Vertex<FieldElt>): Adj<Vertex<FieldElt>, number>[] {
     let c = Seq.Range(0, this.p)
     .map(i => ({vertex: this.apply(node, i), edge: i}))
     .toArray()

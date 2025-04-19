@@ -10,7 +10,7 @@ export interface Adj<V, E> {vertex: V, edge: E}
  * When iterating over recursively, the parent has to be kept track of to avoid backtracking.
  */
 export abstract class UnrootedTree<V, E> {
-  public abstract neigbours(node: V): Adj<V, E>[]
+  public abstract neighbors(node: V): Adj<V, E>[]
   public abstract reverseEdge(parent: V, child: V, edge: E): E
   public reverse(parent: V, child: Adj<V, E>): Adj<V, E> {
     return {vertex: parent, edge: this.reverseEdge(parent, child.vertex, child.edge)}
@@ -39,7 +39,7 @@ export abstract class UnrootedTree<V, E> {
 
   protected iter_helper<U>(f: (state: U, current: V, update: Adj<V, E>) => step<U>, state: step<U>, node: V, parent: V | undefined) {
     if (state.stop) return
-    for (let update of this.neigbours(node)) {
+    for (let update of this.neighbors(node)) {
       if (parent === undefined || !this.equals(update.vertex, parent)) {
         this.iter_helper<U>(f, f(state.value, node, update), update.vertex, node)
       }
@@ -52,7 +52,7 @@ export abstract class UnrootedTree<V, E> {
 
   protected iterVertices_helper(f: (vertex: V) => boolean, stop: boolean, node: V, parent: V | undefined) {
     if (stop) return
-    for (let update of this.neigbours(node)) {
+    for (let update of this.neighbors(node)) {
       if (parent === undefined || !this.equals(update.vertex, parent)) {
         this.iterVertices_helper(f, f(update.vertex), update.vertex, node)
       }

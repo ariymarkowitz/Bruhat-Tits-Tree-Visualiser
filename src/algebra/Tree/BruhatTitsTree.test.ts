@@ -46,7 +46,7 @@ describe('BruhatTitsTree', () => {
 
     test('neighbors', () => {
       const origin = tree.origin
-      const neighbors = tree.neigbours(origin)
+      const neighbors = tree.neighbors(origin)
       
       // Should have p+1 neighbors
       expect(neighbors.length).toBe(p + 1)
@@ -97,7 +97,7 @@ describe('BruhatTitsTree', () => {
 
     test('reverseEdge', () => {
       const origin = tree.origin
-      const neighbors = tree.neigbours(origin)
+      const neighbors = tree.neighbors(origin)
       
       for (const neighbor of neighbors) {
         const reverse = tree.reverseEdge(origin, neighbor.vertex, neighbor.edge)
@@ -199,7 +199,7 @@ describe('BruhatTitsTree', () => {
         u: field.reduce([1, 1], [0, 1]), // (1 + x)/x
         n: 1
       }
-      const neighbors = tree.neigbours(vertex)
+      const neighbors = tree.neighbors(vertex)
       
       // Should have p+1 neighbors
       expect(neighbors.length).toBe(p + 1)
