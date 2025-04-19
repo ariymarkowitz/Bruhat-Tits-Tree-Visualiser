@@ -14,7 +14,7 @@ There are a couple of ways of defining the $p$-adic numbers for a prine $p$. One
 
 The other way of describing the p-adic numbers is to consider them as the field of infinite expansions
 
-$$a_{-m} p^{-m} + a_{-m+1} p^{-m+1} + \dots + a_0 p^0 + a_1 p^1 + a_1 p^2 \dots$$
+$$a_{-m} p^{-m} + a_{-m+1} p^{-m+1} + \dots + a_0 p^0 + a_1 p^1 + a_2 p^2 \dots$$
 
 This is similar to the base-$p$ expansion of a real number, however while real numbers can have infinitely many negative terms and finitely many positive terms, $p$-adic expansions can only have finitely many negative terms and may have infinitely many positive terms. The $p$-adic numbers in which all of the powers are nonnegative is called a *$p$-adic integer*, and the ring $\mathbb{Z}_p$ of $p$-adic integers is analogous to the integers in the field of rational numbers.
 
