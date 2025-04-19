@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest'
 import { BruhatTtsTree } from './BruhatTitsTree'
 import { Adic } from '../Adic/Adic'
-import { FunctionField } from '../Adic/FunctionField'
+import { LaurentField } from '../Adic/LaurentField'
 
 describe('BruhatTitsTree', () => {
   // Test with Adic field
@@ -24,7 +24,7 @@ describe('BruhatTitsTree', () => {
     })
 
     test('toString', () => {
-      expect(tree.toString()).toBe('BruhatTitsTree[3-adic Field]')
+      expect(tree.toString()).toBe('BruhatTitsTree(3-adic Field)')
       
       const vertex = { u: adic.fromInt(5), n: 2 }
       expect(tree.vertexToString(vertex)).toBe('5_2')
@@ -165,10 +165,10 @@ describe('BruhatTitsTree', () => {
     })
   })
 
-  // Test with FunctionField
-  describe('with FunctionField', () => {
+  // Test with LaurentField
+  describe('with LaurentField', () => {
     const p = 2
-    const field = new FunctionField(p)
+    const field = new LaurentField(p)
     const tree = new BruhatTtsTree(field)
 
     test('construction and basic properties', () => {
@@ -184,7 +184,7 @@ describe('BruhatTitsTree', () => {
     })
 
     test('toString', () => {
-      expect(tree.toString()).toBe('BruhatTitsTree[FunctionField]')
+      expect(tree.toString()).toBe('BruhatTitsTree(LaurentField(2))')
       
       const vertex = { 
         u: field.reduce([1, 1], [0, 1]), // (1 + x)/x
@@ -291,9 +291,9 @@ describe('BruhatTitsTree', () => {
 
     test('inEnd and end-related functions', () => {
       const origin = tree.origin
-      const end = [field.zero, field.one] // Canonical end
+      const end = [field.one, field.zero]
       
-      expect(tree.inEnd(origin, end)).toBeDefined()
+      expect(tree.inEnd(origin, end)).toBeTruthy()
       expect(tree.infEnd).toEqual([field.zero, field.one])
     })
   })

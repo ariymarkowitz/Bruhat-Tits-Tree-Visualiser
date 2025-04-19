@@ -1,10 +1,10 @@
 import { describe, test, expect } from 'vitest'
-import { FunctionField } from './FunctionField'
+import { LaurentField } from './LaurentField'
 import { Infinite } from '../Order/ExtendedInt'
 
-describe('FunctionField', () => {
+describe('LaurentField', () => {
   const p = 3
-  const F = new FunctionField(p)
+  const F = new LaurentField(p)
 
   const a = { num: [1, 2], den: [1] } // 1 + 2x
   const b = { num: [2, 1], den: [1] } // 2 + x
@@ -85,7 +85,7 @@ describe('FunctionField', () => {
   })
 
   test('toString', () => {
-    expect(F.toString()).toBe('FunctionField')
+    expect(F.toString()).toBe('LaurentField(3)')
     expect(F.toString(F.zero)).toBe('0')
     expect(F.toString({ num: [1, 2], den: [1, 1] })).toBe('(1 + 2x)/(1 + x)')
   })

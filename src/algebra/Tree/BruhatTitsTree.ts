@@ -297,7 +297,7 @@ export class BruhatTtsTree<FieldElt, RingElt> extends UnrootedTree<Vertex<FieldE
   }
 
   public toString(): string {
-    return `BruhatTitsTree[${this.field.toString()}]`
+    return `BruhatTitsTree(${this.field.toString()})`
   }
 
   public vertexToString(v: Vertex<FieldElt>): string {

@@ -1,5 +1,5 @@
 /**
- * The function field of a polynomial ring over a finite field.
+ * The field of formal power series over a finite field.
  */
 
 import { Memoize } from 'fast-typescript-memoize';
@@ -14,7 +14,7 @@ export type FnFldElt = {
   den: number[]
 }
 
-export class FunctionField extends DVField<FnFldElt, number[]> {
+export class LaurentField extends DVField<FnFldElt, number[]> {
   public uniformizerInt = [0, 1]
   public residueFieldSize: number
 
@@ -130,7 +130,7 @@ export class FunctionField extends DVField<FnFldElt, number[]> {
   public toString(a: FnFldElt): string
   public toString(a?: FnFldElt): string {
     if (a === undefined) {
-      return 'FunctionField'
+      return `LaurentField(${this.p})`
     } else {
       if (this.isZero(a)) return '0'
       const R = this.integralRing

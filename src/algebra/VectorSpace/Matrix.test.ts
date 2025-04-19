@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { Adic } from '../Adic/Adic'
-import { FunctionField, type FnFldElt } from '../Adic/FunctionField'
+import { LaurentField, type FnFldElt } from '../Adic/LaurentField'
 import { VectorSpace } from './VectorSpace'
 
 describe('MatrixAlgebra with Adic Field', () => {
@@ -130,9 +130,9 @@ describe('MatrixAlgebra with Adic Field', () => {
   })
 })
 
-describe('MatrixAlgebra with FunctionField', () => {
+describe('MatrixAlgebra with LaurentField', () => {
   const p = 3
-  const F = new FunctionField(p)
+  const F = new LaurentField(p)
   const V = new VectorSpace<FnFldElt>(2, F)
   const M = V.matrixAlgebra
   
