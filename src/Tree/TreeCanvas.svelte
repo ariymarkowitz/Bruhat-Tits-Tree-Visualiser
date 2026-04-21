@@ -33,7 +33,7 @@
   }
   let mousemove: (e: MouseEvent) => void = $state(_ => {})
 
-  let tooltip: HTMLElement
+  let tooltip: HTMLElement | undefined = $state()
   let tooltipText: string = $derived(hitBoxInfo?.display || '')
   $effect(() => {
     if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
@@ -69,8 +69,8 @@
           if (results.length > 0) {
             const i = results[0]
             setHitBoxInfo(tree.hitBoxMap[i])
-            tooltip.style.left = `${e.pageX}px`
-            tooltip.style.top = `${e.pageY - 10}px`
+            tooltip!.style.left = `${e.pageX}px`
+            tooltip!.style.top = `${e.pageY - 10}px`
           } else {
             setHitBoxInfo(undefined)
           }
