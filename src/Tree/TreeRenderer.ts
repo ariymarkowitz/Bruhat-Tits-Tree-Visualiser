@@ -138,6 +138,9 @@ export class TreeRenderer<FieldElt, RingElt> {
   hitBoxes!: Flatbush
   hitBoxMap!: Array<InteractionState>
 
+  private vertexCanvas?: HTMLCanvasElement
+  private vertexContext?: CanvasRenderingContext2D
+
   constructor(
     public field: DVField<FieldElt, RingElt>,
     public depth: number,
@@ -527,12 +530,20 @@ export class TreeRenderer<FieldElt, RingElt> {
     const dpi = this.resolution * window.devicePixelRatio
     context.clearRect(0, 0, context.canvas.width / this.resolution, context.canvas.height / this.resolution)
 
-    const vertexCanvas = document.createElement('canvas')
-    vertexCanvas.width = context.canvas.width
-    vertexCanvas.height = context.canvas.height
-
-    const vertexContext = vertexCanvas.getContext('2d')
-    if (vertexContext === null) {throw new Error('Failed to create canvas')}
+    if (!this.vertexCanvas || !this.vertexContext
+        || this.vertexCanvas.width !== context.canvas.width
+        || this.vertexCanvas.height !== context.canvas.height) {
+      this.vertexCanvas = document.createElement('canvas')
+      this.vertexCanvas.width = context.canvas.width
+      this.vertexCanvas.height = context.canvas.height
+      const ctx = this.vertexCanvas.getContext('2d')
+      if (ctx === null) throw new Error('Failed to create canvas')
+      this.vertexContext = ctx
+    }
+    const vertexCanvas = this.vertexCanvas
+    const vertexContext = this.vertexContext
+    vertexContext.setTransform(1, 0, 0, 1, 0, 0)
+    vertexContext.clearRect(0, 0, vertexCanvas.width, vertexCanvas.height)
     vertexContext.scale(dpi, dpi)
 
     const i = this.interpolateTime(t)
