@@ -347,7 +347,7 @@ export class TreeRenderer<FieldElt, RingElt> {
         vertex: adj.vertex,
         state: this.cacheState(adj.vertex, previous.state, edgeState)
       }
-    }, { vertex: this.btt.origin, state }).state
+    }, { vertex: v, state }).state
 
     return finalState
   }
