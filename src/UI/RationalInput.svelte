@@ -1,10 +1,8 @@
 <script lang='ts'>
-  export type RationalInputEvent = CustomEvent<[number, number] | undefined>
-
   type RationalInputProps = Partial<{
     allowInf: boolean
     emptyIsZero: boolean
-    onchange: (e: RationalInputEvent) => void
+    onchange: (value: [number, number] | undefined) => void
   }>
 
   let {
@@ -22,12 +20,7 @@
       return
     }
     prevInput = value
-    const parsed = parse(value)
-    if (parsed) {
-      onchange(new CustomEvent('change', { detail: parsed }))
-    } else {
-      onchange(new CustomEvent('change', { detail: undefined }))
-    }
+    onchange(parse(value))
   }
 
   function isValidInput(input: string) {

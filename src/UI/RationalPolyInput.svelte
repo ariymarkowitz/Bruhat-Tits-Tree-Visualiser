@@ -1,10 +1,8 @@
 <script lang='ts'>
-  export type RationalPolyInputEvent = CustomEvent<[number[], number[]] | undefined>
-
   type RationalPolyInputProps = Partial<{
     allowInf: boolean
     emptyIsZero: boolean
-    onchange: (e: RationalPolyInputEvent) => void
+    onchange: (value: [number[], number[]] | undefined) => void
   }>
 
   let {
@@ -16,12 +14,7 @@
   let value: string = $state('')
 
   function onInput() {
-    const parsed = parse(value)
-    if (parsed) {
-      onchange(new CustomEvent('change', { detail: parsed }))
-    } else {
-      onchange(new CustomEvent('change', { detail: undefined }))
-    }
+    onchange(parse(value))
   }
 
   function parseCoefficients(input: string): Map<number, number> | undefined {

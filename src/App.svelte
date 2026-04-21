@@ -78,10 +78,10 @@ import MatrixInput from './ui/MatrixInput.svelte'
 			<div class='sidebar-row'>
 				<input type='checkbox' name='end' bind:checked={showEnd} />End
 				<div style:display={characteristic === 'zero' ? '' : 'none'}>
-					<RationalInput allowInf={true} onchange={e => char0end = e.detail} />
+					<RationalInput allowInf={true} onchange={v => char0end = v} />
 				</div>
 				<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
-					<RationalPolyInput allowInf={true} onchange={e => charpend = e.detail}/>
+					<RationalPolyInput allowInf={true} onchange={v => charpend = v}/>
 				</div>
 			</div>
 			<div class='sidebar-row'>
@@ -89,10 +89,10 @@ import MatrixInput from './ui/MatrixInput.svelte'
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
 					<div style:display={characteristic === 'zero' ? '' : 'none'}>
-						<MatrixInput characteristic={"zero"} onchange={e => char0isometry = e.detail} />
+						<MatrixInput characteristic={"zero"} onchange={v => char0isometry = v} />
 					</div>
 					<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
-						<MatrixInput characteristic={"nonzero"} onchange={e => charpisometry = e.detail} />
+						<MatrixInput characteristic={"nonzero"} onchange={v => charpisometry = v} />
 					</div>
 			</div>
 			<hr />

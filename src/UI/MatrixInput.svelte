@@ -1,6 +1,4 @@
 <script lang="ts" module>
-  export type MatrixInputEvent = CustomEvent<[unknown, unknown][][] | undefined>
-
   const characteristics = {
     zero: {
       type: 'zero',
@@ -21,7 +19,7 @@
 
   type MatrixInputProps = {
     characteristic: keyof typeof characteristics,
-    onchange?: (e: MatrixInputEvent) => void
+    onchange?: (value: [unknown, unknown][][] | undefined) => void
   }
   let { characteristic, onchange = _ => {} }: MatrixInputProps = $props()
   let type = $derived(characteristics[characteristic])
@@ -36,7 +34,7 @@
       [state00, state10],
       [state01, state11]
     ].map(row => row.map(cell => cell ?? type.zero)) as [unknown, unknown][][]
-    onchange(new CustomEvent('change', { detail: parsed }))
+    onchange(parsed)
   }
 </script>
 
@@ -44,10 +42,10 @@
   <Latex text='\left[\rule{"{"}0cm{"}"}{"{"}3em{"}"}\right.'/>
   <div class='matrix-input-container'>
     <div class="matrix-input">
-      <type.component emptyIsZero={true} onchange={e => { state00 = e.detail; setFromInput() }} />
-      <type.component emptyIsZero={true} onchange={e => { state10 = e.detail; setFromInput() }} />
-      <type.component emptyIsZero={true} onchange={e => { state01 = e.detail; setFromInput() }} />
-      <type.component emptyIsZero={true} onchange={e => { state11 = e.detail; setFromInput() }} />
+      <type.component emptyIsZero={true} onchange={v => { state00 = v; setFromInput() }} />
+      <type.component emptyIsZero={true} onchange={v => { state10 = v; setFromInput() }} />
+      <type.component emptyIsZero={true} onchange={v => { state01 = v; setFromInput() }} />
+      <type.component emptyIsZero={true} onchange={v => { state11 = v; setFromInput() }} />
     </div>
   </div>
   <Latex text='\left.\rule{"{"}0cm{"}"}{"{"}3em{"}"}\right]'/>
