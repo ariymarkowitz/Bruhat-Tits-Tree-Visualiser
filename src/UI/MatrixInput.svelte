@@ -17,6 +17,7 @@
 <script lang="ts">
   import RationalInput from "./RationalInput.svelte";
   import RationalPolyInput from './RationalPolyInput.svelte';
+  import Latex from './Latex.svelte';
 
   type MatrixInputProps = {
     characteristic: keyof typeof characteristics,
@@ -39,11 +40,15 @@
   }
 </script>
 
-<div class='matrix-input-container'>
-  <div class="matrix-input">
-    <type.component emptyIsZero={true} onchange={e => { state00 = e.detail; setFromInput() }} />
-    <type.component emptyIsZero={true} onchange={e => { state10 = e.detail; setFromInput() }} />
-    <type.component emptyIsZero={true} onchange={e => { state01 = e.detail; setFromInput() }} />
-    <type.component emptyIsZero={true} onchange={e => { state11 = e.detail; setFromInput() }} />
+<div class='combined-elements'>
+  <Latex text='\left[\rule{"{"}0cm{"}"}{"{"}3em{"}"}\right.'/>
+  <div class='matrix-input-container'>
+    <div class="matrix-input">
+      <type.component emptyIsZero={true} onchange={e => { state00 = e.detail; setFromInput() }} />
+      <type.component emptyIsZero={true} onchange={e => { state10 = e.detail; setFromInput() }} />
+      <type.component emptyIsZero={true} onchange={e => { state01 = e.detail; setFromInput() }} />
+      <type.component emptyIsZero={true} onchange={e => { state11 = e.detail; setFromInput() }} />
+    </div>
   </div>
+  <Latex text='\left.\rule{"{"}0cm{"}"}{"{"}3em{"}"}\right]'/>
 </div>

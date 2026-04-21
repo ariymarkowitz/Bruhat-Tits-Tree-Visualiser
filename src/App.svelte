@@ -3,8 +3,7 @@
 	import { setTheme, themes } from './style/themes/themes'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
   import StepperInput from './ui/StepperInput.svelte'
-	import Latex from './ui/Latex.svelte'
-	import MatrixInput from './ui/MatrixInput.svelte'
+import MatrixInput from './ui/MatrixInput.svelte'
 	import RationalInput from './ui/RationalInput.svelte'
   import RationalPolyInput from './ui/RationalPolyInput.svelte';
 
@@ -89,15 +88,11 @@
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
-					<div class='combined-elements' style:display={characteristic === 'zero' ? '' : 'none'}>
-						<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
+					<div style:display={characteristic === 'zero' ? '' : 'none'}>
 						<MatrixInput characteristic={"zero"} onchange={e => char0isometry = e.detail} />
-						<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
 					</div>
-					<div class='combined-elements' style:display={characteristic === 'nonzero' ? '' : 'none'}>
-						<Latex text='\left[\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right.'/>
+					<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
 						<MatrixInput characteristic={"nonzero"} onchange={e => charpisometry = e.detail} />
-						<Latex text='\left.\rule{'{'}0cm{'}'}{'{'}3em{'}'}\right]'/>
 					</div>
 			</div>
 			<hr />
