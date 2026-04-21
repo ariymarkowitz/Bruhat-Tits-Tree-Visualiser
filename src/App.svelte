@@ -27,14 +27,12 @@
 		return isPrime(p)
 	}
 
-	let depthElt: StepperInput
 	let depthState: [number, number] = $state([inits.depth, inits.p])
 	let depth = $derived(Math.max(
 		1, Math.min(
 			depthState[0], Math.floor(depthState[0] * (depthState[1]+1) / (p+1))
 		)
 	))
-	$effect(() => { depthElt.set(depth) })
 
 	let char0end: [number, number] | undefined = $state(inits.end)
 	let charpend: [number[], number[]] | undefined = $state(inits.end)
@@ -72,10 +70,10 @@
 				</select>
 			</div>
 			<div class='sidebar-row'>p
-				<StepperInput min={2} max={11} init={p} valid={validateP} onchange={e => p = e.detail} />
+				<StepperInput min={2} max={11} value={p} valid={validateP} onchange={n => p = n} />
 			</div>
 			<div class='sidebar-row'>Depth
-				<StepperInput min={1} max={10} init={depth} bind:this={depthElt} onchange={e => depthState = [e.detail, p]} />
+				<StepperInput min={1} max={10} value={depth} onchange={n => depthState = [n, p]} />
 			</div>
 			<hr />
 			<div class='sidebar-row'>
