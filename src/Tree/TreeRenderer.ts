@@ -268,7 +268,6 @@ export class TreeRenderer<FieldElt, RingElt> {
   state(staticState: StaticState, parent: VertexState, edge: EdgeState): VertexState {
     let state: VertexState = this.relativeState(staticState, parent, edge)
     if (staticState.isAbsolute) {
-      if (!parent.static.isAbsolute) throw new Error('Parent of absolute vertex is not absolute')
       if (parent.type !== Absolute) throw new Error('Parent of absolute vertex has no absolute state')
       state = this.absoluteState(state, parent)
     }
@@ -382,10 +381,6 @@ export class TreeRenderer<FieldElt, RingElt> {
         }, stop: state.static.isLeaf
       }
     }, { vertex: this.root, state: state, image: this.rootImage, imageState }, this.root)
-  }
-
-  key(v: Vertex<FieldElt>): string {
-    return this.btt.vertexToString(v)
   }
 
   edgeLength(depth: number): number {
@@ -559,7 +554,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     if (rootInterpState.type !== Absolute) throw new Error('Root state is not absolute')
     this.drawVertex(vertexContext, this.makeVertexGraphicsState(rootInterpState))
 
-    this.btt.iter((prevState: VertexStateAbsolute, current, adj) => {
+    this.btt.iter((prevState: VertexStateAbsolute, _, adj) => {
       const state = this.states.get(this.cacheKey(adj.vertex))
       if (state === undefined) throw new Error('Vertex state not cached')
       const imageState = this.states.get(state.static.event.imageKey)
@@ -571,7 +566,7 @@ export class TreeRenderer<FieldElt, RingElt> {
 
       this.drawVertex(vertexContext, vertexGraphicsState)
       this.drawEdge(context, edgeGraphicsState)
-      
+
       return {value: absoluteState, stop: state.static.isLeaf}
     }, rootInterpState, this.root)
 

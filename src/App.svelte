@@ -7,41 +7,32 @@ import MatrixInput from './ui/MatrixInput.svelte'
 	import RationalInput from './ui/RationalInput.svelte'
   import RationalPolyInput from './ui/RationalPolyInput.svelte';
 
-	const inits = {
-		characteristic: "zero",
-		p: 2,
-		depth: 7,
-		end: undefined,
-		isometry: undefined,
-		resolution: 1,
-	}
-
 	let themeInput: string = $state(themes[0].name)
 	const theme = $derived(themes.find(t => t.name === themeInput) || themes[0])
 	$effect(() => setTheme(theme))
 
-	let characteristic = $state(inits.characteristic) as "zero" | "nonzero"
-	let p = $state(inits.p)
+	let characteristic = $state("zero") as "zero" | "nonzero"
+	let p = $state(2)
 	function validateP(p: number) {
 		return isPrime(p)
 	}
 
-	let depthState: [number, number] = $state([inits.depth, inits.p])
+	let depthState: [number, number] = $state([7, 2])
 	let depth = $derived(Math.max(
 		1, Math.min(
 			depthState[0], Math.floor(depthState[0] * (depthState[1]+1) / (p+1))
 		)
 	))
 
-	let char0end: [number, number] | undefined = $state(inits.end)
-	let charpend: [number[], number[]] | undefined = $state(inits.end)
+	let char0end: [number, number] | undefined = $state(undefined)
+	let charpend: [number[], number[]] | undefined = $state(undefined)
 	let showEnd = $state(false)
 
-	let char0isometry: [unknown, unknown][][] | undefined = $state(inits.isometry)
-	let charpisometry: [unknown, unknown][][] | undefined = $state(inits.isometry)
+	let char0isometry: [unknown, unknown][][] | undefined = $state(undefined)
+	let charpisometry: [unknown, unknown][][] | undefined = $state(undefined)
 	let showIsometry = $state(false)
 
-	let resolution: number = $state(inits.resolution)
+	let resolution: number = $state(1)
 
 	type AnimationType = "animate" | "download" | "static"
 	let animate: AnimationType = $state("static")
@@ -85,8 +76,6 @@ import MatrixInput from './ui/MatrixInput.svelte'
 				</div>
 			</div>
 			<div class='sidebar-row'>
-			</div>
-			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
 					<div style:display={characteristic === 'zero' ? '' : 'none'}>
 						<MatrixInput characteristic={"zero"} onchange={v => char0isometry = v} />
@@ -115,7 +104,7 @@ import MatrixInput from './ui/MatrixInput.svelte'
 			</div>
 			<div class="sidebar-row">
 				Theme <select bind:value={themeInput}>
-					{#each Object.values(themes) as theme, _}
+					{#each themes as theme}
 						<option>{theme.name}</option>
 					{/each}
 				</select>

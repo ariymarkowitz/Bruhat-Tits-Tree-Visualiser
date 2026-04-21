@@ -3,7 +3,6 @@
   import { LaurentField } from '../algebra/Adic/LaurentField';
   import type { DVField } from '../algebra/Field/DVField';
   import Latex from '../ui/Latex.svelte'
-  import { memoize } from '../utils/memoize.svelte';
   import { type InteractionState, type TreeOptions, TreeRenderer } from "./TreeRenderer"
   import JSZip from 'jszip'
   import { saveAs } from 'file-saver'
@@ -25,14 +24,17 @@
   let canvas: HTMLCanvasElement
   const dpr = window.devicePixelRatio
 
-  const hitBoxInfo = memoize<InteractionState | undefined>(
-    undefined,
-    (a, b) => a === b || (a !== undefined && b !== undefined && a.display === b.display && a.imageKey === b.imageKey)
-  )
+  let hitBoxInfo = $state.raw<InteractionState | undefined>(undefined)
+  function setHitBoxInfo(val: InteractionState | undefined) {
+    const prev = hitBoxInfo
+    if (!(prev === val || (prev !== undefined && val !== undefined && prev.display === val.display && prev.imageKey === val.imageKey))) {
+      hitBoxInfo = val
+    }
+  }
   let mousemove: (e: MouseEvent) => void = $state(_ => {})
 
   let tooltip: HTMLElement
-  let tooltipText: string = $derived(hitBoxInfo.get()?.display || '')
+  let tooltipText: string = $derived(hitBoxInfo?.display || '')
   $effect(() => {
     if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
   })
@@ -51,7 +53,7 @@
         end: options.showEnd ? options.end : undefined,
         isometry: options.showIsometry ? options.isometry : undefined,
         hitbox: true,
-        highlight: hitBoxInfo.get()?.imageKey
+        highlight: hitBoxInfo?.imageKey
       }
       const tree = new TreeRenderer(field, depth, _options, width, height)
       const frame = requestAnimationFrame(() => {
@@ -66,11 +68,11 @@
           const results = tree.hitBoxes.search(x, y, x, y)
           if (results.length > 0) {
             const i = results[0]
-            hitBoxInfo.set(tree.hitBoxMap[i])
+            setHitBoxInfo(tree.hitBoxMap[i])
             tooltip.style.left = `${e.pageX}px`
             tooltip.style.top = `${e.pageY - 10}px`
           } else {
-            hitBoxInfo.set(undefined)
+            setHitBoxInfo(undefined)
           }
         }
       })
