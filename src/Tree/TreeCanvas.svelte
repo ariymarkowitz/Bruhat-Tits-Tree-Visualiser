@@ -65,10 +65,10 @@
           const rect = canvas.getBoundingClientRect()
           const x = (e.x - rect.left) * canvas.width / rect.width / dpr
           const y = (e.y - rect.top) * canvas.height / rect.height / dpr
-          const results = tree.hitBoxes.search(x, y, x, y)
-          if (results.length > 0) {
+          const results = tree.hitBoxes?.search(x, y, x, y)
+          if (results && results.length > 0) {
             const i = results[0]
-            setHitBoxInfo(tree.hitBoxMap[i])
+            setHitBoxInfo(tree.hitBoxMap?.[i])
             tooltip!.style.left = `${e.pageX}px`
             tooltip!.style.top = `${e.pageY - 10}px`
           } else {

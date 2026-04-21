@@ -56,18 +56,15 @@ interface AbsoluteState {
   y: number
 }
 
-const Relative = Symbol('Relative')
-const Absolute = Symbol('Absolute')
-
 interface VertexStateRelative {
-  type: typeof Relative
+  type: 'relative'
   static: StaticState
   relative: RelativeState
   absolute?: AbsoluteState
 }
 
 interface VertexStateAbsolute {
-  type: typeof Absolute
+  type: 'absolute'
   static: StaticState
   relative: RelativeState
   absolute: AbsoluteState
@@ -129,14 +126,14 @@ export class TreeRenderer<FieldElt, RingElt> {
 
   loopTime = 2000
 
-  showIsometry!: boolean
-  isoInfo!: IsoInfo<FieldElt>
+  showIsometry: boolean
+  isoInfo: IsoInfo<FieldElt>
 
-  root!: Vertex<FieldElt>
-  rootImage!: Vertex<FieldElt>
+  root: Vertex<FieldElt>
+  rootImage: Vertex<FieldElt>
 
-  hitBoxes!: Flatbush
-  hitBoxMap!: Array<InteractionState>
+  hitBoxes?: Flatbush
+  hitBoxMap?: Array<InteractionState>
 
   private vertexCanvas?: HTMLCanvasElement
   private vertexContext?: CanvasRenderingContext2D
@@ -155,31 +152,40 @@ export class TreeRenderer<FieldElt, RingElt> {
     const F = this.field
     this.end = options.end ? options.end.toReversed().map(n => F.fromIntegral(n)) : undefined
 
-    this.setupIsometry()
-    this.cacheAllVertices()
+    const iso = this.setupIsometry()
+    this.showIsometry = iso.showIsometry
+    this.isoInfo = iso.isoInfo
+
+    const roots = this.cacheAllVertices()
+    this.root = roots.root
+    this.rootImage = roots.rootImage
   }
 
-  setupIsometry() {
+  setupIsometry(): { showIsometry: boolean, isoInfo: IsoInfo<FieldElt> } {
     const M = this.btt.vspace.matrixAlgebra
     let iso: Matrix<FieldElt>
+    let showIsometry: boolean
     if (this.options.isometry) {
       iso = this.options.isometry.map((x) => x.map((y) => this.field.reduce(...y)))
       if (M.isSingular(iso)) {
         iso = M.one
-        this.showIsometry = false
+        showIsometry = false
       } else {
-        this.showIsometry = this.options.showIsometry
+        showIsometry = this.options.showIsometry
       }
     } else {
       iso = M.one
-      this.showIsometry = false
+      showIsometry = false
     }
 
-    this.isoInfo = {
-      iso,
-      minDist: this.btt.minVertexTranslationDistance(iso),
-      isReflection: this.btt.isReflection(iso),
-      isIdentity: this.btt.isIdentity(iso)
+    return {
+      showIsometry,
+      isoInfo: {
+        iso,
+        minDist: this.btt.minVertexTranslationDistance(iso),
+        isReflection: this.btt.isReflection(iso),
+        isIdentity: this.btt.isIdentity(iso)
+      }
     }
   }
 
@@ -221,13 +227,12 @@ export class TreeRenderer<FieldElt, RingElt> {
    * Cache a vertex-indexed map.
    */
   cache<S, T extends S>(map: Map<string, S>, v: Vertex<FieldElt>, value: T): T {
-    const key = this.btt.vertexToString(v)
-    map.set(key, value)
+    map.set(this.cacheKey(v), value)
     return value
   }
 
   cacheStaticState(v: Vertex<FieldElt>, parentState: StaticState): StaticState {
-    const key = this.btt.vertexToString(v)
+    const key = this.cacheKey(v)
     if (this.staticStates.has(key)) {
       return this.staticStates.get(key)!
     } else {
@@ -242,7 +247,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     const zeroAngle = Math.PI + angle - this.edgeAngle(edge.reverse)
     const edgeDepth = Math.min(staticState.depth, parent.static.depth)
     return {
-      type: Relative,
+      type: 'relative',
       static: staticState,
       relative: {
         zeroAngle,
@@ -256,7 +261,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     const angle = current.relative.angle
     return {
       ...current,
-      type: Absolute,
+      type: 'absolute',
       absolute: {
         x: parent.absolute.x + Math.cos(angle) * this.edgeLength(current.relative.edgeDepth),
         y: parent.absolute.y + Math.sin(angle) * this.edgeLength(current.relative.edgeDepth),
@@ -271,7 +276,7 @@ export class TreeRenderer<FieldElt, RingElt> {
   state(staticState: StaticState, parent: VertexState, edge: EdgeState): VertexState {
     let state: VertexState = this.relativeState(staticState, parent, edge)
     if (staticState.isAbsolute) {
-      if (parent.type !== Absolute) throw new Error('Parent of absolute vertex has no absolute state')
+      if (parent.type !== 'absolute') throw new Error('Parent of absolute vertex has no absolute state')
       state = this.absoluteState(state, parent)
     }
     return state
@@ -293,7 +298,7 @@ export class TreeRenderer<FieldElt, RingElt> {
 
   originState(): VertexStateAbsolute {
     return {
-      type: Absolute,
+      type: 'absolute',
       static: this.originStaticState(),
       relative: {
         zeroAngle: 0,
@@ -352,7 +357,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     return finalState
   }
 
-  cacheAllVertices() {
+  cacheAllVertices(): { root: Vertex<FieldElt>, rootImage: Vertex<FieldElt> } {
     type State = {
       vertex: Vertex<FieldElt>
       state: VertexState
@@ -362,11 +367,11 @@ export class TreeRenderer<FieldElt, RingElt> {
 
     const iso = this.isoInfo.iso
 
-    this.root = this.btt.minTranslationVertexNearOrigin(iso)
-    this.rootImage = this.btt.action(iso, this.root)
-    const state = this.rootState(this.root)
-    const imageState = this.cacheStateFromPath(this.root, state, this.rootImage)
-    
+    const root = this.btt.minTranslationVertexNearOrigin(iso)
+    const rootImage = this.btt.action(iso, root)
+    const state = this.rootState(root)
+    const imageState = this.cacheStateFromPath(root, state, rootImage)
+
     this.btt.iter<State>((prev: State, _, adj) => {
       const vertex = adj.vertex
       const image = this.btt.action(iso, vertex)
@@ -383,7 +388,9 @@ export class TreeRenderer<FieldElt, RingElt> {
           vertex, image, state, imageState
         }, stop: state.static.isLeaf
       }
-    }, { vertex: this.root, state: state, image: this.rootImage, imageState }, this.root)
+    }, { vertex: root, state, image: rootImage, imageState }, root)
+
+    return { root, rootImage }
   }
 
   edgeLength(depth: number): number {
@@ -422,16 +429,16 @@ export class TreeRenderer<FieldElt, RingElt> {
   }
 
   interpStates(state1: VertexState, state2: VertexState, t: number): VertexState {
-    if (state1.type === Absolute && state2.type === Absolute) {
+    if (state1.type === 'absolute' && state2.type === 'absolute') {
       return {
-        type: Absolute,
+        type: 'absolute',
         static: this.interpStaticStates(state1.static, state2.static, t),
         relative: this.interpRelativeStates(state1.relative, state2.relative, t),
         absolute: this.interpAbsoluteStates(state1, state2, t)
       }
-    } else if (state1.type === Relative && state2.type === Relative) {
+    } else if (state1.type === 'relative' && state2.type === 'relative') {
       return {
-        type: Relative,
+        type: 'relative',
         static: this.interpStaticStates(state1.static, state2.static, t),
         relative: this.interpRelativeStates(state1.relative, state2.relative, t)
       }
@@ -496,7 +503,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     context.fill()
     context.stroke()
 
-    if (this.options.hitbox) {
+    if (this.hitBoxes && this.hitBoxMap) {
       const i = this.hitBoxes.add(state.x - radius, state.y - radius, state.x + radius, state.y + radius)
       this.hitBoxMap[i] = state.event
     }
@@ -526,43 +533,51 @@ export class TreeRenderer<FieldElt, RingElt> {
     return (1-Math.cos((t * (Math.PI) / this.loopTime) % Math.PI))/2
   }
 
+  private ensureVertexCanvas(target: HTMLCanvasElement): [HTMLCanvasElement, CanvasRenderingContext2D] {
+    if (!this.vertexCanvas || !this.vertexContext
+        || this.vertexCanvas.width !== target.width
+        || this.vertexCanvas.height !== target.height) {
+      const canvas = document.createElement('canvas')
+      canvas.width = target.width
+      canvas.height = target.height
+      const ctx = canvas.getContext('2d')
+      if (ctx === null) throw new Error('Failed to create canvas')
+      this.vertexCanvas = canvas
+      this.vertexContext = ctx
+    }
+    return [this.vertexCanvas, this.vertexContext]
+  }
+
+  private resetHitBoxes() {
+    if (this.options.hitbox) {
+      this.hitBoxes = new Flatbush(this.numberOfVertices, 4, Int32Array)
+      this.hitBoxMap = new Array(this.numberOfVertices)
+    } else {
+      this.hitBoxes = undefined
+      this.hitBoxMap = undefined
+    }
+  }
+
   render(context: CanvasRenderingContext2D, t: number) {
     const dpi = this.resolution * window.devicePixelRatio
     context.clearRect(0, 0, context.canvas.width / this.resolution, context.canvas.height / this.resolution)
 
-    if (!this.vertexCanvas || !this.vertexContext
-        || this.vertexCanvas.width !== context.canvas.width
-        || this.vertexCanvas.height !== context.canvas.height) {
-      this.vertexCanvas = document.createElement('canvas')
-      this.vertexCanvas.width = context.canvas.width
-      this.vertexCanvas.height = context.canvas.height
-      const ctx = this.vertexCanvas.getContext('2d')
-      if (ctx === null) throw new Error('Failed to create canvas')
-      this.vertexContext = ctx
-    }
-    const vertexCanvas = this.vertexCanvas
-    const vertexContext = this.vertexContext
+    const [vertexCanvas, vertexContext] = this.ensureVertexCanvas(context.canvas)
     vertexContext.setTransform(1, 0, 0, 1, 0, 0)
     vertexContext.clearRect(0, 0, vertexCanvas.width, vertexCanvas.height)
     vertexContext.scale(dpi, dpi)
 
     const i = this.interpolateTime(t)
 
-    if (this.options.hitbox) {
-      this.hitBoxes = new Flatbush(this.numberOfVertices, 4, Int32Array)
-      this.hitBoxMap = new Array(this.numberOfVertices)
-    }
+    this.resetHitBoxes()
 
-    const rootKey = this.cacheKey(this.root)
-    const rootImageKey = this.cacheKey(this.rootImage)
-
-    const rootState = this.states.get(rootKey)
-    const rootImageState = this.states.get(rootImageKey)
+    const rootState = this.states.get(this.cacheKey(this.root))
+    const rootImageState = this.states.get(this.cacheKey(this.rootImage))
     if (rootState === undefined) throw new Error('Root state not cached')
     if (rootImageState === undefined) throw new Error('Root image state not cached')
 
     const rootInterpState = this.interpStates(rootState, rootImageState, i)
-    if (rootInterpState.type !== Absolute) throw new Error('Root state is not absolute')
+    if (rootInterpState.type !== 'absolute') throw new Error('Root state is not absolute')
     this.drawVertex(vertexContext, this.makeVertexGraphicsState(rootInterpState))
 
     this.btt.iter((prevState: VertexStateAbsolute, _, adj) => {
@@ -571,7 +586,7 @@ export class TreeRenderer<FieldElt, RingElt> {
       const imageState = this.states.get(state.static.event.imageKey)
       if (imageState === undefined) throw new Error('Vertex image state not cached')
       const interpState = this.interpStates(state, imageState, i)
-      const absoluteState = interpState.type === Absolute ? interpState : this.absoluteState(interpState, prevState)
+      const absoluteState = interpState.type === 'absolute' ? interpState : this.absoluteState(interpState, prevState)
       const vertexGraphicsState = this.makeVertexGraphicsState(absoluteState)
       const edgeGraphicsState = this.makeEdgeGraphicsState(prevState, absoluteState)
 
@@ -583,9 +598,7 @@ export class TreeRenderer<FieldElt, RingElt> {
 
     context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/dpi, vertexCanvas.height/dpi)
 
-    if (this.hitBoxes) {
-      this.hitBoxes.finish()
-    }
+    if (this.hitBoxes) this.hitBoxes.finish()
   }
 
   get theme() {
