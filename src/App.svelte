@@ -2,8 +2,6 @@
 	import { isPrime } from './algebra/utils/int'
 	import { setTheme, themes } from './style/themes/themes'
 	import TreeCanvas from './Tree/TreeCanvas.svelte'
-	import TreeCanvasAnim from './Tree/TreeCanvasAnim.svelte'
-	import TreeCanvasAnimDownload from './Tree/TreeCanvasAnimDownload.svelte'
   import StepperInput from './ui/StepperInput.svelte'
 	import Latex from './ui/Latex.svelte'
 	import MatrixInput from './ui/MatrixInput.svelte'
@@ -63,14 +61,7 @@
 <main>
 	<div class='container'>
 		<div class='tree-container'>
-			{#if animate === "animate"}
-			<TreeCanvasAnim width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions} resolution={resolution}/>
-			{:else if animate === "download"}
-			<TreeCanvasAnimDownload width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions} resolution={resolution}
-			oncomplete={() => animate = "static"}/>
-			{:else}
-			<TreeCanvas width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions}/>
-			{/if}
+			<TreeCanvas mode={animate} width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions} resolution={resolution} oncomplete={() => animate = "static"}/>
 		</div>
 		<div class='sidebar'>
 			<div class='sidebar-row'>

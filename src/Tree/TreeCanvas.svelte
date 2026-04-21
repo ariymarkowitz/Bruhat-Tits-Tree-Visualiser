@@ -5,20 +5,25 @@
   import Latex from '../ui/Latex.svelte'
   import { memoize } from '../utils/memoize.svelte';
   import { type InteractionState, type TreeOptions, TreeRenderer } from "./TreeRenderer"
+  import JSZip from 'jszip'
+  import { saveAs } from 'file-saver'
 
   type TreeCanvasProps = {
+    mode: "static" | "animate" | "download"
     characteristic: "zero" | "nonzero"
     p: number
     depth: number
     width: number
     height: number
     options: TreeOptions<unknown>
+    resolution?: number
+    oncomplete?: () => void
   }
 
-  const { characteristic, p, depth, width, height, options }: TreeCanvasProps = $props()
+  const { mode, characteristic, p, depth, width, height, options, resolution = 1, oncomplete = () => {} }: TreeCanvasProps = $props()
 
   let canvas: HTMLCanvasElement
-  let dpr: number = $state(window.devicePixelRatio)
+  const dpr = window.devicePixelRatio
 
   const hitBoxInfo = memoize<InteractionState | undefined>(
     undefined,
@@ -32,66 +37,112 @@
     if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
   })
 
-  let field: DVField<unknown, unknown> = $derived(
+  const field: DVField<unknown, unknown> = $derived(
     characteristic === "zero" ? new Adic(p) : new LaurentField(p)
   )
 
-  let _options: TreeOptions<unknown> = $derived({
-    ...options,
-    end: options.showEnd ? options.end : undefined,
-    isometry: options.showIsometry ? options.isometry : undefined,
-    hitbox: true,
-    highlight: hitBoxInfo.get()?.imageKey
-  })
-
-  function render<F, R>(field: DVField<F, R>, depth: number, options: TreeOptions<R>, canvas: HTMLCanvasElement) {
-    if (!canvas) return
-    options = {...options, hitbox: true, highlight: hitBoxInfo.get()?.imageKey}
-    let tree = new TreeRenderer(field, depth, options, width, height)
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-    
-    ctx.save()
-    ctx.scale(dpr, dpr)
-    tree.render(ctx, 0)
-    ctx.restore()
-
-    mousemove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      const x = (e.x - rect.left)*canvas.width/rect.width/dpr
-      const y = (e.y - rect.top)*canvas.height/rect.height/dpr
-      const results = tree.hitBoxes.search(x, y, x, y)
-      if (results.length > 0) {
-        const i = results[0]
-        hitBoxInfo.set(tree.hitBoxMap[i])
-        tooltip.style.left = `${e.pageX}px`
-        tooltip.style.top = `${e.pageY - 10}px`
-      } else {
-        hitBoxInfo.set(undefined)
-      }
-    }
-  }
-
-  function startRender<F, R>(field: DVField<F, R>, depth: number, options: TreeOptions<R>, canvas: HTMLCanvasElement): number {
-    return requestAnimationFrame(_ => render(field, depth, options, canvas))
-  }
   $effect(() => {
-    const n = startRender(field, depth, _options, canvas)
-    return () => cancelAnimationFrame(n)
+    if (!canvas) return
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+
+    if (mode === "static") {
+      const _options: TreeOptions<unknown> = {
+        ...options,
+        end: options.showEnd ? options.end : undefined,
+        isometry: options.showIsometry ? options.isometry : undefined,
+        hitbox: true,
+        highlight: hitBoxInfo.get()?.imageKey
+      }
+      const tree = new TreeRenderer(field, depth, _options, width, height)
+      const frame = requestAnimationFrame(() => {
+        ctx.save()
+        ctx.scale(dpr, dpr)
+        tree.render(ctx, 0)
+        ctx.restore()
+        mousemove = (e: MouseEvent) => {
+          const rect = canvas.getBoundingClientRect()
+          const x = (e.x - rect.left) * canvas.width / rect.width / dpr
+          const y = (e.y - rect.top) * canvas.height / rect.height / dpr
+          const results = tree.hitBoxes.search(x, y, x, y)
+          if (results.length > 0) {
+            const i = results[0]
+            hitBoxInfo.set(tree.hitBoxMap[i])
+            tooltip.style.left = `${e.pageX}px`
+            tooltip.style.top = `${e.pageY - 10}px`
+          } else {
+            hitBoxInfo.set(undefined)
+          }
+        }
+      })
+      return () => cancelAnimationFrame(frame)
+    }
+
+    const scaledDpr = dpr * resolution
+    const tree = new TreeRenderer(field, depth, options, width, height, resolution)
+
+    if (mode === "animate") {
+      let prevTime = 0
+      let t = 0
+      let frame = requestAnimationFrame(anim)
+      function anim(time: number) {
+        t += Math.min(time - prevTime, 1000 / 10)
+        prevTime = time
+        ctx.save()
+        ctx.scale(scaledDpr, scaledDpr)
+        tree.render(ctx, t)
+        ctx.restore()
+        frame = requestAnimationFrame(anim)
+      }
+      return () => cancelAnimationFrame(frame)
+    }
+
+    // download mode
+    const zip = new JSZip()
+    let f = 0
+    let t = 0
+    let done = false
+    let frame = requestAnimationFrame(anim)
+    function anim() {
+      ctx.save()
+      ctx.scale(scaledDpr, scaledDpr)
+      tree.render(ctx, t)
+      ctx.restore()
+      if (done) {
+        zip.generateAsync({ type: "blob" }).then(blob => {
+          saveAs(blob, "tree.zip")
+          oncomplete()
+        })
+        return
+      }
+      const imgURL = canvas.toDataURL('image/png')
+      zip.file(`${f}.png`, imgURL.split('base64,')[1], { base64: true })
+      if (t >= tree.loopTime) {
+        done = true
+        t = 0
+      } else {
+        f += 1
+        t += 1000 / 60
+      }
+      frame = requestAnimationFrame(anim)
+    }
+    return () => cancelAnimationFrame(frame)
   })
 </script>
 
 <canvas class='tree-canvas'
   style={`width: 100%; max-width: ${width}px; max-height: ${height}px`}
   bind:this={canvas}
-  width={width*dpr}
-  height={height*dpr}
-  onmousemove={mousemove}
+  width={mode === "static" ? width * dpr : width * dpr * resolution}
+  height={mode === "static" ? height * dpr : height * dpr * resolution}
+  onmousemove={mode === "static" ? mousemove : undefined}
 ></canvas>
+{#if mode === "static"}
 <div class='tooltip' bind:this={tooltip}>
   <div class='tooltip-content'>
     <Latex text={tooltipText}/>
   </div>
 </div>
+{/if}
 
 <style lang="css">
   .tooltip {
