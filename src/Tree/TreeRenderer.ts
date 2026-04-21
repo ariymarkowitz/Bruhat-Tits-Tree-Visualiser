@@ -156,7 +156,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     this.showIsometry = iso.showIsometry
     this.isoInfo = iso.isoInfo
 
-    const roots = this.cacheAllVertices()
+    const roots = this.cacheRoots()
     this.root = roots.root
     this.rootImage = roots.rootImage
   }
@@ -357,39 +357,12 @@ export class TreeRenderer<FieldElt, RingElt> {
     return finalState
   }
 
-  cacheAllVertices(): { root: Vertex<FieldElt>, rootImage: Vertex<FieldElt> } {
-    type State = {
-      vertex: Vertex<FieldElt>
-      state: VertexState
-      image: Vertex<FieldElt>
-      imageState: VertexState
-    }
-
+  cacheRoots(): { root: Vertex<FieldElt>, rootImage: Vertex<FieldElt> } {
     const iso = this.isoInfo.iso
-
     const root = this.btt.minTranslationVertexNearOrigin(iso)
     const rootImage = this.btt.action(iso, root)
     const state = this.rootState(root)
-    const imageState = this.cacheStateFromPath(root, state, rootImage)
-
-    this.btt.iter<State>((prev: State, _, adj) => {
-      const vertex = adj.vertex
-      const image = this.btt.action(iso, vertex)
-
-      const edgeState = this.edgeState(prev.vertex, adj)
-      const imageAdj = this.btt.path(prev.image, image)[0]
-      const imageEdgeState = this.edgeState(prev.image, imageAdj)
-
-      const state = this.cacheState(vertex, prev.state, edgeState)
-      const imageState = this.cacheState(image, prev.imageState, imageEdgeState)
-
-      return {
-        value: {
-          vertex, image, state, imageState
-        }, stop: state.static.isLeaf
-      }
-    }, { vertex: root, state, image: rootImage, imageState }, root)
-
+    this.cacheStateFromPath(root, state, rootImage)
     return { root, rootImage }
   }
 
@@ -571,30 +544,58 @@ export class TreeRenderer<FieldElt, RingElt> {
 
     this.resetHitBoxes()
 
-    const rootState = this.states.get(this.cacheKey(this.root))
-    const rootImageState = this.states.get(this.cacheKey(this.rootImage))
-    if (rootState === undefined) throw new Error('Root state not cached')
-    if (rootImageState === undefined) throw new Error('Root image state not cached')
+    type IterState = {
+      vertex: Vertex<FieldElt>
+      cachedState: VertexState
+      interpState: VertexStateAbsolute
+      image: Vertex<FieldElt>
+      cachedImageState: VertexState
+    }
 
-    const rootInterpState = this.interpStates(rootState, rootImageState, i)
+    const iso = this.isoInfo.iso
+    const rootCached = this.states.get(this.cacheKey(this.root))
+    const rootImageCached = this.states.get(this.cacheKey(this.rootImage))
+    if (rootCached === undefined) throw new Error('Root state not cached')
+    if (rootImageCached === undefined) throw new Error('Root image state not cached')
+
+    const rootInterpState = this.interpStates(rootCached, rootImageCached, i)
     if (rootInterpState.type !== 'absolute') throw new Error('Root state is not absolute')
     this.drawVertex(vertexContext, this.makeVertexGraphicsState(rootInterpState))
 
-    this.btt.iter((prevState: VertexStateAbsolute, _, adj) => {
-      const state = this.states.get(this.cacheKey(adj.vertex))
-      if (state === undefined) throw new Error('Vertex state not cached')
-      const imageState = this.states.get(state.static.event.imageKey)
-      if (imageState === undefined) throw new Error('Vertex image state not cached')
-      const interpState = this.interpStates(state, imageState, i)
-      const absoluteState = interpState.type === 'absolute' ? interpState : this.absoluteState(interpState, prevState)
-      const vertexGraphicsState = this.makeVertexGraphicsState(absoluteState)
-      const edgeGraphicsState = this.makeEdgeGraphicsState(prevState, absoluteState)
+    this.btt.iter<IterState>((prev, _, adj) => {
+      const vertex = adj.vertex
+      const image = this.btt.action(iso, vertex)
 
-      this.drawVertex(vertexContext, vertexGraphicsState)
-      this.drawEdge(context, edgeGraphicsState)
+      const edgeState = this.edgeState(prev.vertex, adj)
+      const state = this.cacheState(vertex, prev.cachedState, edgeState)
 
-      return {value: absoluteState, stop: state.static.isLeaf}
-    }, rootInterpState, this.root)
+      const imageAdj = this.btt.path(prev.image, image)[0]
+      const imageEdgeState = this.edgeState(prev.image, imageAdj)
+      const imageState = this.cacheState(image, prev.cachedImageState, imageEdgeState)
+
+      const interp = this.interpStates(state, imageState, i)
+      const absoluteState = interp.type === 'absolute' ? interp : this.absoluteState(interp, prev.interpState)
+
+      this.drawVertex(vertexContext, this.makeVertexGraphicsState(absoluteState))
+      this.drawEdge(context, this.makeEdgeGraphicsState(prev.interpState, absoluteState))
+
+      return {
+        value: {
+          vertex,
+          cachedState: state,
+          interpState: absoluteState,
+          image,
+          cachedImageState: imageState,
+        },
+        stop: state.static.isLeaf,
+      }
+    }, {
+      vertex: this.root,
+      cachedState: rootCached,
+      interpState: rootInterpState,
+      image: this.rootImage,
+      cachedImageState: rootImageCached,
+    }, this.root)
 
     context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/dpi, vertexCanvas.height/dpi)
 
