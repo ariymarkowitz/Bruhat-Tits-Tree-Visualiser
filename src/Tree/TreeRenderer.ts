@@ -17,7 +17,6 @@ export interface TreeOptions<RingElt> {
   showIsometry: boolean
   showEnd: boolean
   hitbox?: boolean
-  highlight?: string
   theme: Theme
 }
 
@@ -134,6 +133,9 @@ export class TreeRenderer<FieldElt, RingElt> {
 
   hitBoxes?: Flatbush
   hitBoxMap?: Array<InteractionState>
+
+  /** The key of the vertex to draw highlighted. */
+  highlight?: string
 
   private vertexCanvas?: HTMLCanvasElement
   private vertexContext?: CanvasRenderingContext2D
@@ -367,7 +369,7 @@ export class TreeRenderer<FieldElt, RingElt> {
   }
 
   vertexColor(state: VertexState): string {
-    if (this.options.highlight && state.static.event.key === this.options.highlight) {
+    if (this.highlight && state.static.event.key === this.highlight) {
       return this.theme.tree.highlightVertex
     }
     return mixRgba(this.type0Color, this.type1Color, state.static.type)

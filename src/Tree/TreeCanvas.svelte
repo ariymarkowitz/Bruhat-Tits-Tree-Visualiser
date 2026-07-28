@@ -34,11 +34,18 @@
     characteristic === "zero" ? new Adic(p) : new LaurentField(p)
   )
 
+  const staticTree = $derived.by(() => mode !== "static" ? undefined : new TreeRenderer(field, depth, {
+    ...options,
+    end: options.showEnd ? options.end : undefined,
+    isometry: options.showIsometry ? options.isometry : undefined,
+    hitbox: true
+  }, width, height))
+
   // The renderer of the frame currently on screen, used to hit-test the mouse.
-  // Only set in static mode.
+  // Only set in static mode, once the hit boxes have been filled in by a render.
   let hitTree = $state.raw<TreeRenderer<unknown, unknown> | undefined>(undefined)
 
-  // Highlighting the hovered vertex re-renders the tree, so ignore mouse moves
+  // Highlighting the hovered vertex redraws the canvas, so ignore mouse moves
   // that land on a vertex equivalent to the one already hovered.
   function sameHitBox(a: InteractionState | undefined, b: InteractionState | undefined) {
     return a === b || (a !== undefined && b !== undefined
@@ -75,13 +82,9 @@
   })
 
   function renderStatic(ctx: CanvasRenderingContext2D) {
-    const tree = new TreeRenderer(field, depth, {
-      ...options,
-      end: options.showEnd ? options.end : undefined,
-      isometry: options.showIsometry ? options.isometry : undefined,
-      hitbox: true,
-      highlight: hitBox.get()?.imageKey
-    }, width, height)
+    const tree = staticTree
+    if (!tree) return
+    tree.highlight = hitBox.get()?.imageKey
 
     const frame = requestAnimationFrame(() => {
       tree.render(ctx, 0)
