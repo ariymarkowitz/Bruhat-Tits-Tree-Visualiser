@@ -1,98 +1,101 @@
 <script lang='ts'>
 	import { isPrime } from './algebra/utils/int'
 	import { setTheme, themes } from './style/themes/themes'
-	import TreeCanvas from './Tree/TreeCanvas.svelte'
-  import StepperInput from './ui/StepperInput.svelte'
-import MatrixInput from './ui/MatrixInput.svelte'
+	import TreeCanvas, { type Characteristic } from './Tree/TreeCanvas.svelte'
+	import MatrixInput from './ui/MatrixInput.svelte'
 	import RationalInput from './ui/RationalInput.svelte'
-  import RationalPolyInput from './ui/RationalPolyInput.svelte';
+	import RationalPolyInput from './ui/RationalPolyInput.svelte'
+	import StepperInput from './ui/StepperInput.svelte'
 
 	let themeInput: string = $state(themes[0].name)
 	const theme = $derived(themes.find(t => t.name === themeInput) || themes[0])
 	$effect(() => setTheme(theme))
 
-	let characteristic = $state("zero") as "zero" | "nonzero"
+	let characteristic: Characteristic = $state("zero")
 	let p = $state(2)
-	function validateP(p: number) {
-		return isPrime(p)
-	}
 
-	let depthState: [number, number] = $state([7, 2])
+	// The depth the user asked for, and the p it was asked at. Raising p caps the drawn
+	// depth (keeping the vertex count manageable), but the original request is remembered,
+	// so lowering p again restores it.
+	let chosenDepth = $state({ depth: 7, p: 2 })
 	let depth = $derived(Math.max(
 		1, Math.min(
-			depthState[0], Math.floor(depthState[0] * (depthState[1]+1) / (p+1))
+			chosenDepth.depth, Math.floor(chosenDepth.depth * (chosenDepth.p + 1) / (p + 1))
 		)
 	))
 
-	let char0end: [number, number] | undefined = $state(undefined)
-	let charpend: [number[], number[]] | undefined = $state(undefined)
+	let end: { zero?: [number, number], nonzero?: [number[], number[]] } = $state({})
 	let showEnd = $state(true)
 
-	let char0isometry: [unknown, unknown][][] | undefined = $state(undefined)
-	let charpisometry: [unknown, unknown][][] | undefined = $state(undefined)
+	let isometry: { zero?: [unknown, unknown][][], nonzero?: [unknown, unknown][][] } = $state({})
 	let showIsometry = $state(true)
 
 	let resolution: number = $state(1)
 
-	type AnimationType = "animate" | "download" | "static"
-	let animate: AnimationType = $state("static")
+	type Mode = "animate" | "download" | "static"
+	let mode: Mode = $state("static")
 
 	const treeOptions = $derived({
-		end: characteristic === "zero" ? char0end : charpend,
+		end: end[characteristic],
 		showEnd,
-		isometry: characteristic === "zero" ? char0isometry : charpisometry,
+		isometry: isometry[characteristic],
 		showIsometry,
-		theme: theme
+		theme
 	})
 </script>
 
 <main>
 	<div class='container'>
 		<div class='tree-container'>
-			<TreeCanvas mode={animate} width={800} height={800} characteristic={characteristic} p={p} depth={depth} options={treeOptions} resolution={resolution} oncomplete={() => animate = "static"}/>
+			<TreeCanvas
+				{mode} {characteristic} {p} {depth} {resolution}
+				width={800} height={800}
+				options={treeOptions}
+				oncomplete={() => mode = "static"}
+			/>
 		</div>
 		<div class='sidebar'>
 			<div class='sidebar-row'>
 				Characteristic
-				<select value={characteristic} oninput={e => characteristic = e.currentTarget.value as "zero" | "nonzero"}>
+				<select bind:value={characteristic}>
 					<option value="zero">0</option>
 					<option value="nonzero">p</option>
 				</select>
 			</div>
 			<div class='sidebar-row'>p
-				<StepperInput min={2} max={11} value={p} valid={validateP} onchange={n => p = n} />
+				<StepperInput min={2} max={11} value={p} valid={isPrime} onchange={n => p = n} />
 			</div>
 			<div class='sidebar-row'>Depth
-				<StepperInput min={1} max={10} value={depth} onchange={n => depthState = [n, p]} />
+				<StepperInput min={1} max={10} value={depth} onchange={n => chosenDepth = { depth: n, p }} />
 			</div>
 			<hr />
 			<div class='sidebar-row'>
 				<input type='checkbox' name='end' bind:checked={showEnd} />End
 				<div style:display={characteristic === 'zero' ? '' : 'none'}>
-					<RationalInput allowInf={true} onchange={v => char0end = v} />
+					<RationalInput allowInf={true} onchange={v => end.zero = v} />
 				</div>
 				<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
-					<RationalPolyInput allowInf={true} onchange={v => charpend = v}/>
+					<RationalPolyInput allowInf={true} onchange={v => end.nonzero = v}/>
 				</div>
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
 					<div style:display={characteristic === 'zero' ? '' : 'none'}>
-						<MatrixInput characteristic={"zero"} onchange={v => char0isometry = v} />
+						<MatrixInput characteristic={"zero"} onchange={v => isometry.zero = v} />
 					</div>
 					<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
-						<MatrixInput characteristic={"nonzero"} onchange={v => charpisometry = v} />
+						<MatrixInput characteristic={"nonzero"} onchange={v => isometry.nonzero = v} />
 					</div>
 			</div>
 			<hr />
 			<div class="sidebar-row">
-				<button onclick={_ => animate = (animate === "animate" ? "static" : "animate")}>
-					{#if animate == "animate"}Stop animation{:else}Animate!{/if}
+				<button onclick={() => mode = (mode === "animate" ? "static" : "animate")}>
+					{#if mode === "animate"}Stop animation{:else}Animate!{/if}
 				</button>
 			</div>
 			<div class="sidebar-row">
-				<button onclick={_ => animate = (animate === "download" ? "static" : "download")}>
-					{#if animate == "download"}Cancel download{:else}Download animation{/if}
+				<button onclick={() => mode = (mode === "download" ? "static" : "download")}>
+					{#if mode === "download"}Cancel download{:else}Download animation{/if}
 				</button>
 			</div>
 			<div class="sidebar-row">

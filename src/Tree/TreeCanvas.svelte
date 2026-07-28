@@ -1,15 +1,20 @@
+<script lang='ts' module>
+  export type Characteristic = "zero" | "nonzero"
+</script>
+
 <script lang='ts'>
   import { Adic } from '../algebra/Adic/Adic';
   import { LaurentField } from '../algebra/Adic/LaurentField';
   import type { DVField } from '../algebra/Field/DVField';
   import Latex from '../ui/Latex.svelte'
+  import { memoize } from '../utils/memoize.svelte'
   import { type InteractionState, type TreeOptions, TreeRenderer } from "./TreeRenderer"
   import JSZip from 'jszip'
   import { saveAs } from 'file-saver'
 
   type TreeCanvasProps = {
     mode: "static" | "animate" | "download"
-    characteristic: "zero" | "nonzero"
+    characteristic: Characteristic
     p: number
     depth: number
     width: number
@@ -23,123 +28,119 @@
 
   let canvas: HTMLCanvasElement
   const dpr = window.devicePixelRatio
-
-  let hitBoxInfo = $state.raw<InteractionState | undefined>(undefined)
-  function setHitBoxInfo(val: InteractionState | undefined) {
-    const prev = hitBoxInfo
-    if (!(prev === val || (prev !== undefined && val !== undefined && prev.display === val.display && prev.imageKey === val.imageKey))) {
-      hitBoxInfo = val
-    }
-  }
-  let mousemove: (e: MouseEvent) => void = $state(_ => {})
-
-  let tooltip: HTMLElement | undefined = $state()
-  let tooltipText: string = $derived(hitBoxInfo?.display || '')
-  $effect(() => {
-    if (tooltip) tooltip.style.visibility = tooltipText ? 'visible' : 'hidden'
-  })
+  const canvasScale = $derived(mode === "static" ? dpr : dpr * resolution)
 
   const field: DVField<unknown, unknown> = $derived(
     characteristic === "zero" ? new Adic(p) : new LaurentField(p)
   )
 
+  // The renderer of the frame currently on screen, used to hit-test the mouse.
+  // Only set in static mode.
+  let hitTree = $state.raw<TreeRenderer<unknown, unknown> | undefined>(undefined)
+
+  // Highlighting the hovered vertex re-renders the tree, so ignore mouse moves
+  // that land on a vertex equivalent to the one already hovered.
+  function sameHitBox(a: InteractionState | undefined, b: InteractionState | undefined) {
+    return a === b || (a !== undefined && b !== undefined
+      && a.display === b.display && a.imageKey === b.imageKey)
+  }
+  const hitBox = memoize<InteractionState | undefined>(undefined, sameHitBox)
+
+  let tooltip: HTMLElement | undefined = $state()
+  const tooltipText: string = $derived(hitBox.get()?.display || '')
+
+  function onMouseMove(e: MouseEvent) {
+    if (!hitTree || !tooltip) return
+    const rect = canvas.getBoundingClientRect()
+    const x = (e.x - rect.left) * canvas.width / rect.width / canvasScale
+    const y = (e.y - rect.top) * canvas.height / rect.height / canvasScale
+    const results = hitTree.hitBoxes?.search(x, y, x, y)
+    if (results && results.length > 0) {
+      hitBox.set(hitTree.hitBoxMap?.[results[0]])
+      tooltip.style.left = `${e.pageX}px`
+      tooltip.style.top = `${e.pageY - 10}px`
+    } else {
+      hitBox.set(undefined)
+    }
+  }
+
   $effect(() => {
     if (!canvas) return
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-
-    if (mode === "static") {
-      const _options: TreeOptions<unknown> = {
-        ...options,
-        end: options.showEnd ? options.end : undefined,
-        isometry: options.showIsometry ? options.isometry : undefined,
-        hitbox: true,
-        highlight: hitBoxInfo?.imageKey
-      }
-      const tree = new TreeRenderer(field, depth, _options, width, height)
-      const frame = requestAnimationFrame(() => {
-        ctx.save()
-        ctx.scale(dpr, dpr)
-        tree.render(ctx, 0)
-        ctx.restore()
-        mousemove = (e: MouseEvent) => {
-          const rect = canvas.getBoundingClientRect()
-          const x = (e.x - rect.left) * canvas.width / rect.width / dpr
-          const y = (e.y - rect.top) * canvas.height / rect.height / dpr
-          const results = tree.hitBoxes?.search(x, y, x, y)
-          if (results && results.length > 0) {
-            const i = results[0]
-            setHitBoxInfo(tree.hitBoxMap?.[i])
-            tooltip!.style.left = `${e.pageX}px`
-            tooltip!.style.top = `${e.pageY - 10}px`
-          } else {
-            setHitBoxInfo(undefined)
-          }
-        }
-      })
-      return () => cancelAnimationFrame(frame)
+    switch (mode) {
+      case "static": return renderStatic(ctx)
+      case "animate": return renderAnimation(ctx)
+      case "download": return renderDownload(ctx)
     }
+  })
 
-    const scaledDpr = dpr * resolution
+  function renderStatic(ctx: CanvasRenderingContext2D) {
+    const tree = new TreeRenderer(field, depth, {
+      ...options,
+      end: options.showEnd ? options.end : undefined,
+      isometry: options.showIsometry ? options.isometry : undefined,
+      hitbox: true,
+      highlight: hitBox.get()?.imageKey
+    }, width, height)
+
+    const frame = requestAnimationFrame(() => {
+      tree.render(ctx, 0)
+      hitTree = tree
+    })
+    return () => cancelAnimationFrame(frame)
+  }
+
+  function renderAnimation(ctx: CanvasRenderingContext2D) {
     const tree = new TreeRenderer(field, depth, options, width, height, resolution)
 
-    if (mode === "animate") {
-      let prevTime = 0
-      let t = 0
-      let frame = requestAnimationFrame(anim)
-      function anim(time: number) {
-        t += Math.min(time - prevTime, 1000 / 10)
-        prevTime = time
-        ctx.save()
-        ctx.scale(scaledDpr, scaledDpr)
-        tree.render(ctx, t)
-        ctx.restore()
-        frame = requestAnimationFrame(anim)
-      }
-      return () => cancelAnimationFrame(frame)
+    let prevTime = 0
+    let t = 0
+    let frame = requestAnimationFrame(anim)
+    function anim(time: number) {
+      t += Math.min(time - prevTime, 1000 / 10)
+      prevTime = time
+      tree.render(ctx, t)
+      frame = requestAnimationFrame(anim)
     }
+    return () => cancelAnimationFrame(frame)
+  }
 
-    // download mode
+  function renderDownload(ctx: CanvasRenderingContext2D) {
+    const tree = new TreeRenderer(field, depth, options, width, height, resolution)
+
     const zip = new JSZip()
     let f = 0
     let t = 0
-    let done = false
     let frame = requestAnimationFrame(anim)
     function anim() {
-      ctx.save()
-      ctx.scale(scaledDpr, scaledDpr)
       tree.render(ctx, t)
-      ctx.restore()
-      if (done) {
+      const imgURL = canvas.toDataURL('image/png')
+      zip.file(`${f}.png`, imgURL.split('base64,')[1], { base64: true })
+
+      if (t >= tree.loopTime) {
         zip.generateAsync({ type: "blob" }).then(blob => {
           saveAs(blob, "tree.zip")
           oncomplete()
         })
         return
       }
-      const imgURL = canvas.toDataURL('image/png')
-      zip.file(`${f}.png`, imgURL.split('base64,')[1], { base64: true })
-      if (t >= tree.loopTime) {
-        done = true
-        t = 0
-      } else {
-        f += 1
-        t += 1000 / 60
-      }
+      f += 1
+      t += 1000 / 60
       frame = requestAnimationFrame(anim)
     }
     return () => cancelAnimationFrame(frame)
-  })
+  }
 </script>
 
 <canvas class='tree-canvas'
   style={`--tree-max-width: ${width}px; --tree-aspect: ${width / height}`}
   bind:this={canvas}
-  width={mode === "static" ? width * dpr : width * dpr * resolution}
-  height={mode === "static" ? height * dpr : height * dpr * resolution}
-  onmousemove={mode === "static" ? mousemove : undefined}
+  width={width * canvasScale}
+  height={height * canvasScale}
+  onmousemove={mode === "static" ? onMouseMove : undefined}
 ></canvas>
 {#if mode === "static"}
-<div class='tooltip' bind:this={tooltip}>
+<div class='tooltip' bind:this={tooltip} style:visibility={tooltipText ? 'visible' : 'hidden'}>
   <div class='tooltip-content'>
     <Latex text={tooltipText}/>
   </div>
@@ -158,7 +159,6 @@
 
   .tooltip {
     position:absolute;
-    visibility: hidden;
     z-index: 1;
     pointer-events: none;
   }

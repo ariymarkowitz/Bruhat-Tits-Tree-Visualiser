@@ -2,7 +2,7 @@
 
 https://ariymarkowitz.github.io/Bruhat-Tits-Tree-Visualiser/
 
-This is a visualiser of the Bruhat-Tits tree over $\mathbb{Q}_p$, and the action of $\textrm{GL}(2, \mathbb{Q}_p$)$ on the tree.
+This is a visualiser of the Bruhat-Tits tree over $\mathbb{Q}_p$, and the action of $\textrm{GL}(2, \mathbb{Q}_p)$ on the tree.
 
 <img src=https://github.com/ariymarkowitz/Bruhat-Tits-Tree-Visualiser/blob/master/images/canvas.png width='800px'>
 
@@ -10,7 +10,7 @@ This is a visualiser of the Bruhat-Tits tree over $\mathbb{Q}_p$, and the action
 
 ## p-adic numbers
 
-There are a couple of ways of defining the $p$-adic numbers for a prine $p$. One way is to consider the rationals $\mathbb{Q}$, and use a different metric (notion of 'distance'). Informally, a pair of $p$-adic numbers $x$ and $y$ are 'close' to each other when $x-y$ is a multiple of a large power of $p$. We may then take the completion, similar to the real numbers, to give a field and metric space $\mathbb{Q}_p$.
+There are a couple of ways of defining the $p$-adic numbers for a prime $p$. One way is to consider the rationals $\mathbb{Q}$, and use a different metric (notion of 'distance'). Informally, a pair of $p$-adic numbers $x$ and $y$ are 'close' to each other when $x-y$ is a multiple of a large power of $p$. We may then take the completion, similar to the real numbers, to give a field and metric space $\mathbb{Q}_p$.
 
 The other way of describing the p-adic numbers is to consider them as the field of infinite expansions
 
@@ -56,7 +56,7 @@ If each vertex is a finite $p$-adic expansion, then an infinite path can be asso
 
 ## Function fields
 
-The Bruhat-Tits tree can also be defined over a the field $\mathbb{F}_p((x))$ of formal Laurent series (infinite power series, with finitely many terms with negative exponent) over a finite field. We define a similar metric to the $p$-adic numbers; in this case, power series $f(x)$ and $g(x)$ are 'close' when $f(x)-g(x)$ is a multiple of a large power of $x$.
+The Bruhat-Tits tree can also be defined over the field $\mathbb{F}_p((x))$ of formal Laurent series (infinite power series, with finitely many terms with negative exponent) over a finite field. We define a similar metric to the $p$-adic numbers; in this case, power series $f(x)$ and $g(x)$ are 'close' when $f(x)-g(x)$ is a multiple of a large power of $x$.
 
 The Laurent series and $p$-adic numbers have a lot of similarities, and together they classify the *non-Archimedean local fields*. The main factor that distinguishes them is their *characteristic*: The number of times you need to add 1 to itself to reach 0. The field of Laurent series $\mathbb{F}_p((x))$ has characteristic $p$. In $\mathbb{Q}_p$ you can add 1 to itself forever and never reach 0; for convenience we say that $\mathbb{Q}_p$ has characteristic 0.
 
@@ -67,7 +67,7 @@ The Laurent series and $p$-adic numbers have a lot of similarities, and together
 - 'characteristic' chooses the characteristic of the field.
 - 'p' sets the field. In characteristic 0 the field is $\mathbb{Q}_p$, while in characteristic $p$ the field is $\mathbb{F}_p((x))$.
 - 'Depth' sets the depth of the tree (maximum distance rendered).
-- 'End' shows an end of the tree (an infinite ray starting from the origin). The input may be an integer or rational number in characteristic 0, or a polynomial or rational function (like (1 + x^3) / 4x) in characteristic $p$. the input a/b corresponds to the projective point (b, a). 1/0 gives the end corresponding to the projective point at infinity.
+- 'End' shows an end of the tree (an infinite ray starting from the origin). The input may be an integer or rational number in characteristic 0, or a polynomial or rational function (like (1 + x^3) / 4x) in characteristic $p$. The input a/b corresponds to the projective point (b, a). 1/0 gives the end corresponding to the projective point at infinity.
 - 'Isometry' shows the minimum translation set of the isometry induced by a given matrix. The inputs may be rational numbers in characteristic 0, or a rational function in characteristic p.
 
 ## Colour scheme

@@ -16,7 +16,7 @@
   }: StepperInputProps = $props()
 
   let text: string = $state(value.toString())
-  let prevInput: string = $state(value.toString())
+  let prevInput: string = value.toString()
 
   // Prop→display sync. Not a two-way binding — it mirrors external `value` changes
   // (e.g. derived depth recomputing when p changes) into the input field without
@@ -63,11 +63,9 @@
 
   function isValidInput(input: string) {
     if (input === '') return true
-    if (/^(0|[1-9]\d*)$/.test(input)) {
-      const intInput = Number(input)
-      if ((min <= 0 || intInput > 0) && intInput <= max) return true
-    }
-    return false
+    if (!/^(0|[1-9]\d*)$/.test(input)) return false
+    const n = Number(input)
+    return (min <= 0 || n > 0) && n <= max
   }
 
   function isValidValue(input: string) {

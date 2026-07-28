@@ -17,18 +17,21 @@
     onchange(parse(value))
   }
 
+  /**
+   * Parse a polynomial into a map from exponent to coefficient.
+   */
   function parseCoefficients(input: string): Map<number, number> | undefined {
     const coefficients = new Map<number, number>()
-    input = input.replace(/[ \(\)]/g, '')
+    const terms = input.replace(/[ ()]/g, '')
 
-    for (const [term] of input.matchAll(/(^|[\+-])((?:(?:\^[\+-]?)|[^\+-])+)/g)) {
+    for (const [term] of terms.matchAll(/(^|[\+-])((?:(?:\^[\+-]?)|[^\+-])+)/g)) {
       const match = term.match(/^([\+-]?\d*)(x(?:\^([\+-]?\d+))?)?$/)
       if (!match) return undefined
-      
-      const [_, coeff, xTerm, exp] = match
+
+      const [, coeff, xTerm, exp] = match
       const coefficient = coeff === '' || coeff === '+' ? 1 : coeff === '-' ? -1 : Number(coeff)
       const exponent = xTerm === undefined ? 0 : exp === undefined ? 1 : Number(exp)
-      coefficients.set(exponent, (coefficients.get(exponent) || 0) + coefficient)
+      coefficients.set(exponent, (coefficients.get(exponent) ?? 0) + coefficient)
     }
     return coefficients
   }
@@ -38,39 +41,39 @@
     const parts = input.split('/')
     if (parts.length > 2) return undefined
 
-    const maps = parts.map(part => parseCoefficients(part))
-    if (maps.some(map => map === undefined)) return undefined
+    const parsed = parts.map(parseCoefficients)
+    if (parsed.some(map => map === undefined)) return undefined
+    // A missing denominator is 1.
+    const [numerator, denominator = new Map([[0, 1]])] = parsed as Map<number, number>[]
 
-    let numerators = maps[0]!
-    let denominators = maps[1] ?? new Map<number, number>([[0, 1]])
-
-    // Remove zero coefficients
-    let nEntries = Array.from(numerators.entries()).filter(([_, value]) => value !== 0)
-    let dEntries = Array.from(denominators.entries()).filter(([_, value]) => value !== 0)
-    if (nEntries.length === 0 && dEntries.length === 0) return undefined
+    let numerTerms = [...numerator].filter(([, coefficient]) => coefficient !== 0)
+    let denomTerms = [...denominator].filter(([, coefficient]) => coefficient !== 0)
+    if (numerTerms.length === 0 && denomTerms.length === 0) return undefined
 
     // Handle negative exponents
-    const nMin = nEntries.length > 0 ? Math.min(...nEntries.map(([key]) => key)) : 0
-    const dMin = dEntries.length > 0 ? Math.min(...dEntries.map(([key]) => key)) : 0
+    const nMin = numerTerms.length > 0 ? Math.min(...numerTerms.map(([exp]) => exp)) : 0
+    const dMin = denomTerms.length > 0 ? Math.min(...denomTerms.map(([exp]) => exp)) : 0
     const minExp = Math.min(nMin, dMin)
     if (minExp < 0) {
-      nEntries = nEntries.map(([key, value]) => [key - minExp, value])
-      dEntries = dEntries.map(([key, value]) => [key - minExp, value])
+      numerTerms = numerTerms.map(([exp, coefficient]) => [exp - minExp, coefficient])
+      denomTerms = denomTerms.map(([exp, coefficient]) => [exp - minExp, coefficient])
     }
 
-    const n = arrayFromEntries(nEntries)
-    const d = arrayFromEntries(dEntries)
-    return allowInf || d.length > 0 ? [n, d] : undefined 
+    const n = coefficientArray(numerTerms)
+    const d = coefficientArray(denomTerms)
+    return allowInf || d.length > 0 ? [n, d] : undefined
   }
 
-  function arrayFromEntries(entries: [number, number][]): number[] {
-    const arr = new Array(Math.max(...entries.map(([key]) => key + 1), 0)).fill(0)
-    for (const [key, value] of entries) {
-      arr[key] = value
+  /**
+   * Convert [exponent, coefficient] pairs into an array of coefficients by degree.
+   */
+  function coefficientArray(terms: [number, number][]): number[] {
+    const arr = new Array(Math.max(...terms.map(([exp]) => exp + 1), 0)).fill(0)
+    for (const [exp, coefficient] of terms) {
+      arr[exp] = coefficient
     }
     return arr
   }
-
 </script>
 
 <input type='text' bind:value oninput={onInput}/>

@@ -149,16 +149,15 @@ export class TreeRenderer<FieldElt, RingElt> {
     this.btt = new BruhatTitsTree(field)
     this.p = this.btt.p
 
-    const F = this.field
-    this.end = options.end ? options.end.toReversed().map(n => F.fromIntegral(n)) : undefined
+    this.end = options.end?.toReversed().map(n => field.fromIntegral(n))
 
-    const iso = this.setupIsometry()
-    this.showIsometry = iso.showIsometry
-    this.isoInfo = iso.isoInfo
+    const { showIsometry, isoInfo } = this.setupIsometry()
+    this.showIsometry = showIsometry
+    this.isoInfo = isoInfo
 
-    const roots = this.cacheRoots()
-    this.root = roots.root
-    this.rootImage = roots.rootImage
+    this.root = this.btt.minTranslationVertexNearOrigin(isoInfo.iso)
+    this.rootImage = this.btt.action(isoInfo.iso, this.root)
+    this.cacheStateFromPath(this.root, this.rootState(this.root), this.rootImage)
   }
 
   setupIsometry(): { showIsometry: boolean, isoInfo: IsoInfo<FieldElt> } {
@@ -212,10 +211,6 @@ export class TreeRenderer<FieldElt, RingElt> {
     }
   }
 
-  staticState(v: Vertex<FieldElt>, parentState: StaticState): StaticState {
-    return this.staticStateFromParams(v, parentState.depth + 1)
-  }
-
   /**
    * Get the key of a vertex.
    */
@@ -232,14 +227,8 @@ export class TreeRenderer<FieldElt, RingElt> {
   }
 
   cacheStaticState(v: Vertex<FieldElt>, parentState: StaticState): StaticState {
-    const key = this.cacheKey(v)
-    if (this.staticStates.has(key)) {
-      return this.staticStates.get(key)!
-    } else {
-      const state = this.staticState(v, parentState)
-      this.staticStates.set(key, state)
-      return state
-    }
+    return this.staticStates.get(this.cacheKey(v))
+      ?? this.cache(this.staticStates, v, this.staticStateFromParams(v, parentState.depth + 1))
   }
 
   relativeState(staticState: StaticState, parent: VertexState, edge: EdgeState): VertexStateRelative {
@@ -269,17 +258,11 @@ export class TreeRenderer<FieldElt, RingElt> {
     }
   }
 
-  getStartVertex(iso: IsoInfo<FieldElt>) {
-    return this.btt.minTranslationVertexNearOrigin(iso.iso)
-  }
-
   state(staticState: StaticState, parent: VertexState, edge: EdgeState): VertexState {
-    let state: VertexState = this.relativeState(staticState, parent, edge)
-    if (staticState.isAbsolute) {
-      if (parent.type !== 'absolute') throw new Error('Parent of absolute vertex has no absolute state')
-      state = this.absoluteState(state, parent)
-    }
-    return state
+    const relative = this.relativeState(staticState, parent, edge)
+    if (!staticState.isAbsolute) return relative
+    if (parent.type !== 'absolute') throw new Error('Parent of absolute vertex has no absolute state')
+    return this.absoluteState(relative, parent)
   }
 
   cacheState(v: Vertex<FieldElt>, parentState: VertexState, edge: EdgeState): VertexState {
@@ -313,57 +296,20 @@ export class TreeRenderer<FieldElt, RingElt> {
   }
 
   rootState(v: Vertex<FieldElt>): VertexStateAbsolute {
-    type PathState = {
-      vertex: Vertex<FieldElt>,
-      state: VertexStateAbsolute
-    }
-
-    const path = this.btt.path(this.btt.origin, v)
-    const state = path.reduce<PathState>((previous: PathState, adj) => {
-      const edgeState = this.edgeState(previous.vertex, adj)
-      const staticState = this.cacheStaticState(adj.vertex, previous.state.static)
-      const relativeState = this.relativeState(staticState, previous.state, edgeState)
-      const absoluteState = this.absoluteState(relativeState, previous.state)
-      return {
-        vertex: adj.vertex,
-        state: absoluteState
-      }
-    }, {
-      vertex: this.btt.origin,
-      state: this.originState()
-    }).state
+    const state = this.btt.reducePath<VertexStateAbsolute>((previous, vertex, adj) => {
+      const staticState = this.cacheStaticState(adj.vertex, previous.static)
+      const relativeState = this.relativeState(staticState, previous, this.edgeState(vertex, adj))
+      return this.absoluteState(relativeState, previous)
+    }, this.btt.origin, v, this.originState())
 
     return this.cache(this.states, v, state)
   }
 
-  cacheStateFromPath(v: Vertex<FieldElt>, state: VertexState, w: Vertex<FieldElt>) {
-    type PathState = {
-      vertex: Vertex<FieldElt>,
-      state: VertexState
-    }
-
-    const path = this.btt.path(v, w)
-    const finalState = path.reduce<PathState>((previous: PathState, adj) => {
-      const edgeState = {
-        forward: adj.edge,
-        reverse: this.btt.reverse(previous.vertex, adj).edge
-      }
-      return {
-        vertex: adj.vertex,
-        state: this.cacheState(adj.vertex, previous.state, edgeState)
-      }
-    }, { vertex: v, state }).state
-
-    return finalState
-  }
-
-  cacheRoots(): { root: Vertex<FieldElt>, rootImage: Vertex<FieldElt> } {
-    const iso = this.isoInfo.iso
-    const root = this.btt.minTranslationVertexNearOrigin(iso)
-    const rootImage = this.btt.action(iso, root)
-    const state = this.rootState(root)
-    this.cacheStateFromPath(root, state, rootImage)
-    return { root, rootImage }
+  cacheStateFromPath(v: Vertex<FieldElt>, state: VertexState, w: Vertex<FieldElt>): VertexState {
+    return this.btt.reducePath<VertexState>(
+      (previous, vertex, adj) => this.cacheState(adj.vertex, previous, this.edgeState(vertex, adj)),
+      v, w, state
+    )
   }
 
   edgeLength(depth: number): number {
@@ -394,10 +340,10 @@ export class TreeRenderer<FieldElt, RingElt> {
     }
   }
 
-  interpAbsoluteStates(state1: VertexStateAbsolute, state2: VertexStateAbsolute, t: number): AbsoluteState {
+  interpAbsoluteStates(state1: AbsoluteState, state2: AbsoluteState, t: number): AbsoluteState {
     return {
-      x: lerp(state1.absolute.x, state2.absolute.x, t),
-      y: lerp(state1.absolute.y, state2.absolute.y, t)
+      x: lerp(state1.x, state2.x, t),
+      y: lerp(state1.y, state2.y, t)
     }
   }
 
@@ -407,7 +353,7 @@ export class TreeRenderer<FieldElt, RingElt> {
         type: 'absolute',
         static: this.interpStaticStates(state1.static, state2.static, t),
         relative: this.interpRelativeStates(state1.relative, state2.relative, t),
-        absolute: this.interpAbsoluteStates(state1, state2, t)
+        absolute: this.interpAbsoluteStates(state1.absolute, state2.absolute, t)
       }
     } else if (state1.type === 'relative' && state2.type === 'relative') {
       return {
@@ -531,9 +477,22 @@ export class TreeRenderer<FieldElt, RingElt> {
     }
   }
 
+  private cachedState(v: Vertex<FieldElt>): VertexState {
+    const key = this.cacheKey(v)
+    const state = this.states.get(key)
+    if (state === undefined) throw new Error(`State of vertex ${key} is not cached`)
+    return state
+  }
+
+  /**
+   * Draw the tree, at time `t` of the animation loop.
+   * The context is scaled here, so callers pass an untransformed context.
+   */
   render(context: CanvasRenderingContext2D, t: number) {
     const dpi = this.resolution * window.devicePixelRatio
-    context.clearRect(0, 0, context.canvas.width / this.resolution, context.canvas.height / this.resolution)
+    context.save()
+    context.scale(dpi, dpi)
+    context.clearRect(0, 0, context.canvas.width / dpi, context.canvas.height / dpi)
 
     const [vertexCanvas, vertexContext] = this.ensureVertexCanvas(context.canvas)
     vertexContext.setTransform(1, 0, 0, 1, 0, 0)
@@ -553,10 +512,8 @@ export class TreeRenderer<FieldElt, RingElt> {
     }
 
     const iso = this.isoInfo.iso
-    const rootCached = this.states.get(this.cacheKey(this.root))
-    const rootImageCached = this.states.get(this.cacheKey(this.rootImage))
-    if (rootCached === undefined) throw new Error('Root state not cached')
-    if (rootImageCached === undefined) throw new Error('Root image state not cached')
+    const rootCached = this.cachedState(this.root)
+    const rootImageCached = this.cachedState(this.rootImage)
 
     const rootInterpState = this.interpStates(rootCached, rootImageCached, i)
     if (rootInterpState.type !== 'absolute') throw new Error('Root state is not absolute')
@@ -598,6 +555,7 @@ export class TreeRenderer<FieldElt, RingElt> {
     }, this.root)
 
     context.drawImage(vertexCanvas, 0, 0, vertexCanvas.width/dpi, vertexCanvas.height/dpi)
+    context.restore()
 
     if (this.hitBoxes) this.hitBoxes.finish()
   }

@@ -1,21 +1,24 @@
 <script lang="ts" module>
   const characteristics = {
     zero: {
-      type: 'zero',
       component: RationalInput,
       zero: [0, 1]
     },
     nonzero: {
-      type: 'nonzero',
       component: RationalPolyInput,
       zero: [[], [1]]
     }
   } as const
+
+  const leftBracket = String.raw`\left[\rule{0cm}{3em}\right.`
+  const rightBracket = String.raw`\left.\rule{0cm}{3em}\right]`
 </script>
 <script lang="ts">
   import RationalInput from "./RationalInput.svelte";
   import RationalPolyInput from './RationalPolyInput.svelte';
   import Latex from './Latex.svelte';
+
+  type Cell = [unknown, unknown] | undefined
 
   type MatrixInputProps = {
     characteristic: keyof typeof characteristics,
@@ -24,29 +27,27 @@
   let { characteristic, onchange = _ => {} }: MatrixInputProps = $props()
   let type = $derived(characteristics[characteristic])
 
-  let state00: [unknown, unknown] | undefined = $state(undefined)
-  let state01: [unknown, unknown] | undefined = $state(undefined)
-  let state10: [unknown, unknown] | undefined = $state(undefined)
-  let state11: [unknown, unknown] | undefined = $state(undefined)
+  // The four inputs, in the order they are laid out: top row, then bottom row.
+  let cells: Cell[] = $state([undefined, undefined, undefined, undefined])
 
-  function setFromInput() {
+  function setCell(index: number, value: Cell) {
+    cells[index] = value
     const parsed = [
-      [state00, state10],
-      [state01, state11]
+      [cells[0], cells[1]],
+      [cells[2], cells[3]]
     ].map(row => row.map(cell => cell ?? type.zero)) as [unknown, unknown][][]
     onchange(parsed)
   }
 </script>
 
 <div class='combined-elements'>
-  <Latex text='\left[\rule{"{"}0cm{"}"}{"{"}3em{"}"}\right.'/>
+  <Latex text={leftBracket}/>
   <div class='matrix-input-container'>
     <div class="matrix-input">
-      <type.component emptyIsZero={true} onchange={v => { state00 = v; setFromInput() }} />
-      <type.component emptyIsZero={true} onchange={v => { state10 = v; setFromInput() }} />
-      <type.component emptyIsZero={true} onchange={v => { state01 = v; setFromInput() }} />
-      <type.component emptyIsZero={true} onchange={v => { state11 = v; setFromInput() }} />
+      {#each cells as _, i}
+        <type.component emptyIsZero={true} onchange={v => setCell(i, v)} />
+      {/each}
     </div>
   </div>
-  <Latex text='\left.\rule{"{"}0cm{"}"}{"{"}3em{"}"}\right]'/>
+  <Latex text={rightBracket}/>
 </div>

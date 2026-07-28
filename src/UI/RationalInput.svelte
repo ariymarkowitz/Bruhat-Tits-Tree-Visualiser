@@ -12,7 +12,7 @@
   }: RationalInputProps = $props()
 
   let value: string = $state('')
-  let prevInput: string = $state('')
+  let prevInput: string = ''
 
   function onInput() {
     if (!isValidInput(value)) {
@@ -25,32 +25,21 @@
 
   function isValidInput(input: string) {
     if (input === '') return true
-    if (allowInf) {
-      return (/^-?\d* *(\/ *-?\d*)?$/.test(input))
-    } else {
-      return (/^-?\d* *(\/ *-?([1-9]\d*)?)?$/.test(input))
-    }
+    const pattern = allowInf ? /^-?\d* *(\/ *-?\d*)?$/ : /^-?\d* *(\/ *-?([1-9]\d*)?)?$/
+    return pattern.test(input)
   }
 
   function parse(input: string): [number, number] | undefined {
     if (input === '' && emptyIsZero) return [0, 1]
-    const matches = /^(?<num>-?\d+) *(\/ *(?<den>-?\d+) *)?$/.exec(input)
-    if (!matches || !matches.groups) return undefined
-    const g = matches.groups
-    if (g.num) {
-      const num = Number(matches.groups.num)
-      if (g.den) {
-        const den = Number(matches.groups.den)
-        if (num === 0 && den === 0) return undefined
-        return [num, den]
-      } else {
-        return [num, 1]
-      }
-    } else {
-      return undefined
-    }
-  }
+    const groups = /^(?<num>-?\d+) *(\/ *(?<den>-?\d+) *)?$/.exec(input)?.groups
+    if (!groups?.num) return undefined
 
+    const num = Number(groups.num)
+    if (!groups.den) return [num, 1]
+
+    const den = Number(groups.den)
+    return num === 0 && den === 0 ? undefined : [num, den]
+  }
 </script>
 
 <input type='text' bind:value oninput={onInput}/>

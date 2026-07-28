@@ -12,7 +12,7 @@ export interface Theme {
     focusBorder: string,
     thickBorder: string,
     disabledBorder: string,
-    githubColor: string,
+    githubColor: 'white' | 'black',
   },
   tree: {
     type0: string,
@@ -32,14 +32,18 @@ export interface Theme {
 export const themes: Theme[] = [darkTheme, lightTheme, lightLargeTheme, mochaTheme]
 
 export function setTheme(theme: Theme) {
-  const html = document.documentElement
-  html.style.setProperty('--bgColor', theme.ui.background)
-  html.style.setProperty('--borderColor', theme.ui.border)
-  html.style.setProperty('--focusBorderColor', theme.ui.focusBorder)
-  html.style.setProperty('--textColor', theme.ui.textColor)
-  html.style.setProperty('--thickBorderColor', theme.ui.thickBorder)
-  html.style.setProperty('--disabledBorderColor', theme.ui.disabledBorder)
-  html.style.setProperty('--fixedPointColor', theme.tree.fixedPoints)
-  html.style.setProperty('--translationAxisColor', theme.tree.translationAxis)
-  html.style.setProperty('--endColor', theme.tree.end)
+  const cssVariables = {
+    bgColor: theme.ui.background,
+    borderColor: theme.ui.border,
+    focusBorderColor: theme.ui.focusBorder,
+    textColor: theme.ui.textColor,
+    thickBorderColor: theme.ui.thickBorder,
+    disabledBorderColor: theme.ui.disabledBorder,
+    fixedPointColor: theme.tree.fixedPoints,
+    translationAxisColor: theme.tree.translationAxis,
+    endColor: theme.tree.end,
+  }
+  for (const [name, value] of Object.entries(cssVariables)) {
+    document.documentElement.style.setProperty(`--${name}`, value)
+  }
 }

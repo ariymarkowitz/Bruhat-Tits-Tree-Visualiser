@@ -91,7 +91,6 @@ input[type='checkbox'] {
 	width: 18px;
 	height: 18px;
 	border: 2px solid var(--thickBorderColor);
-	background-color: none;
 }
 
 input[type="checkbox"]::before {
@@ -157,19 +156,25 @@ hr {
 		display: flex;
 		flex-direction: column;
 
-		.number-input-up {
+		button {
 			flex: 1;
 			border: 1px solid var(--borderColor);
 			border-left: none;
-
-			border-radius: 0 4px 0 0;
-
 			position: relative;
+
+			i {
+				border-style: solid;
+			}
+		}
+
+		/* The arrows are CSS triangles: the up arrow colours its bottom border,
+		   the down arrow its top border. */
+		.number-input-up {
+			border-radius: 0 4px 0 0;
 
 			i {
 				border-width: 0 .3em .3em;
 				border-color: transparent transparent var(--borderColor);
-				border-style: solid;
 				margin: -0.2em 0 0 -0.3em;
 			}
 
@@ -183,19 +188,12 @@ hr {
 		}
 
 		.number-input-down {
-			flex: 1;
-			border: 1px solid var(--borderColor);;
-			border-left: none;
 			border-top: none;
-
 			border-radius: 0 0 4px 0;
-
-			position: relative;
 
 			i {
 				border-width: .3em .3em 0;
 				border-color: var(--borderColor) transparent transparent;
-				border-style: solid;
 				margin: -0.1em 0 0 -0.3em;
 			}
 

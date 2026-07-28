@@ -1,3 +1,5 @@
+import type { Theme } from './themes'
+
 export default {
   name: 'Mocha',
   ui: {
@@ -22,4 +24,4 @@ export default {
     vertexStrokeWidth: 2.5,
     vertexRadius: 10,
   }
-}
+} satisfies Theme
