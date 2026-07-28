@@ -28,16 +28,26 @@
     prevInput = s
   })
 
-  function increment() {
+  const nextValue = $derived.by(() => {
     for (let i = value + 1; i <= max; i++) {
-      if (valid(i)) { onchange(i); return }
+      if (valid(i)) return i
     }
+    return undefined
+  })
+
+  const prevValue = $derived.by(() => {
+    for (let i = value - 1; i >= min; i--) {
+      if (valid(i)) return i
+    }
+    return undefined
+  })
+
+  function increment() {
+    if (nextValue !== undefined) onchange(nextValue)
   }
 
   function decrement() {
-    for (let i = value - 1; i >= min; i--) {
-      if (valid(i)) { onchange(i); return }
-    }
+    if (prevValue !== undefined) onchange(prevValue)
   }
 
   function onInput() {
@@ -70,7 +80,7 @@
 <div class='number-input'>
   <input type='text' bind:value={text} oninput={onInput}/>
   <div class='number-input-buttons'>
-    <button type="button" aria-label="Increment" class='number-input-up' onclick={increment}><i></i></button>
-    <button type="button" aria-label="Decrement" class='number-input-down' onclick={decrement}><i></i></button>
+    <button type="button" aria-label="Increment" class='number-input-up' disabled={nextValue === undefined} onclick={increment}><i></i></button>
+    <button type="button" aria-label="Decrement" class='number-input-down' disabled={prevValue === undefined} onclick={decrement}><i></i></button>
   </div>
 </div>

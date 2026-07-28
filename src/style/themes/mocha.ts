@@ -4,8 +4,9 @@ export default {
     background: '#d9bea6',
     textColor: '#60503B',
     border: '#60503B',
-    focusBorder: '#261702',
+    focusBorder: '#120b01',
     thickBorder: '#60503B',
+    disabledBorder: 'rgba(96, 80, 59, 0.3)',
     githubColor: 'black',
   },
   tree: {

@@ -132,7 +132,7 @@
 </script>
 
 <canvas class='tree-canvas'
-  style={`width: 100%; max-width: ${width}px; max-height: ${height}px`}
+  style={`--tree-max-width: ${width}px; --tree-aspect: ${width / height}`}
   bind:this={canvas}
   width={mode === "static" ? width * dpr : width * dpr * resolution}
   height={mode === "static" ? height * dpr : height * dpr * resolution}
@@ -147,6 +147,15 @@
 {/if}
 
 <style lang="css">
+  /* Fit the canvas to the viewport: never wider than its natural size or the
+     container, and never taller than the viewport (width is derived from the
+     height budget so the aspect ratio is preserved). */
+  .tree-canvas {
+    width: min(100%, var(--tree-max-width), calc((100vh - 20px) * var(--tree-aspect)));
+    width: min(100%, var(--tree-max-width), calc((100dvh - 20px) * var(--tree-aspect)));
+    height: auto;
+  }
+
   .tooltip {
     position:absolute;
     visibility: hidden;

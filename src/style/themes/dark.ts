@@ -6,6 +6,7 @@ export default {
     border: 'rgba(255, 255, 255, 0.6)',
     focusBorder: '#fff',
     thickBorder: '#fff',
+    disabledBorder: 'rgba(255, 255, 255, 0.3)',
     githubColor: 'white',
   },
   tree: {

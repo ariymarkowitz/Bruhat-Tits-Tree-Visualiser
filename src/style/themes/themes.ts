@@ -11,6 +11,7 @@ export interface Theme {
     border: string,
     focusBorder: string,
     thickBorder: string,
+    disabledBorder: string,
     githubColor: string,
   },
   tree: {
@@ -37,6 +38,7 @@ export function setTheme(theme: Theme) {
   html.style.setProperty('--focusBorderColor', theme.ui.focusBorder)
   html.style.setProperty('--textColor', theme.ui.textColor)
   html.style.setProperty('--thickBorderColor', theme.ui.thickBorder)
+  html.style.setProperty('--disabledBorderColor', theme.ui.disabledBorder)
   html.style.setProperty('--fixedPointColor', theme.tree.fixedPoints)
   html.style.setProperty('--translationAxisColor', theme.tree.translationAxis)
   html.style.setProperty('--endColor', theme.tree.end)

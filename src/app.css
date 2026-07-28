@@ -25,14 +25,17 @@ body {
 .tree-container {
 	max-width: 800px;
 	flex: 1;
+	min-width: 0;
 
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
 }
 
 .sidebar {
-	width: 230px;
+	width: 260px;
+	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
@@ -40,7 +43,7 @@ body {
 	@media screen and (max-width: 600px) {
 		width: 100%;
 	}
-	padding: 10px;
+	padding: 20px;
 }
 
 .sidebar-row {
@@ -63,6 +66,13 @@ input[type='text'], select, button {
 
 input[type='text'], select {
 	&:focus {
+		outline: none;
+		border-color: var(--focusBorderColor);
+	}
+}
+
+.sidebar-row > button {
+	&:active {
 		outline: none;
 		border-color: var(--focusBorderColor);
 	}
@@ -163,8 +173,12 @@ hr {
 				margin: -0.2em 0 0 -0.3em;
 			}
 
-			&:hover i {
+			&:not(:disabled):hover i {
 				border-color: transparent transparent var(--focusBorderColor);
+			}
+
+			&:disabled i {
+				border-color: transparent transparent var(--disabledBorderColor);
 			}
 		}
 
@@ -185,9 +199,17 @@ hr {
 				margin: -0.1em 0 0 -0.3em;
 			}
 
-			&:hover i {
+			&:not(:disabled):hover i {
 				border-color: var(--focusBorderColor) transparent transparent;
 			}
+
+			&:disabled i {
+				border-color: var(--disabledBorderColor) transparent transparent;
+			}
+		}
+
+		button:disabled {
+			cursor: default;
 		}
 
 		i {
@@ -229,6 +251,7 @@ hr {
 	flex-direction: row;
 	align-items: center;
 	gap: 0.2em;
+	margin-inline: -4pt;
 }
 
 .latex {

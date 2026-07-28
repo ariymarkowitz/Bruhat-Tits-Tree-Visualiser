@@ -26,11 +26,11 @@ import MatrixInput from './ui/MatrixInput.svelte'
 
 	let char0end: [number, number] | undefined = $state(undefined)
 	let charpend: [number[], number[]] | undefined = $state(undefined)
-	let showEnd = $state(false)
+	let showEnd = $state(true)
 
 	let char0isometry: [unknown, unknown][][] | undefined = $state(undefined)
 	let charpisometry: [unknown, unknown][][] | undefined = $state(undefined)
-	let showIsometry = $state(false)
+	let showIsometry = $state(true)
 
 	let resolution: number = $state(1)
 
