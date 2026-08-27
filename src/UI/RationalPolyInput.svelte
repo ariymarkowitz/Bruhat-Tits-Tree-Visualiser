@@ -1,24 +1,43 @@
 <script lang='ts'>
+  import { deepEquals } from '../utils/equals'
+
+  type RationalPoly = [number[], number[]] | undefined
+
   type RationalPolyInputProps = Partial<{
     allowInf: boolean
     emptyIsZero: boolean
-    onchange: (value: [number[], number[]] | undefined) => void
+    value: RationalPoly
+    onchange: (value: RationalPoly) => void
   }>
 
   let {
     allowInf = false,
     emptyIsZero = false,
+    value = undefined,
     onchange = _ => {}
   }: RationalPolyInputProps = $props()
 
-  let value: string = $state('')
+  let text: string = $state(format(value))
+  // The value this input last reported. Anything else in `value` was set from
+  // outside, and replaces the text.
+  let emitted: RationalPoly = value
+
+  // Prop→display sync, as in StepperInput. Not a two-way binding: the text the user
+  // is typing is left alone, since the value it produces is already the one shown.
+  $effect(() => {
+    if (deepEquals(value, emitted)) return
+    emitted = value
+    text = format(value)
+  })
 
   function onInput() {
-    onchange(parse(value))
+    emitted = parse(text)
+    onchange(emitted)
   }
 
   /**
-   * Parse a polynomial into a map from exponent to coefficient.
+   * Parse a polynomial into a map from exponent to coefficient,
+   * or undefined if the input is not a polynomial.
    */
   function parseCoefficients(input: string): Map<number, number> | undefined {
     const coefficients = new Map<number, number>()
@@ -33,10 +52,12 @@
       const exponent = xTerm === undefined ? 0 : exp === undefined ? 1 : Number(exp)
       coefficients.set(exponent, (coefficients.get(exponent) ?? 0) + coefficient)
     }
-    return coefficients
+    // Nothing matched at all, so the input was empty or a stray sign rather
+    // than the polynomial 0, which parses to a single zero coefficient.
+    return coefficients.size === 0 ? undefined : coefficients
   }
 
-  function parse(input: string): [number[], number[]] | undefined {
+  function parse(input: string): RationalPoly {
     if (input === '' && emptyIsZero) return [[0], [1]]
     const parts = input.split('/')
     if (parts.length > 2) return undefined
@@ -64,6 +85,30 @@
     return allowInf || d.length > 0 ? [n, d] : undefined
   }
 
+  function format(value: RationalPoly): string {
+    if (value === undefined) return ''
+    const [numerator, denominator] = value
+    return deepEquals(denominator, [1])
+      ? formatPoly(numerator)
+      : `(${formatPoly(numerator)})/(${formatPoly(denominator)})`
+  }
+
+  /**
+   * Write an array of coefficients by degree as a polynomial, eg. [1, 0, 2] as '2x^2 + 1'.
+   */
+  function formatPoly(coefficients: number[]): string {
+    const terms = coefficients
+      .map((coefficient, exp) => ({ coefficient, exp }))
+      .filter(({ coefficient }) => coefficient !== 0)
+      .reverse()
+      .map(({ coefficient, exp }) => {
+        if (exp === 0) return `${coefficient}`
+        const power = exp === 1 ? 'x' : `x^${exp}`
+        return coefficient === 1 ? power : coefficient === -1 ? `-${power}` : `${coefficient}${power}`
+      })
+    return terms.length === 0 ? '0' : terms.join(' + ').replaceAll('+ -', '- ')
+  }
+
   /**
    * Convert [exponent, coefficient] pairs into an array of coefficients by degree.
    */
@@ -76,4 +121,4 @@
   }
 </script>
 
-<input type='text' bind:value oninput={onInput}/>
+<input type='text' bind:value={text} oninput={onInput}/>

@@ -45,8 +45,7 @@
   // Only set in static mode, once the hit boxes have been filled in by a render.
   let hitTree = $state.raw<TreeRenderer<unknown, unknown> | undefined>(undefined)
 
-  // Highlighting the hovered vertex redraws the canvas, so ignore mouse moves
-  // that land on a vertex equivalent to the one already hovered.
+  // Don't rerender the canvas if the hit box hasn't changed.
   function sameHitBox(a: InteractionState | undefined, b: InteractionState | undefined) {
     return a === b || (a !== undefined && b !== undefined
       && a.display === b.display && a.imageKey === b.imageKey)
@@ -151,9 +150,7 @@
 {/if}
 
 <style lang="css">
-  /* Fit the canvas to the viewport: never wider than its natural size or the
-     container, and never taller than the viewport (width is derived from the
-     height budget so the aspect ratio is preserved). */
+  /* Fit the canvas to the viewport up to its natural size */
   .tree-canvas {
     width: min(100%, var(--tree-max-width), calc((100vh - 20px) * var(--tree-aspect)));
     width: min(100%, var(--tree-max-width), calc((100dvh - 20px) * var(--tree-aspect)));

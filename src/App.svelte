@@ -6,6 +6,8 @@
 	import RationalInput from './ui/RationalInput.svelte'
 	import RationalPolyInput from './ui/RationalPolyInput.svelte'
 	import StepperInput from './ui/StepperInput.svelte'
+	import { examples } from './ui/examples'
+	import { deepEquals } from './utils/equals'
 
 	let themeInput: string = $state(themes[0].name)
 	const theme = $derived(themes.find(t => t.name === themeInput) || themes[0])
@@ -29,6 +31,25 @@
 
 	let isometry: { zero?: [unknown, unknown][][], nonzero?: [unknown, unknown][][] } = $state({})
 	let showIsometry = $state(true)
+
+	// An example is 'chosen' exactly while the field and the matrix still match it,
+	// so editing the matrix by hand takes the dropdown back to its placeholder.
+	const chosenExample = $derived(examples.find(e =>
+		e.characteristic === characteristic && e.p === p
+		&& deepEquals(e.matrix, isometry[e.characteristic])
+	))
+
+	function chooseExample(name: string) {
+		const example = examples.find(e => e.name === name)
+		if (!example) {
+			isometry[characteristic] = undefined
+			return
+		}
+		characteristic = example.characteristic
+		p = example.p
+		isometry[example.characteristic] = example.matrix
+		showIsometry = true
+	}
 
 	let resolution: number = $state(1)
 
@@ -81,11 +102,28 @@
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
 					<div style:display={characteristic === 'zero' ? '' : 'none'}>
-						<MatrixInput characteristic={"zero"} onchange={v => isometry.zero = v} />
+						<MatrixInput characteristic={"zero"}
+							value={isometry.zero} onchange={v => isometry.zero = v} />
 					</div>
 					<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
-						<MatrixInput characteristic={"nonzero"} onchange={v => isometry.nonzero = v} />
+						<MatrixInput characteristic={"nonzero"}
+							value={isometry.nonzero} onchange={v => isometry.nonzero = v} />
 					</div>
+			</div>
+			<div class='sidebar-row'>
+				<select value={chosenExample?.name ?? ''} onchange={e => chooseExample(e.currentTarget.value)}>
+					<option value=''>Examples</option>
+					<optgroup label='Characteristic 0'>
+						{#each examples.filter(e => e.characteristic === 'zero') as example}
+							<option value={example.name}>{example.name}</option>
+						{/each}
+					</optgroup>
+					<optgroup label='Characteristic p'>
+						{#each examples.filter(e => e.characteristic === 'nonzero') as example}
+							<option value={example.name}>{example.name}</option>
+						{/each}
+					</optgroup>
+				</select>
 			</div>
 			<hr />
 			<div class="sidebar-row">

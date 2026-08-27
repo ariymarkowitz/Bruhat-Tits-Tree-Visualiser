@@ -64,6 +64,6 @@ export abstract class EuclideanDomain<RingElement> extends Ring<RingElement> {
   public inverseMod(a: RingElement, b: RingElement): RingElement {
     const [gcd, x] = this.extendedGCD(a, b)
     if (!this.isUnit(gcd)) throw new Error('No inverse exists.')
-    return this.mod(x, b)
+    return this.mod(this.div(x, gcd), b)
   }
 }

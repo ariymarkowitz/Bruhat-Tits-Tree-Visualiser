@@ -12,11 +12,11 @@ This is a visualiser of the Bruhat-Tits tree over $\mathbb{Q}_p$, and the action
 
 There are a couple of ways of defining the $p$-adic numbers for a prime $p$. One way is to consider the rationals $\mathbb{Q}$, and use a different metric (notion of 'distance'). Informally, a pair of $p$-adic numbers $x$ and $y$ are 'close' to each other when $x-y$ is a multiple of a large power of $p$. We may then take the completion, similar to the real numbers, to give a field and metric space $\mathbb{Q}_p$.
 
-The other way of describing the p-adic numbers is to consider them as the field of infinite expansions
+The other way of describing the $p$-adic numbers is to consider them as the field of infinite expansions
 
 $$a_{-m} p^{-m} + a_{-m+1} p^{-m+1} + \dots + a_0 p^0 + a_1 p^1 + a_2 p^2 \dots$$
 
-This is similar to the base-$p$ expansion of a real number, however while real numbers can have infinitely many negative terms and finitely many positive terms, $p$-adic expansions can only have finitely many negative terms and may have infinitely many positive terms. The $p$-adic numbers in which all of the powers are nonnegative is called a *$p$-adic integer*, and the ring $\mathbb{Z}_p$ of $p$-adic integers is analogous to the integers in the field of rational numbers.
+This is similar to the base-$p$ expansion of a real number, however while real numbers can have infinitely many negative terms and finitely many positive terms, $p$-adic expansions can only have finitely many negative terms and may have infinitely many positive terms. The $p$-adic numbers in which all of the powers are nonnegative is called a $p$*-adic integer*, and the ring $\mathbb{Z}_p$ of $p$-adic integers is analogous to the integers in the field of rational numbers.
 
 The $p$-adic numbers allow us to use the properties of metric spaces and geometry to explore number-theoretic properties.
 
@@ -42,7 +42,7 @@ We may write this similarly to decimal form; for example, 11.1 in $\mathbb{Q}_2$
 
 The neighbours of a vertex are the possible ways to add to the next term in the expansion, together with one neighbour that removes the last term in the expansion. For example, in the Bruhat-Tits tree over $\mathbb{Q}_2$ the vertex corresponding to $1.000\dots$ has neighbours $01.000\dots$,  $11.000\dots$, and $.000\dots$
 
-Another way to put this is that the vertices represent p-adic numbers up to a certain number of digits of precision, and neighbours are the ways of changing the precision by 1 digit.
+Another way to put this is that the vertices represent $p$-adic numbers up to a certain number of digits of precision, and neighbours are the ways of changing the precision by 1 digit.
 
 Note that two pieces of information are needed to represent a vertex: the $p$-adic integer $u$, and $n$ such that $p^n$ is the next term in the expansion. For example, the vertex $1 \times 2^0$ is different from the vertex $1 \times 2^0 + 0 \times 2^1$. We represent this as $[u]_n$ in the visualiser (this can be seen when hovering over a node).
 
@@ -53,6 +53,17 @@ Since the vertices are equivalence classes of lattices, the group $\mathrm{GL}(2
 ## Boundary of the tree
 
 If each vertex is a finite $p$-adic expansion, then an infinite path can be associated with an infinite $p$-adic expansion. Hence we may identify the 'boundary' of the tree with the projective $p$-adic line. (The point at infinity corresponds to following the 'reverse' path $[0]_n$ as $n \to -\infty$). An infinite ray on the tree is called an 'end', and if we fix the starting point of the ray then each end corresponds to a unique point on the boundary. This is shown in the visualisation by the fact that neighbours farther from the origin are exponentially closer together, so that every infinite ray converges to a unique point. (One may draw an analogy to, or represent this directly with, the Poincaré disk model of the hyperbolic plane.) Thus we can visualise the boundary of the tree. We see that $\mathrm{GL}(2, \mathbb{Q}_p)$ also acts on the projective $p$-adic line.
+
+A matrix of the form
+
+$$
+\begin{bmatrix}a & b \\ c & d\end{bmatrix}
+$$
+
+maps a boundary point $x$ to
+$$\frac{c + dx}{a + bx}.$$
+
+If you are familiar with Möbius transformations, you might wonder why the mapping is not $\frac{ax + b}{cx + d}$. The reason is that I chose a bad standard when I started my research, and now I'm sticking with it for consistency.
 
 ## Function fields
 
@@ -69,6 +80,7 @@ The Laurent series and $p$-adic numbers have a lot of similarities, and together
 - 'Depth' sets the depth of the tree (maximum distance rendered).
 - 'End' shows an end of the tree (an infinite ray starting from the origin). The input may be an integer or rational number in characteristic 0, or a polynomial or rational function (like (1 + x^3) / 4x) in characteristic $p$. The input a/b corresponds to the projective point (b, a). 1/0 gives the end corresponding to the projective point at infinity.
 - 'Isometry' shows the minimum translation set of the isometry induced by a given matrix. The inputs may be rational numbers in characteristic 0, or a rational function in characteristic p.
+- 'Examples' shows some different example isometries.
 
 ## Colour scheme
 

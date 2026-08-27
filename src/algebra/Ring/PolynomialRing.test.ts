@@ -110,6 +110,15 @@ describe('PolynomialRing', () => {
     expect(reduce(R.gcd([1, 3, 2], [2, 1]))).toEqual([1])
   })
 
+  test('inverseMod', () => {
+    // The extended GCD may return a unit other than 1, which has to be divided out.
+    const inv = R.inverseMod([2, 0, 1], [0, 0, 0, 1])
+    expect(R.mod(R.multiply([2, 0, 1], inv), [0, 0, 0, 1])).toEqual(R.one)
+
+    expect(R.inverseMod([1, 1], [1, 0, 1])).toEqual([3, 2])
+    expect(() => R.inverseMod([1, 2, 1], [1, 1])).toThrow()
+  })
+
   test('toString and toLatex', () => {
     expect(R.toString()).toBe('PolynomialRing(F(5))')
     expect(R.toString([1, 2, 0, 1])).toBe('1 + 2x + x^3')

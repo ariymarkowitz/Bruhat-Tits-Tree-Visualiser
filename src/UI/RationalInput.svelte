@@ -1,26 +1,44 @@
 <script lang='ts'>
+  import { deepEquals } from '../utils/equals'
+
+  type Rational = [number, number] | undefined
+
   type RationalInputProps = Partial<{
     allowInf: boolean
     emptyIsZero: boolean
-    onchange: (value: [number, number] | undefined) => void
+    value: Rational
+    onchange: (value: Rational) => void
   }>
 
   let {
     allowInf = false,
     emptyIsZero = false,
+    value = undefined,
     onchange = _ => {}
   }: RationalInputProps = $props()
 
-  let value: string = $state('')
-  let prevInput: string = ''
+  let text: string = $state(format(value))
+  let prevInput: string = format(value)
+  // The value this input last reported. Anything else in `value` was set from
+  // outside, and replaces the text.
+  let emitted: Rational = value
+
+  // Prop→display sync, as in StepperInput. Not a two-way binding: the text the user
+  // is typing is left alone, since the value it produces is already the one shown.
+  $effect(() => {
+    if (deepEquals(value, emitted)) return
+    emitted = value
+    text = prevInput = format(value)
+  })
 
   function onInput() {
-    if (!isValidInput(value)) {
-      value = prevInput
+    if (!isValidInput(text)) {
+      text = prevInput
       return
     }
-    prevInput = value
-    onchange(parse(value))
+    prevInput = text
+    emitted = parse(text)
+    onchange(emitted)
   }
 
   function isValidInput(input: string) {
@@ -29,7 +47,7 @@
     return pattern.test(input)
   }
 
-  function parse(input: string): [number, number] | undefined {
+  function parse(input: string): Rational {
     if (input === '' && emptyIsZero) return [0, 1]
     const groups = /^(?<num>-?\d+) *(\/ *(?<den>-?\d+) *)?$/.exec(input)?.groups
     if (!groups?.num) return undefined
@@ -40,6 +58,12 @@
     const den = Number(groups.den)
     return num === 0 && den === 0 ? undefined : [num, den]
   }
+
+  function format(value: Rational): string {
+    if (value === undefined) return ''
+    const [num, den] = value
+    return den === 1 ? `${num}` : `${num}/${den}`
+  }
 </script>
 
-<input type='text' bind:value oninput={onInput}/>
+<input type='text' bind:value={text} oninput={onInput}/>
