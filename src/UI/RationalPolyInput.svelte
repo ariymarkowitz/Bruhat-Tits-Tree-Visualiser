@@ -52,8 +52,7 @@
       const exponent = xTerm === undefined ? 0 : exp === undefined ? 1 : Number(exp)
       coefficients.set(exponent, (coefficients.get(exponent) ?? 0) + coefficient)
     }
-    // Nothing matched at all, so the input was empty or a stray sign rather
-    // than the polynomial 0, which parses to a single zero coefficient.
+    // No coefficients parses as no input.
     return coefficients.size === 0 ? undefined : coefficients
   }
 
