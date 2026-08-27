@@ -1,5 +1,6 @@
 <script lang='ts'>
   import { deepEquals } from '../utils/equals'
+  import { inputValue } from './inputValue.svelte'
 
   type RationalPoly = [number[], number[]] | undefined
 
@@ -17,22 +18,14 @@
     onchange = _ => {}
   }: RationalPolyInputProps = $props()
 
-  let text: string = $state(format(value))
-  // The value this input last reported. Anything else in `value` was set from
-  // outside, and replaces the text.
-  let emitted: RationalPoly = value
-
-  // Prop→display sync, as in StepperInput. Not a two-way binding: the text the user
-  // is typing is left alone, since the value it produces is already the one shown.
-  $effect(() => {
-    if (deepEquals(value, emitted)) return
-    emitted = value
-    text = format(value)
+  const input = inputValue({
+    value: () => value,
+    format, parse, accept: isValidInput, onchange
   })
 
-  function onInput() {
-    emitted = parse(text)
-    onchange(emitted)
+  function isValidInput(input: string) {
+    // Accept all valid characters, and at most one slash.
+    return /^[\dx+\-^() ]*\/?[\dx+\-^() ]*$/.test(input)
   }
 
   /**
@@ -70,7 +63,7 @@
     let denomTerms = [...denominator].filter(([, coefficient]) => coefficient !== 0)
     if (numerTerms.length === 0 && denomTerms.length === 0) return undefined
 
-    // Handle negative exponents
+    // Handle negative exponents.
     const nMin = numerTerms.length > 0 ? Math.min(...numerTerms.map(([exp]) => exp)) : 0
     const dMin = denomTerms.length > 0 ? Math.min(...denomTerms.map(([exp]) => exp)) : 0
     const minExp = Math.min(nMin, dMin)
@@ -120,4 +113,4 @@
   }
 </script>
 
-<input type='text' bind:value={text} oninput={onInput}/>
+<input type='text' bind:value={input.display} oninput={input.commit}/>

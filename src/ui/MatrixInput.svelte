@@ -17,7 +17,7 @@
   import RationalInput from "./RationalInput.svelte";
   import RationalPolyInput from './RationalPolyInput.svelte';
   import Latex from './Latex.svelte';
-  import { deepEquals } from '../utils/equals';
+  import { inputValue } from './inputValue.svelte';
 
   type Matrix = [unknown, unknown][][] | undefined
   type Cell = [unknown, unknown] | undefined
@@ -30,29 +30,23 @@
   let { characteristic, value = undefined, onchange = _ => {} }: MatrixInputProps = $props()
   let type = $derived(characteristics[characteristic])
 
-  // The four inputs, in the order they are laid out: top row, then bottom row.
-  let cells: Cell[] = $state(cellsOf(value))
-  // The matrix this input last reported. Anything else in `value` was set from
-  // outside, and replaces the cells. Unlike the reported matrix, a cell that the
-  // user has not finished typing is kept as undefined rather than as zero.
-  let emitted: Matrix = value
-
-  // Prop→display sync, as in StepperInput.
-  $effect(() => {
-    if (deepEquals(value, emitted)) return
-    emitted = value
-    cells = cellsOf(value)
+  // The display is the four cells, in the order they are laid out: top row, then bottom.
+  const input = inputValue({
+    value: () => value,
+    format: cellsOf,
+    // MatrixAlgebra stores matrices column-wise, so we transpose the entered matrix
+    // (rows [a, b] and [c, d]) to get the isometry u -> (c + d*u)/(a + b*u). A cell the
+    // user has not finished typing reports as zero, but stays undefined in the display.
+    parse: cells => [
+      [cells[0], cells[2]],
+      [cells[1], cells[3]]
+    ].map(row => row.map(cell => cell ?? type.zero)) as Matrix,
+    onchange
   })
 
   function setCell(index: number, cell: Cell) {
-    cells[index] = cell
-    // MatrixAlgebra stores matrices column-wise, so we transpose the entered matrix
-    // (rows [a, b] and [c, d]) to get the isometry u -> (c + d*u)/(a + b*u).
-    emitted = [
-      [cells[0], cells[2]],
-      [cells[1], cells[3]]
-    ].map(row => row.map(cell => cell ?? type.zero)) as [unknown, unknown][][]
-    onchange(emitted)
+    input.display[index] = cell
+    input.commit()
   }
 
   function cellsOf(matrix: Matrix): Cell[] {
@@ -64,7 +58,7 @@
   <Latex text={leftBracket}/>
   <div class='matrix-input-container'>
     <div class="matrix-input">
-      {#each cells as cell, i}
+      {#each input.display as cell, i}
         <!-- A cell's type depends on the characteristic, which the props of a dynamic
              component cannot express. -->
         <type.component emptyIsZero={true} value={cell as never} onchange={v => setCell(i, v)} />

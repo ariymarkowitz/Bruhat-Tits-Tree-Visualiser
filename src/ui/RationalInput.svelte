@@ -1,5 +1,5 @@
 <script lang='ts'>
-  import { deepEquals } from '../utils/equals'
+  import { inputValue } from './inputValue.svelte'
 
   type Rational = [number, number] | undefined
 
@@ -17,29 +17,10 @@
     onchange = _ => {}
   }: RationalInputProps = $props()
 
-  let text: string = $state(format(value))
-  let prevInput: string = format(value)
-  // The value this input last reported. Anything else in `value` was set from
-  // outside, and replaces the text.
-  let emitted: Rational = value
-
-  // Prop→display sync, as in StepperInput. Not a two-way binding: the text the user
-  // is typing is left alone, since the value it produces is already the one shown.
-  $effect(() => {
-    if (deepEquals(value, emitted)) return
-    emitted = value
-    text = prevInput = format(value)
+  const input = inputValue({
+    value: () => value,
+    format, parse, accept: isValidInput, onchange
   })
-
-  function onInput() {
-    if (!isValidInput(text)) {
-      text = prevInput
-      return
-    }
-    prevInput = text
-    emitted = parse(text)
-    onchange(emitted)
-  }
 
   function isValidInput(input: string) {
     if (input === '') return true
@@ -66,4 +47,4 @@
   }
 </script>
 
-<input type='text' bind:value={text} oninput={onInput}/>
+<input type='text' bind:value={input.display} oninput={input.commit}/>

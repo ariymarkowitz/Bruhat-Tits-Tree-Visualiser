@@ -1,4 +1,6 @@
 <script lang='ts'>
+  import { incomplete, inputValue } from './inputValue.svelte'
+
   type StepperInputProps = {
     min?: number
     max?: number
@@ -15,17 +17,12 @@
     onchange = _ => {}
   }: StepperInputProps = $props()
 
-  let text: string = $state(value.toString())
-  let prevInput: string = value.toString()
-
-  // Prop→display sync. Not a two-way binding — it mirrors external `value` changes
-  // (e.g. derived depth recomputing when p changes) into the input field without
-  // mutating depthState. Replacing this with bind:value would silently lose the
-  // "remember original depth when p bounces" behaviour.
-  $effect(() => {
-    const s = value.toString()
-    text = s
-    prevInput = s
+  const input = inputValue({
+    value: () => value,
+    format: n => n.toString(),
+    parse: text => isValidValue(text) ? Number(text) : incomplete,
+    accept: isValidInput,
+    onchange
   })
 
   const nextValue = $derived.by(() => {
@@ -50,17 +47,6 @@
     if (prevValue !== undefined) onchange(prevValue)
   }
 
-  function onInput() {
-    if (!isValidInput(text)) {
-      text = prevInput
-      return
-    }
-    prevInput = text
-    if (isValidValue(text)) {
-      onchange(Number(text))
-    }
-  }
-
   function isValidInput(input: string) {
     if (input === '') return true
     if (!/^(0|[1-9]\d*)$/.test(input)) return false
@@ -76,7 +62,7 @@
 </script>
 
 <div class='number-input'>
-  <input type='text' bind:value={text} oninput={onInput}/>
+  <input type='text' bind:value={input.display} oninput={input.commit}/>
   <div class='number-input-buttons'>
     <button type="button" aria-label="Increment" class='number-input-up' disabled={nextValue === undefined} onclick={increment}><i></i></button>
     <button type="button" aria-label="Decrement" class='number-input-down' disabled={prevValue === undefined} onclick={decrement}><i></i></button>
