@@ -64,6 +64,12 @@ input[type='text'], select, button {
 	border-radius: 4px;
 }
 
+/* Sized from the select's own font, so the line the fallback glyphs make can't change it. */
+select {
+	height: 1.2lh;
+	box-sizing: content-box;
+}
+
 input[type='text'], select {
 	&:focus {
 		outline: none;
