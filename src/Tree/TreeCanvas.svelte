@@ -144,7 +144,7 @@
 {#if mode === "static"}
 <div class='tooltip' bind:this={tooltip} style:visibility={tooltipText ? 'visible' : 'hidden'}>
   <div class='tooltip-content'>
-    <Latex text={tooltipText}/>
+    <Latex text={tooltipText} displayStyle={true}/>
   </div>
 </div>
 {/if}

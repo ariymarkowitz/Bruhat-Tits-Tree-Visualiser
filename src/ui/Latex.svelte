@@ -1,10 +1,11 @@
 <script lang="ts">
   import katex from "katex"
-  let {text}: {text: string} = $props()
+  let {text, displayStyle = false}: {text: string, displayStyle?: boolean} = $props()
 
   let element: HTMLElement
   $effect(() => {
-    if (element) katex.render(text, element)
+    const rendered = displayStyle ? `\\displaystyle ${text}` : text
+    if (element) katex.render(rendered, element)
   })
 </script>
 <span class='latex' bind:this={element}></span>
