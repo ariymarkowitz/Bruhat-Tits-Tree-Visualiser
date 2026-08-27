@@ -1,7 +1,7 @@
 <script lang='ts'>
 	import { isPrime } from './algebra/utils/int'
 	import { setTheme, themes } from './style/themes/themes'
-	import TreeCanvas, { type Characteristic } from './Tree/TreeCanvas.svelte'
+	import TreeCanvas, { type Characteristic, type Mode } from './Tree/TreeCanvas.svelte'
 	import MatrixInput from './ui/MatrixInput.svelte'
 	import RationalInput from './ui/RationalInput.svelte'
 	import RationalPolyInput from './ui/RationalPolyInput.svelte'
@@ -9,22 +9,21 @@
 	import { examples } from './ui/examples'
 	import { deepEquals } from './utils/equals'
 
-	let themeInput: string = $state(themes[0].name)
-	const theme = $derived(themes.find(t => t.name === themeInput) || themes[0])
+	let theme = $state(themes[0])
 	$effect(() => setTheme(theme))
 
 	let characteristic: Characteristic = $state("zero")
 	let p = $state(2)
 
-	// The depth the user asked for, and the p it was asked at. Raising p caps the drawn
-	// depth (keeping the vertex count manageable), but the original request is remembered,
-	// so lowering p again restores it.
+	/**
+	 * The depth and p the last time the user set depth. The depth decreases
+	 * as p is increased, but lowering p again restores it.
+	 */
 	let chosenDepth = $state({ depth: 7, p: 2 })
-	let depth = $derived(Math.max(
-		1, Math.min(
-			chosenDepth.depth, Math.floor(chosenDepth.depth * (chosenDepth.p + 1) / (p + 1))
-		)
-	))
+	const depth = $derived.by(() => {
+		const capped = Math.floor(chosenDepth.depth * (chosenDepth.p + 1) / (p + 1))
+		return Math.max(1, Math.min(chosenDepth.depth, capped))
+	})
 
 	let end: { zero?: [number, number], nonzero?: [number[], number[]] } = $state({})
 	let showEnd = $state(true)
@@ -51,9 +50,7 @@
 		showIsometry = true
 	}
 
-	let resolution: number = $state(1)
-
-	type Mode = "animate" | "download" | "static"
+	let resolution = $state(1)
 	let mode: Mode = $state("static")
 
 	const treeOptions = $derived({
@@ -92,35 +89,37 @@
 			<hr />
 			<div class='sidebar-row'>
 				<input type='checkbox' name='end' bind:checked={showEnd} />End
-				<div style:display={characteristic === 'zero' ? '' : 'none'}>
+				<!-- Hide rather than remove the inputs, so that switching back and forth
+				 does not discard what the user typed. -->
+				<div hidden={characteristic !== 'zero'}>
 					<RationalInput allowInf={true} onchange={v => end.zero = v} />
 				</div>
-				<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
+				<div hidden={characteristic !== 'nonzero'}>
 					<RationalPolyInput allowInf={true} onchange={v => end.nonzero = v}/>
 				</div>
 			</div>
 			<div class='sidebar-row'>
 				<input type='checkbox' name='isometry' bind:checked={showIsometry}/>Isometry
-					<div style:display={characteristic === 'zero' ? '' : 'none'}>
-						<MatrixInput characteristic={"zero"}
-							value={isometry.zero} onchange={v => isometry.zero = v} />
-					</div>
-					<div style:display={characteristic === 'nonzero' ? '' : 'none'}>
-						<MatrixInput characteristic={"nonzero"}
-							value={isometry.nonzero} onchange={v => isometry.nonzero = v} />
-					</div>
+				<div hidden={characteristic !== 'zero'}>
+					<MatrixInput characteristic={"zero"}
+						value={isometry.zero} onchange={v => isometry.zero = v} />
+				</div>
+				<div hidden={characteristic !== 'nonzero'}>
+					<MatrixInput characteristic={"nonzero"}
+						value={isometry.nonzero} onchange={v => isometry.nonzero = v} />
+				</div>
 			</div>
 			<div class='sidebar-row'>
 				<select value={chosenExample?.name ?? ''} onchange={e => chooseExample(e.currentTarget.value)}>
 					<option value=''>Examples</option>
 					<optgroup label='Characteristic 0'>
 						{#each examples.filter(e => e.characteristic === 'zero') as example}
-							<option value={example.name}>{example.name}</option>
+							<option>{example.name}</option>
 						{/each}
 					</optgroup>
 					<optgroup label='Characteristic p'>
 						{#each examples.filter(e => e.characteristic === 'nonzero') as example}
-							<option value={example.name}>{example.name}</option>
+							<option>{example.name}</option>
 						{/each}
 					</optgroup>
 				</select>
@@ -137,16 +136,16 @@
 				</button>
 			</div>
 			<div class="sidebar-row">
-				Resolution <select value={resolution.toString()} oninput={e => resolution = Number(e.currentTarget.value)}>
-					<option>0.25</option>
-					<option>0.5</option>
-					<option>1</option>
+				Resolution <select bind:value={resolution}>
+					<option value={0.25}>0.25</option>
+					<option value={0.5}>0.5</option>
+					<option value={1}>1</option>
 				</select>
 			</div>
 			<div class="sidebar-row">
-				Theme <select bind:value={themeInput}>
-					{#each themes as theme}
-						<option>{theme.name}</option>
+				Theme <select bind:value={theme}>
+					{#each themes as t}
+						<option value={t}>{t.name}</option>
 					{/each}
 				</select>
 			</div>

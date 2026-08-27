@@ -223,30 +223,24 @@ hr {
 		}
 	}
 }
-.matrix-input-container {
-	display: flex;
-	gap: 0.5em;
-	align-items: center;
+.matrix-input {
+	display: inline-grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-template-rows: repeat(2, 1fr);
+	gap: 3px;
+	width: 100px;
+	height: 80px;
 
-	.matrix-input {
-		display: inline-grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-template-rows: repeat(2, 1fr);
-		gap: 3px;
-		width: 100px;
-		height: 80px;
-	
-		input {
-			background: none;
-			color: inherit;
-			border: 1px dashed var(--borderColor);
-			padding: 2px;
-			text-align: center;
-		}
-	
-		input:focus {
-			border-color: var(--focusBorderColor);
-		}
+	input {
+		background: none;
+		color: inherit;
+		border: 1px dashed var(--borderColor);
+		padding: 2px;
+		text-align: center;
+	}
+
+	input:focus {
+		border-color: var(--focusBorderColor);
 	}
 }
 

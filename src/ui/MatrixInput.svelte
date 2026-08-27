@@ -28,7 +28,7 @@
     onchange?: (value: Matrix) => void
   }
   let { characteristic, value = undefined, onchange = _ => {} }: MatrixInputProps = $props()
-  let type = $derived(characteristics[characteristic])
+  let cellType = $derived(characteristics[characteristic])
 
   // The display is the four cells, in the order they are laid out: top row, then bottom.
   const input = inputValue({
@@ -40,7 +40,7 @@
     parse: cells => [
       [cells[0], cells[2]],
       [cells[1], cells[3]]
-    ].map(row => row.map(cell => cell ?? type.zero)) as Matrix,
+    ].map(row => row.map(cell => cell ?? cellType.zero)) as Matrix,
     onchange
   })
 
@@ -56,14 +56,12 @@
 
 <div class='combined-elements'>
   <Latex text={leftBracket}/>
-  <div class='matrix-input-container'>
-    <div class="matrix-input">
-      {#each input.display as cell, i}
-        <!-- A cell's type depends on the characteristic, which the props of a dynamic
-             component cannot express. -->
-        <type.component emptyIsZero={true} value={cell as never} onchange={v => setCell(i, v)} />
-      {/each}
-    </div>
+  <div class="matrix-input">
+    {#each input.display as cell, i}
+      <!-- A cell's type depends on the characteristic, which the props of a dynamic
+           component cannot express. -->
+      <cellType.component emptyIsZero={true} value={cell as never} onchange={v => setCell(i, v)} />
+    {/each}
   </div>
   <Latex text={rightBracket}/>
 </div>

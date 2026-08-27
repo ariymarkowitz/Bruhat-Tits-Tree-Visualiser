@@ -23,24 +23,18 @@ export type InputValueOptions<Value, Display> = {
   accept?: (display: Display) => boolean
   onchange: (value: Value) => void
 }
-
 /**
  * Creates a coordinated pair of value and display states. The two states are
- * not fully synchronised: Editing the display might not change the value, and
- * multiple displays may correspond to the same value. But an external change to
- * the value (not by user input) will update the display to match.
+ * only loosely coupled: editing the display might not change the value, and
+ * different displays might correspond to the same value. An external change to
+ * the value (one not driven by the element) updates the display to match.
  * 
- * The source of truth for the value exists upstream of the input element; it is
- * read through `value()` and user input is handled through the 'onchange'
- * callback. When the value is changed upstream, the display is changed using
- * `format` without triggering `onchange`.
- * 
- * When the input itself is changed, the element handles the update by setting
- * `display` (either explicitly or via double binding) and calling `commit()`.
- * If `accept(display)` outputs `false`, then the change is immediately reverted,
- * as if nothing was typed. Otherwise, `parse(value)` is passed to `onchange` if
- * it does not return `incomplete`.
+ * The source of truth for the value lives upstream of the input element; it is
+ * read through `value()` and updated through 'onchange'. The other direction
+ * (a change driven by the element) is handled by setting `display` (directly or
+ * via `bind:`) and calling `commit()`.
  */
+
 export function inputValue<Value, Display>(
   { value, format, parse, accept = () => true, onchange }: InputValueOptions<Value, Display>
 ): InputValue<Display> {

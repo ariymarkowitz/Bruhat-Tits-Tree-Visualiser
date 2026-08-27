@@ -5,7 +5,7 @@
   let element: HTMLElement
   $effect(() => {
     const rendered = displayStyle ? `\\displaystyle ${text}` : text
-    if (element) katex.render(rendered, element)
+    katex.render(rendered, element)
   })
 </script>
 <span class='latex' bind:this={element}></span>

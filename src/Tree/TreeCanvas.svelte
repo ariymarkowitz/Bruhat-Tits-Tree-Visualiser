@@ -1,5 +1,6 @@
 <script lang='ts' module>
   export type Characteristic = "zero" | "nonzero"
+  export type Mode = "static" | "animate" | "download"
 </script>
 
 <script lang='ts'>
@@ -13,7 +14,7 @@
   import { saveAs } from 'file-saver'
 
   type TreeCanvasProps = {
-    mode: "static" | "animate" | "download"
+    mode: Mode
     characteristic: Characteristic
     p: number
     depth: number
@@ -34,6 +35,8 @@
     characteristic === "zero" ? new Adic(p) : new LaurentField(p)
   )
 
+  // Only the static tree uses the show flags.
+  // An animated tree runs whether or not its isometry is drawn.
   const staticTree = $derived.by(() => mode !== "static" ? undefined : new TreeRenderer(field, depth, {
     ...options,
     end: options.showEnd ? options.end : undefined,
